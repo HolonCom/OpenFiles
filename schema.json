@@ -1,0 +1,19 @@
+﻿{
+    "type": "object",
+    "properties": {
+        "title": {
+            "title": "Title",
+            "type": "string"
+        },
+        "description": {
+            "title": "Description",
+            "type": "string"
+        },
+        "category": {
+            "title": "Category",
+            "type": "array",
+            "enum": ["cat1","cat2","cat3"]
+
+        }
+    }
+}

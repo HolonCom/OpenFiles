@@ -1,0 +1,26 @@
+﻿<div class="License">
+	<h3>License</h3>
+	<p class="Owner">
+		HolonCom <a href=http://www.holoncom.be>http://www.holoncom.be</a></br>
+		Copyright (c) 2015 by Robrecht Siera, HolonCom</br>
+	</p>
+    <p>
+    OpenDocument
+    Copyright (C) 2015  Robrecht Siera, HolonCom
+    <p>
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation version 2 of the License.
+    </p>
+    <p>
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    </p>
+    <p>
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+    </p>
+</div>

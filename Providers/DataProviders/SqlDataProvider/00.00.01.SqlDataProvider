@@ -1,0 +1,31 @@
+﻿/************************************************************/
+/*****              SqlDataProvider                     *****/
+/*****                                                  *****/
+/*****                                                  *****/
+/***** Note: To manually execute this script you must   *****/
+/*****       perform a search and replace operation     *****/
+/*****       for {databaseOwner} and {objectQualifier}  *****/
+/*****                                                  *****/
+/************************************************************/
+
+
+INSERT INTO {databaseOwner}{objectQualifier}[Schedule]
+         
+     VALUES
+           ('Satrabel.OpenDocument.Components.Lucene.SearchEngineScheduler, OpenDocument'
+           ,30
+           ,'m'
+           ,15
+           ,'m'
+           ,60
+           ,''
+           ,0
+           ,1
+           ,'SearchEngine'
+           ,null
+           ,null
+           ,null
+           ,null
+           ,null
+           ,'Search : OpenDocument', null)
+GO

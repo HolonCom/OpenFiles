@@ -1,0 +1,75 @@
+﻿{
+    "fields": {
+        "croppers": {
+            "type": "imagecropper",
+            "cropper": {
+                "aspectRatio": 1,
+                "minContainerWidth": 500,
+                "minContainerHeight": 300
+            },
+            "croppers": {
+                "1x1": {
+                    "width": 1,
+                    "height": 1,
+                    "desc": "Square (1x1)"
+                },
+                "5x8": {
+                    "width": 5,
+                    "height": 8,
+                    "desc": "Portrait (5x8 or 0,6)"
+                },
+                "8x5": {
+                    "width": 8,
+                    "height": 5,
+                    "desc": "Landscape (8x5 or 1,6)"
+                },
+                "21x11": {
+                    "width": 21,
+                    "height": 11,
+                    "desc": "Facebook (21x11 or 1,9)"
+                },
+                "21x9": {
+                    "width": 21,
+                    "height": 9,
+                    "desc": "Full Page Banner (21x9 or 2,3)"
+                },
+                "16x5": {
+                    "width": 16,
+                    "height": 5,
+                    "desc": "Homepage Banner (16x5 or 3,2)"
+                },
+                "24x5": {
+                    "width": 24,
+                    "height": 5,
+                    "desc": "Slim Banner (24x5 or 4,8)"
+                }
+            },
+            "cropperExamples": {
+                "1x1": {
+                    "width": 1,
+                    "height": 1
+                },
+                "5x4": {
+                    "width": 5,
+                    "height": 4
+                },
+                "4x3": {
+                    "width": 4,
+                    "height": 3
+                },
+                "8x5": {
+                    "width": 8,
+                    "height": 5
+                },
+                "16x9": {
+                    "width": 16,
+                    "height": 9
+                },
+                "21x9": {
+                    "width": 21,
+                    "height": 9
+                }
+            }
+        }
+    }
+}
