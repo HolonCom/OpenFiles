@@ -5,8 +5,8 @@ Add-on to OpenContent
 
 
 ##Minimal requirements:
- * [Dnn v7.4.2](https://github.com/dnnsoftware/Dnn.Platform)
- * [OpenContent v2.0](https://github.com/sachatrauwaen/OpenContent)
+ * [Dnn v7.4.2](https://dotnetnuke.codeplex.com/)
+ * [OpenContent v2.0](https://opencontent.codeplex.com)
 
 ##Features
 
