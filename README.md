@@ -21,7 +21,7 @@ Add-on to OpenContent
 ##How to use it
 
 * Install the Module
-* Create a Host page + install OpenDocument module on it
+* Create a Host page + install OpenFiles module on it
 * Click on the button "create a scheduled task": every 30 min new pdf files will be indexed
 * Goto DNN Filemanager, notice that every file has now some additional meta data fields.
 * Goto DNN Filemanager, notice that every image file has a cropper function.
