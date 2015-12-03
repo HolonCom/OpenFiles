@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 
-namespace Satrabel.OpenDocument.Components.JPList
+namespace Satrabel.OpenFiles.Components.JPList
 {
     public class RequestDTO
     {

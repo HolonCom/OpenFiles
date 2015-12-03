@@ -3,7 +3,7 @@ using System.Text;
 using iTextSharp.text.pdf.parser;
 using iTextSharp.text.pdf;
 
-namespace Satrabel.OpenDocument.Components.Lucene
+namespace Satrabel.OpenFiles.Components.Lucene
 {
    public static class PdfParser
     {

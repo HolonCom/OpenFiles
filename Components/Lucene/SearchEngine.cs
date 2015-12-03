@@ -21,7 +21,7 @@ using Lucene.Net.Search;
 
 #endregion
 
-namespace Satrabel.OpenDocument.Components.Lucene
+namespace Satrabel.OpenFiles.Components.Lucene
 {
     internal class SearchEngine
     {

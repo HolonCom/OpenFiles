@@ -15,14 +15,14 @@ using DotNetNuke.Common;
 using Lucene.Net.Analysis;
 using Directory = Lucene.Net.Store.Directory;
 
-namespace Satrabel.OpenDocument.Components.Lucene
+namespace Satrabel.OpenFiles.Components.Lucene
 {
     public static class LuceneService
     {
         private static readonly ILog Logger = LoggerSource.Instance.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         // properties
-        private static readonly string LuceneOutputPath = Path.Combine(Globals.ApplicationMapPath, "App_Data\\OpenDocument\\lucene_index");
+        private static readonly string LuceneOutputPath = Path.Combine(Globals.ApplicationMapPath, "App_Data\\OpenFiles\\lucene_index");
         private static FSDirectory _directoryTemp;
 
         private static FSDirectory LuceneOutputFolder

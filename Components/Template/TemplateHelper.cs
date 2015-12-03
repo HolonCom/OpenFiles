@@ -10,14 +10,14 @@ using System.Linq;
 using System.Web;
 using System.Web.Hosting;
 
-namespace Satrabel.OpenDocument.Components.Template
+namespace Satrabel.OpenFiles.Components.Template
 {
     public static class TemplateHelper
     {
         public static dynamic GetDocumentModel(string folder)
         {
             PortalSettings ps = PortalSettings.Current;
-            string PhysicalTemplateFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenDocument/");
+            string PhysicalTemplateFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenFiles/");
             dynamic model = new ExpandoObject();
             // schema
             string schemaFilename = PhysicalTemplateFolder + "\\" + "schema.json";

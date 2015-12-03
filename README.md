@@ -1,4 +1,4 @@
-# OpenDocument
+# OpenFiles
 Integrated Image Management in DNN (Dotnetnuke),
 
 Integrated PDF search with Lucene,
@@ -10,8 +10,8 @@ Add-on to OpenContent
  * [Dnn v7.4.2](https://github.com/dnnsoftware/Dnn.Platform)
  * [OpenContent v2.0](https://github.com/sachatrauwaen/OpenContent)
 
-###About OpenDocument
-OpenDocument is a joint project of Robrecht Siera ([HolonCom](http://www.holoncom.eu)) and Sacha Trauwaen ([Satrabel](http://www.satrabel.be))
+###About OpenFiles
+OpenFiles is a joint project of Robrecht Siera ([HolonCom](http://www.holoncom.eu)) and Sacha Trauwaen ([Satrabel](http://www.satrabel.be))
 
 ##Minimal requirements:
  * [Dnn v7.4.2](https://dotnetnuke.codeplex.com/)
@@ -30,7 +30,7 @@ OpenDocument is a joint project of Robrecht Siera ([HolonCom](http://www.holonco
 ##How to use it
 
 * Install the Module
-* Create a Host page + install OpenDocument module on it
+* Create a Host page + install OpenFiles module on it
 * Click on the button "create a scheduled task": every 30 min new pdf files will be indexed
 * Goto DNN Filemanager, notice that every file has now some additional meta data fields.
 * Goto DNN Filemanager, notice that every image file has a cropper function.
@@ -41,5 +41,5 @@ OpenDocument is a joint project of Robrecht Siera ([HolonCom](http://www.holonco
 
 ##Coming soon ...
 
-[![Build by AppVeyor](https://ci.appveyor.com/api/projects/status/github/sachatrauwaen/OpenDocument?branch=master&svg=true)](https://ci.appveyor.com/project/sachatrauwaen/opendocument/)
-https://ci.appveyor.com/project/sachatrauwaen/opendocument
+[![Build by AppVeyor](https://ci.appveyor.com/api/projects/status/github/sachatrauwaen/OpenFiles?branch=master&svg=true)](https://ci.appveyor.com/project/sachatrauwaen/openfiles/)
+https://ci.appveyor.com/project/sachatrauwaen/openfiles

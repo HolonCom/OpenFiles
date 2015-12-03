@@ -1,9 +1,9 @@
 <dotnetnuke type="Package" version="5.0">
   <packages>
-    <package name="OpenDocument" type="Module" version="01.00.00">
-      <friendlyName>OpenDocument</friendlyName>
-      <description>OpenDocument module by Satrabel.be</description>
-      <iconFile>~/DesktopModules/OpenDocument/Images/icon_extensions.png</iconFile>
+    <package name="OpenFiles" type="Module" version="01.00.00">
+      <friendlyName>OpenFiles</friendlyName>
+      <description>OpenFiles module by Satrabel.be</description>
+      <iconFile>~/DesktopModules/OpenFiles/Images/icon_extensions.png</iconFile>
       <owner>
         <name>Satrabel.be</name>
         <organization>Satrabel.be</organization>
@@ -21,7 +21,7 @@
       <components>
         <component type="ResourceFile">
           <resourceFiles>
-            <basePath>DesktopModules/OpenDocument</basePath>
+            <basePath>DesktopModules/OpenFiles</basePath>
             <resourceFile>
               <name>Resources.zip</name>
             </resourceFile>
@@ -29,18 +29,18 @@
         </component>
         <component type="Module">
           <desktopModule>
-            <moduleName>OpenDocument</moduleName>
-            <foldername>OpenDocument</foldername>
-            <businessControllerClass>Satrabel.OpenDocument.Components.FeatureController</businessControllerClass>
+            <moduleName>OpenFiles</moduleName>
+            <foldername>OpenFiles</foldername>
+            <businessControllerClass>Satrabel.OpenFiles.Components.FeatureController</businessControllerClass>
             <supportedFeatures />
             <moduleDefinitions>
               <moduleDefinition>
-                <friendlyName>OpenDocument</friendlyName>
+                <friendlyName>OpenFiles</friendlyName>
                 <defaultCacheTime>0</defaultCacheTime>
                 <moduleControls>
                   <moduleControl>
                     <controlKey />
-                    <controlSrc>DesktopModules/OpenDocument/View.ascx</controlSrc>
+                    <controlSrc>DesktopModules/OpenFiles/View.ascx</controlSrc>
                     <supportsPartialRendering>False</supportsPartialRendering>
                     <controlTitle />
                     <controlType>View</controlType>
@@ -57,7 +57,7 @@
         <component type="Assembly">
           <assemblies>
             <assembly>
-              <name>OpenDocument.dll</name>
+              <name>OpenFiles.dll</name>
               <path>bin</path>
             </assembly>
             <assembly>

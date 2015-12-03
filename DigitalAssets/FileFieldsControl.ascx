@@ -72,7 +72,7 @@
         if (itemId) getData = "id=" + itemId;
         $.ajax({
             type: "GET",
-            url: sf.getServiceRoot('OpenDocument') + "OpenDocumentAPI/" + action,
+            url: sf.getServiceRoot('OpenFiles') + "OpenFilesAPI/" + action,
             data: getData,
             beforeSend: sf.setModuleHeaders
         }).done(function (config) {

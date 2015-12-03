@@ -3,7 +3,7 @@ using DotNetNuke.Modules.DigitalAssets.Components.ExtensionPoint;
 using DotNetNuke.Services.FileSystem;
 using DotNetNuke.Services.Localization;
 using Satrabel.OpenContent.Components.Alpaca;
-using Satrabel.OpenDocument.Components.DigitalAssets;
+using Satrabel.OpenFiles.Components.DigitalAssets;
 using System;
 using System.Web.UI.WebControls;
 
@@ -15,7 +15,7 @@ namespace Satrabel.Modules.DigitalAssets
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            AlpacaEngine alpaca = new AlpacaEngine(Page, ModuleContext,"DesktopModules/OpenDocument/","images");
+            AlpacaEngine alpaca = new AlpacaEngine(Page, ModuleContext,"DesktopModules/OpenFiles/","images");
             alpaca.RegisterAll();
 
             int fileid = int.Parse(Page.Request.QueryString["fileId"]);

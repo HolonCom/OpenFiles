@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace Satrabel.OpenDocument.Components.JPList
+namespace Satrabel.OpenFiles.Components.JPList
 {
     public class StatusDataDTO
     {

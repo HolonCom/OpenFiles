@@ -1,7 +1,7 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="FilePropertiesTabControl.ascx.cs" Inherits="Satrabel.Modules.DigitalAssets.FilePropertiesTabControl" %>
 
 <%@ Register TagPrefix="dnn" Namespace="DotNetNuke.Web.Client.ClientResourceManagement" Assembly="DotNetNuke.Web.Client" %>
-<dnn:DnnJsInclude runat="server" FilePath="~/DesktopModules/OpenDocument/js/ImageCropperField.js" Priority="130" />
+<dnn:DnnJsInclude runat="server" FilePath="~/DesktopModules/OpenFiles/js/ImageCropperField.js" Priority="130" />
 
 <asp:Label runat="server" ID="lblNoImage" Visible="False">File is not an image. No Metadata to set.</asp:Label>
 <asp:Panel runat="server" ID="ScopeWrapper">
@@ -48,7 +48,7 @@
         if (itemId) getData = "id=" + itemId;
         $.ajax({
             type: "GET",
-            url: sf.getServiceRoot('OpenDocument') + "OpenDocumentAPI/" + action,
+            url: sf.getServiceRoot('OpenFiles') + "OpenFilesAPI/" + action,
             data: getData,
             beforeSend: sf.setModuleHeaders
         }).done(function (config) {

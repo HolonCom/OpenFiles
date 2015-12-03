@@ -19,7 +19,7 @@ using System.Text;
 
 #endregion
 
-namespace Satrabel.OpenDocument.Components.Lucene
+namespace Satrabel.OpenFiles.Components.Lucene
 {
     public class FileIndexer
     {

@@ -17,7 +17,7 @@ using DotNetNuke.Web.Client.ClientResourceManagement;
 using DotNetNuke.Web.Client;
 using System.Web.Hosting;
 using Satrabel.OpenContent.Components.Alpaca;
-using Satrabel.OpenDocument.Components.DigitalAssets;
+using Satrabel.OpenFiles.Components.DigitalAssets;
 
 namespace Satrabel.Modules.DigitalAssets
 {
@@ -26,7 +26,7 @@ namespace Satrabel.Modules.DigitalAssets
         protected override void OnInit(EventArgs e)
         {
             base.OnInit(e);
-            AlpacaEngine alpaca = new AlpacaEngine(Page, ModuleContext, "DesktopModules/OpenDocument/", "");
+            AlpacaEngine alpaca = new AlpacaEngine(Page, ModuleContext, "DesktopModules/OpenFiles/", "");
             alpaca.RegisterAll();
         }
         protected override void OnLoad(EventArgs e)

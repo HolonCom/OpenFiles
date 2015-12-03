@@ -5,7 +5,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Web;
 
-namespace Satrabel.OpenDocument.Components.DigitalAssets
+namespace Satrabel.OpenFiles.Components.DigitalAssets
 {
     [Export(typeof(IUserControlExtensionPoint))]
     [ExportMetadata("Module", "DigitalAssets")]
@@ -16,7 +16,7 @@ namespace Satrabel.OpenDocument.Components.DigitalAssets
     {
         public string UserControlSrc
         {
-            get { return "~/DesktopModules/OpenDocument/DigitalAssets/PreviewPanelControl.ascx"; }
+            get { return "~/DesktopModules/OpenFiles/DigitalAssets/PreviewPanelControl.ascx"; }
         }
 
         public string Text

@@ -5,7 +5,7 @@
 		Copyright (c) 2015 by Robrecht Siera, HolonCom</br>
 	</p>
     <p>
-    OpenDocument
+    OpenFiles
     Copyright (C) 2015  Robrecht Siera, HolonCom
     <p>
     This program is free software; you can redistribute it and/or modify

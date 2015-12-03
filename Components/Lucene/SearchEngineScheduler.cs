@@ -9,7 +9,7 @@ using DotNetNuke.Services.Exceptions;
 
 #endregion
 
-namespace Satrabel.OpenDocument.Components.Lucene
+namespace Satrabel.OpenFiles.Components.Lucene
 {
   
     public class SearchEngineScheduler : SchedulerClient
