@@ -87,7 +87,7 @@ namespace Satrabel.OpenDocument.Components.Lucene
         public static void RemoveLuceneIndexRecord(int indexId)
         {
             // init lucene
-            var analyzer = new StandardAnalyzer(Version.LUCENE_30);
+            var analyzer = GetCustomAnalyzer();
             using (var writer = new IndexWriter(LuceneOutputFolder, analyzer, IndexWriter.MaxFieldLength.UNLIMITED))
             {
                 // remove older index entry
@@ -124,7 +124,7 @@ namespace Satrabel.OpenDocument.Components.Lucene
 
         public static void Optimize()
         {
-            var analyzer = new StandardAnalyzer(Version.LUCENE_30);
+            var analyzer = GetCustomAnalyzer();
             using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, false))
             {
                 analyzer.Close();
