@@ -1,4 +1,4 @@
-# OpenDocument
+# OpenFiles
 Integrated Image Management in DNN (Dotnetnuke),
 Integrated PDF search with Lucene,
 Add-on to OpenContent
