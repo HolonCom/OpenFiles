@@ -15,11 +15,11 @@ namespace Satrabel.Modules.DigitalAssets.Components.ExtensionPoint.UserControls
     
     public class FilePropertiesTab : IEditPageTabExtensionPoint
     {
-        private const string _localResourceFile = "DesktopModules/OpenDocument/DigitalAssets/App_LocalResources/FilePropertiesTabControl.ascx.resx";
+        private const string _localResourceFile = "DesktopModules/OpenFiles/DigitalAssets/App_LocalResources/FilePropertiesTabControl.ascx.resx";
 
         public string UserControlSrc
         {
-            get { return "~/DesktopModules/OpenDocument/DigitalAssets/FilePropertiesTabControl.ascx"; }
+            get { return "~/DesktopModules/OpenFiles/DigitalAssets/FilePropertiesTabControl.ascx"; }
         }
 
         public string Text

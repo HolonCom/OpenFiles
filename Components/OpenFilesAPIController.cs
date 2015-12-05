@@ -25,17 +25,16 @@ using Satrabel.OpenContent.Components;
 
 #endregion
 
-namespace Satrabel.OpenDocument.Components
+namespace Satrabel.OpenFiles.Components
 {
-    // [SupportedModules("OpenDocument")]
-    public class OpenDocumentAPIController : DnnApiController
+    // [SupportedModules("OpenFiles")]
+    public class OpenFilesAPIController : DnnApiController
     {
-        private static readonly ILog Logger = LoggerSource.Instance.GetLogger(typeof(OpenDocumentAPIController));
         public string BaseDir
         {
             get
             {
-                return PortalSettings.HomeDirectory + "/OpenDocument/Templates/";
+                return PortalSettings.HomeDirectory + "/OpenFiles/Templates/";
             }
         }
 
@@ -44,12 +43,12 @@ namespace Satrabel.OpenDocument.Components
         [HttpGet]
         public HttpResponseMessage Edit(int id)
         {
-            //string Template = "DesktopModules/OpenDocument/";
+            //string Template = "DesktopModules/OpenFiles/";
             JObject json = new JObject();
             try
             {
-                string desktopFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenDocument/");
-                string portalFolder = HostingEnvironment.MapPath(PortalSettings.HomeDirectory + "/OpenDocument/");
+                string desktopFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenFiles/");
+                string portalFolder = HostingEnvironment.MapPath(PortalSettings.HomeDirectory + "/OpenFiles/");
                 GetJson(json, desktopFolder, portalFolder, "");
                 int moduleId = ActiveModule.ModuleID;
                 if (id > 0)
@@ -66,7 +65,7 @@ namespace Satrabel.OpenDocument.Components
             }
             catch (Exception exc)
             {
-                Logger.Error(exc);
+                Utils.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
@@ -147,8 +146,8 @@ namespace Satrabel.OpenDocument.Components
                 string TemplateFilename = HostingEnvironment.MapPath("~/" + Template);
                 string prefix = Path.GetFileNameWithoutExtension(TemplateFilename) + "-";
 
-                string DesktopFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenDocument/");
-                string PortalFolder = HostingEnvironment.MapPath(PortalSettings.HomeDirectory + "/OpenDocument/");
+                string DesktopFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenFiles/");
+                string PortalFolder = HostingEnvironment.MapPath(PortalSettings.HomeDirectory + "/OpenFiles/");
                 GetJson(json, DesktopFolder, PortalFolder, prefix);
 
                 if (!string.IsNullOrEmpty(Data))
@@ -159,14 +158,14 @@ namespace Satrabel.OpenDocument.Components
                     }
                     catch (Exception ex)
                     {
-                        Logger.Error("Settings Json Data : " + Data, ex);
+                        Utils.Logger.Error("Settings Json Data : " + Data, ex);
                     }
                 }
                 return Request.CreateResponse(HttpStatusCode.OK, json);
             }
             catch (Exception exc)
             {
-                Logger.Error(exc);
+                Utils.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
@@ -184,7 +183,7 @@ namespace Satrabel.OpenDocument.Components
             }
             catch (Exception exc)
             {
-                Logger.Error(exc);
+                Utils.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
@@ -194,12 +193,12 @@ namespace Satrabel.OpenDocument.Components
         [HttpGet]
         public HttpResponseMessage EditImages(int id)
         {
-            //string Template = "DesktopModules/OpenDocument/";
+            //string Template = "DesktopModules/OpenFiles/";
             JObject json = new JObject();
             try
             {
-                string desktopFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenDocument/");
-                string portalFolder = HostingEnvironment.MapPath(PortalSettings.HomeDirectory + "/OpenDocument/");
+                string desktopFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenFiles/");
+                string portalFolder = HostingEnvironment.MapPath(PortalSettings.HomeDirectory + "/OpenFiles/");
                 GetJson(json, desktopFolder, portalFolder, "images");
 
                 int moduleId = ActiveModule.ModuleID;
@@ -217,7 +216,7 @@ namespace Satrabel.OpenDocument.Components
             }
             catch (Exception exc)
             {
-                Logger.Error(exc);
+                Utils.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }

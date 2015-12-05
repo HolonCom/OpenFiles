@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Satrabel.OpenDocument {
+namespace Satrabel.OpenFiles {
     
     
     public partial class View {

@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("OpenDocument")]
+[assembly: AssemblyTitle("OpenFiles")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Satrabel")]
-[assembly: AssemblyProduct("OpenDocument")]
+[assembly: AssemblyCompany("HolonCom")]
+[assembly: AssemblyProduct("OpenFiles")]
 [assembly: AssemblyCopyright("Copyright © 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -30,5 +30,5 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("01.00.00.0")]
-[assembly: AssemblyFileVersion("01.00.00.0")]
+[assembly: AssemblyVersion("02.00.00.0")]
+[assembly: AssemblyFileVersion("02.00.00.0")]

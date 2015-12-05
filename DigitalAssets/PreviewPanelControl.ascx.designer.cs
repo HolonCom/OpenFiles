@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Satrabel.OpenDocument.DigitalAssets {
+namespace Satrabel.OpenFiles.DigitalAssets {
     
     
     public partial class PreviewPanelControl {

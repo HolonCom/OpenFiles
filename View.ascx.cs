@@ -12,12 +12,12 @@
 using System;
 using DotNetNuke.Entities.Modules;
 using DotNetNuke.Common.Utilities;
-using Satrabel.OpenDocument.Components.Lucene;
+using Satrabel.OpenFiles.Components.Lucene;
 using DotNetNuke.Services.Scheduling;
 
 #endregion
 
-namespace Satrabel.OpenDocument
+namespace Satrabel.OpenFiles
 {
     public partial class View : PortalModuleBase
     {
@@ -43,7 +43,7 @@ namespace Satrabel.OpenDocument
         protected void bScheduleTask_Click(object sender, EventArgs e)
         {
             var sc = SchedulingProvider.Instance();
-            var schedule = sc.GetSchedule("Satrabel.OpenDocument.Components.Lucene.SearchEngineScheduler,Satrabel.OpenDocument", "");
+            var schedule = sc.GetSchedule("Satrabel.OpenFiles.Components.Lucene.SearchEngineScheduler, OpenFiles", "");
             if (schedule == null)
             {
                 schedule = CreateScheduleItem();
@@ -54,8 +54,8 @@ namespace Satrabel.OpenDocument
         private ScheduleItem CreateScheduleItem()
         {
             var scheduleItem = new ScheduleItem();
-            scheduleItem.TypeFullName = "Satrabel.OpenDocument.Components.Lucene.SearchEngineScheduler,Satrabel.OpenDocument";
-            scheduleItem.FriendlyName = "OpenDocument.Search";
+            scheduleItem.TypeFullName = "Satrabel.OpenFiles.Components.Lucene.SearchEngineScheduler, OpenFiles";
+            scheduleItem.FriendlyName = "OpenFiles.Search";
             //DNN-4964 - values for time lapse and retry frequency can't be set to 0, -1 or left empty (client side validation has been added)
             scheduleItem.TimeLapse = 30;
             scheduleItem.TimeLapseMeasurement = "m";

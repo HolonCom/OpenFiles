@@ -12,7 +12,7 @@
 INSERT INTO {databaseOwner}{objectQualifier}[Schedule]
          
      VALUES
-           ('Satrabel.OpenDocument.Components.Lucene.SearchEngineScheduler, OpenDocument'
+           ('Satrabel.OpenFiles.Components.Lucene.SearchEngineScheduler, OpenFiles'
            ,30
            ,'m'
            ,15
@@ -27,5 +27,5 @@ INSERT INTO {databaseOwner}{objectQualifier}[Schedule]
            ,null
            ,null
            ,null
-           ,'Search : OpenDocument', null)
+           ,'Search : OpenFiles', null)
 GO

@@ -19,7 +19,7 @@ using DotNetNuke.Common;
 using System;
 using DotNetNuke.Services.Search.Entities;
 
-namespace Satrabel.OpenDocument.Components
+namespace Satrabel.OpenFiles.Components
 {
     public class FeatureController //: ModuleSearchBase //,IPortable //, IUpgradeable
     {

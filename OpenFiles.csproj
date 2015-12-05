@@ -11,8 +11,8 @@
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Satrabel.OpenDocument</RootNamespace>
-    <AssemblyName>OpenDocument</AssemblyName>
+    <RootNamespace>Satrabel.OpenFiles</RootNamespace>
+    <AssemblyName>OpenFiles</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
@@ -152,8 +152,8 @@
     <Compile Include="Components\Lucene\PdfParser.cs" />
     <Compile Include="Components\Lucene\SearchEngine.cs" />
     <Compile Include="Components\Lucene\SearchEngineScheduler.cs" />
-    <Compile Include="Components\OpenDocumentAPIController.cs" />
-    <Compile Include="Components\OpenDocumentRouteMapper.cs" />
+    <Compile Include="Components\OpenFilesAPIController.cs" />
+    <Compile Include="Components\OpenFilesRouteMapper.cs" />
     <Compile Include="Components\JPList\PaginationDTO.cs" />
     <Compile Include="Components\JPList\JpListQueryDTO.cs" />
     <Compile Include="Components\JPList\RequestDTO.cs" />
@@ -161,6 +161,7 @@
     <Compile Include="Components\Template\DataDTO.cs" />
     <Compile Include="Components\Template\FileDTO.cs" />
     <Compile Include="Components\Template\TemplateHelper.cs" />
+    <Compile Include="Components\Utils.cs" />
     <Compile Include="DigitalAssets\FolderFieldsControl.ascx.cs">
       <DependentUpon>FolderFieldsControl.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -212,7 +213,7 @@
     <Content Include="View.ascx" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="OpenDocument.dnn">
+    <Content Include="OpenFiles.dnn">
       <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
@@ -307,8 +308,8 @@
   </ProjectExtensions>
   <PropertyGroup>
     <Extension>zip</Extension>
-    <DNNFileName>OpenDocument</DNNFileName>
-    <PackageName>OpenDocument</PackageName>
+    <DNNFileName>OpenFiles</DNNFileName>
+    <PackageName>OpenFiles</PackageName>
     <MSBuildCommunityTasksPath>$(SolutionDir)\packages\MSBuildTasks.1.4.0.88\tools</MSBuildCommunityTasksPath>
   </PropertyGroup>
   <Import Project="BuildScripts\ModulePackage.Targets" />

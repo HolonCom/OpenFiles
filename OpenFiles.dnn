@@ -1,14 +1,14 @@
 <dotnetnuke type="Package" version="5.0">
   <packages>
-    <package name="OpenDocument" type="Module" version="01.00.00">
-      <friendlyName>OpenDocument</friendlyName>
-      <description>OpenDocument module by Satrabel.be</description>
-      <iconFile>~/DesktopModules/OpenDocument/Images/icon_extensions.png</iconFile>
+    <package name="OpenFiles" type="Module" version="02.00.00">
+      <friendlyName>OpenFiles</friendlyName>
+      <description>OpenFiles module by HolonCom.eu</description>
+      <iconFile>~/DesktopModules/OpenFiles/Images/icon_extensions.png</iconFile>
       <owner>
-        <name>Satrabel.be</name>
-        <organization>Satrabel.be</organization>
-        <url>http://www.satrabel.be</url>
-        <email>info@satrabel.be</email>
+        <name>HolonCom.eu</name>
+        <organization>HolonCom.eu</organization>
+        <url>http://www.holoncom.eu</url>
+        <email>info@holoncom.eu</email>
       </owner>
       <license src="License.txt"></license>
       <releaseNotes src="ReleaseNotes.txt"></releaseNotes>
@@ -19,9 +19,25 @@
         <dependency type="type">Satrabel.OpenContent.Components.TemplateHelpers.ImageHelper</dependency>
       </dependencies>
       <components>
+        <component type="Script">
+          <scripts>
+            <basePath>DesktopModules\OpenFiles</basePath>
+            <script type="Install">
+              <path>Providers\DataProviders\SqlDataProvider</path>
+              <name>02.00.00.SqlDataProvider</name>
+              <version>02.00.00</version>
+            </script>
+            <script type="UnInstall">
+              <path>Providers\DataProviders\SqlDataProvider</path>
+              <name>Uninstall.SqlDataProvider</name>
+              <version>00.00.01</version>
+            </script>
+          </scripts>
+        </component>
+
         <component type="ResourceFile">
           <resourceFiles>
-            <basePath>DesktopModules/OpenDocument</basePath>
+            <basePath>DesktopModules/OpenFiles</basePath>
             <resourceFile>
               <name>Resources.zip</name>
             </resourceFile>
@@ -29,18 +45,18 @@
         </component>
         <component type="Module">
           <desktopModule>
-            <moduleName>OpenDocument</moduleName>
-            <foldername>OpenDocument</foldername>
-            <businessControllerClass>Satrabel.OpenDocument.Components.FeatureController</businessControllerClass>
+            <moduleName>OpenFiles</moduleName>
+            <foldername>OpenFiles</foldername>
+            <businessControllerClass>Satrabel.OpenFiles.Components.FeatureController</businessControllerClass>
             <supportedFeatures />
             <moduleDefinitions>
               <moduleDefinition>
-                <friendlyName>OpenDocument</friendlyName>
+                <friendlyName>OpenFiles</friendlyName>
                 <defaultCacheTime>0</defaultCacheTime>
                 <moduleControls>
                   <moduleControl>
                     <controlKey />
-                    <controlSrc>DesktopModules/OpenDocument/View.ascx</controlSrc>
+                    <controlSrc>DesktopModules/OpenFiles/View.ascx</controlSrc>
                     <supportsPartialRendering>False</supportsPartialRendering>
                     <controlTitle />
                     <controlType>View</controlType>
@@ -57,7 +73,7 @@
         <component type="Assembly">
           <assemblies>
             <assembly>
-              <name>OpenDocument.dll</name>
+              <name>OpenFiles.dll</name>
               <path>bin</path>
             </assembly>
             <assembly>

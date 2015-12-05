@@ -6,8 +6,8 @@ using DotNetNuke.Services.FileSystem;
 using DotNetNuke.Web.Api;
 using Newtonsoft.Json.Linq;
 using Satrabel.OpenContent.Components.Json;
-using Satrabel.OpenDocument.Components.Lucene;
-using Satrabel.OpenDocument.Components.Template;
+using Satrabel.OpenFiles.Components.Lucene;
+using Satrabel.OpenFiles.Components.Template;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,15 +17,13 @@ using System.Net.Http;
 using System.Web;
 using System.Web.Http;
 using Satrabel.OpenContent.Components.TemplateHelpers;
-using TemplateHelper = Satrabel.OpenDocument.Components.Template.TemplateHelper;
+using TemplateHelper = Satrabel.OpenFiles.Components.Template.TemplateHelper;
 
-namespace Satrabel.OpenDocument.Components.JPList
+namespace Satrabel.OpenFiles.Components.JPList
 {
-    //[SupportedModules("OpenDocument")]
+    //[SupportedModules("OpenFiles")]
     public class JplistAPIController : DnnApiController
     {
-        private static readonly ILog Logger = LoggerSource.Instance.GetLogger(typeof(OpenDocumentAPIController));
-
         [ValidateAntiForgeryToken]
         [DnnModuleAuthorize(AccessLevel = SecurityAccessLevel.View)]
         [HttpPost]
@@ -106,7 +104,7 @@ namespace Satrabel.OpenDocument.Components.JPList
             }
             catch (Exception exc)
             {
-                Logger.Error(exc);
+                Utils.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
 

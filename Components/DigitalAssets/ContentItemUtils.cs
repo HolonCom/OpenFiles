@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace Satrabel.OpenDocument.Components.DigitalAssets
+namespace Satrabel.OpenFiles.Components.DigitalAssets
 {
     public class ContentItemUtils
     {

@@ -14,7 +14,7 @@ namespace Satrabel.Modules.DigitalAssets.Components.ExtensionPoint.UserControls
     {
         public string UserControlSrc
         {
-            get { return "~/DesktopModules/OpenDocument/DigitalAssets/FileFieldsControl.ascx"; }
+            get { return "~/DesktopModules/OpenFiles/DigitalAssets/FileFieldsControl.ascx"; }
         }
 
         public string Text

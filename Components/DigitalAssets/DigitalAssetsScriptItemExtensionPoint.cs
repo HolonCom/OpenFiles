@@ -5,7 +5,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Web;
 
-namespace Satrabel.OpenDocument.Components.DigitalAssets
+namespace Satrabel.OpenFiles.Components.DigitalAssets
 {
     [Export(typeof(IScriptItemExtensionPoint))]
     [ExportMetadata("Module", "DigitalAssets")]
@@ -17,7 +17,7 @@ namespace Satrabel.OpenDocument.Components.DigitalAssets
         public string ScriptName
         {
             get {
-                return "~/DesktopModules/OpenDocument/js/DigitalAssetsExtension.js";
+                return "~/DesktopModules/OpenFiles/js/DigitalAssetsExtension.js";
             }
         }
 

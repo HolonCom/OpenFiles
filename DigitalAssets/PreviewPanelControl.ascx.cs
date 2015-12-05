@@ -9,7 +9,7 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace Satrabel.OpenDocument.DigitalAssets
+namespace Satrabel.OpenFiles.DigitalAssets
 {
     public partial class PreviewPanelControl : DotNetNuke.Modules.DigitalAssets.PreviewPanelControl
     {

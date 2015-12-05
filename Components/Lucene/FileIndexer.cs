@@ -19,13 +19,10 @@ using System.Text;
 
 #endregion
 
-namespace Satrabel.OpenDocument.Components.Lucene
+namespace Satrabel.OpenFiles.Components.Lucene
 {
     public class FileIndexer
     {
-        private static readonly ILog Logger = LoggerSource.Instance.GetLogger(typeof(FileIndexer));
-        //private static readonly int FileSearchTypeId = SearchHelper.Instance.GetSearchTypeByName("file").SearchTypeId;
-
         /// -----------------------------------------------------------------------------
         /// <summary>
         /// Returns the collection of SearchDocuments populated with Tab MetaData for the given portal.
