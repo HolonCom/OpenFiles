@@ -43,7 +43,7 @@ namespace Satrabel.OpenFiles
         protected void bScheduleTask_Click(object sender, EventArgs e)
         {
             var sc = SchedulingProvider.Instance();
-            var schedule = sc.GetSchedule("Satrabel.OpenFiles.Components.Lucene.SearchEngineScheduler,OpenFiles", "");
+            var schedule = sc.GetSchedule("Satrabel.OpenFiles.Components.Lucene.SearchEngineScheduler, OpenFiles", "");
             if (schedule == null)
             {
                 schedule = CreateScheduleItem();
@@ -54,7 +54,7 @@ namespace Satrabel.OpenFiles
         private ScheduleItem CreateScheduleItem()
         {
             var scheduleItem = new ScheduleItem();
-            scheduleItem.TypeFullName = "Satrabel.OpenFiles.Components.Lucene.SearchEngineScheduler,OpenFiles";
+            scheduleItem.TypeFullName = "Satrabel.OpenFiles.Components.Lucene.SearchEngineScheduler, OpenFiles";
             scheduleItem.FriendlyName = "OpenFiles.Search";
             //DNN-4964 - values for time lapse and retry frequency can't be set to 0, -1 or left empty (client side validation has been added)
             scheduleItem.TimeLapse = 30;

@@ -19,29 +19,27 @@ namespace Satrabel.OpenFiles.Components.Lucene
 {
     public static class LuceneService
     {
-        private static readonly ILog Logger = LoggerSource.Instance.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         // properties
-        private static readonly string LuceneOutputPath = Path.Combine(Globals.ApplicationMapPath, "App_Data\\OpenFiles\\lucene_index");
+        private static readonly string LuceneOutputPath = Path.Combine(Globals.ApplicationMapPath, "App_Data\\OpenFiles\\LuceneIndex");
         private static FSDirectory _directoryTemp;
 
         private static FSDirectory LuceneOutputFolder
         {
             get
             {
-                if (_directoryTemp == null) 
+                if (_directoryTemp == null)
                     _directoryTemp = FSDirectory.Open(new DirectoryInfo(LuceneOutputPath));
-                if (IndexWriter.IsLocked(_directoryTemp)) 
+                if (IndexWriter.IsLocked(_directoryTemp))
                     IndexWriter.Unlock(_directoryTemp);
                 var lockFilePath = Path.Combine(LuceneOutputPath, "write.lock");
-                if (File.Exists(lockFilePath)) 
+                if (File.Exists(lockFilePath))
                     File.Delete(lockFilePath);
                 return _directoryTemp;
             }
         }
 
         // search methods
-        internal static IEnumerable<LuceneIndexItem> GetAllIndexedRecords()
+        internal static List<LuceneIndexItem> GetAllIndexedRecords()
         {
             // validate search index
             if (!System.IO.Directory.EnumerateFiles(LuceneOutputPath).Any()) return new List<LuceneIndexItem>();
@@ -66,13 +64,16 @@ namespace Satrabel.OpenFiles.Components.Lucene
             IndexItem(new List<LuceneIndexItem> { item });
         }
 
-        internal static void IndexItem(IEnumerable<LuceneIndexItem> itemlist)
+        internal static void IndexItem(List<LuceneIndexItem> itemlist)
         {
             // init lucene
             //var analyzer = new StandardAnalyzer(Version.LUCENE_30);
 
+            if (itemlist.Count() == 0) return;
+
             var analyzer = GetCustomAnalyzer();
-            using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, false))
+            
+            using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, !IndexExists()))
             {
                 // add data to lucene search index (replaces older entries if any)
                 foreach (var sampleData in itemlist)
@@ -102,24 +103,33 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         public static bool ClearLuceneIndex()
         {
+            var retval = true;
+            Utils.Logger.DebugFormat("Executing ==> public static bool ClearLuceneIndex()");
             try
             {
-                var analyzer = GetCustomAnalyzer();
-                using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, true))
+                if (LuceneOutputFolder.Directory.Exists)
                 {
-                    // remove older index entries
-                    writer.DeleteAll();
 
-                    // close handles
-                    analyzer.Close();
-                    writer.Dispose();
+                    var analyzer = GetCustomAnalyzer();
+                    using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, false))
+                    {
+                        Utils.Logger.DebugFormat("          ==> Deleting all documents from index");
+                        // remove older index entries
+                        writer.DeleteAll();
+
+                        // close handles
+                        analyzer.Close();
+                        writer.Dispose();
+                    }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false;
+                Utils.Logger.DebugFormat("          ==> Deleting documents failed with {0}", ex.Message);
+                retval = false;
             }
-            return true;
+            Utils.Logger.DebugFormat("     Exit ==> public static bool ClearLuceneIndex() with {0}", retval);
+            return retval;
         }
 
         public static void Optimize()
@@ -137,7 +147,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         #region Private Methods
 
-        internal static IEnumerable<LuceneIndexItem> DoSearch(string searchQuery, string searchField = "")
+        internal static List<LuceneIndexItem> DoSearch(string searchQuery, string searchField = "")
         {
             // main search method
 
@@ -186,13 +196,13 @@ namespace Satrabel.OpenFiles.Components.Lucene
             return query;
         }
 
-        private static IEnumerable<LuceneIndexItem> MapLuceneToDataList(IEnumerable<Document> hits)
+        private static List<LuceneIndexItem> MapLuceneToDataList(IEnumerable<Document> hits)
         {
             // map Lucene search index to data
             return hits.Select(MapLuceneDocumentToData).ToList();
         }
 
-        private static IEnumerable<LuceneIndexItem> MapLuceneToDataList(IEnumerable<ScoreDoc> hits, IndexSearcher searcher)
+        private static List<LuceneIndexItem> MapLuceneToDataList(IEnumerable<ScoreDoc> hits, IndexSearcher searcher)
         {
             // v 2.9.4: use 'hit.doc'
             // v 3.0.3: use 'hit.Doc'
@@ -288,7 +298,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             }
             catch (Exception ex)
             {
-                Logger.Error(string.Format("Failed to index File [{0}:{1}]", item.FileId, item.Title), ex);
+                Utils.Logger.Error(string.Format("Failed to index File [{0}:{1}]", item.FileId, item.Title), ex);
             }
         }
 
@@ -307,10 +317,11 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         #endregion
 
-        internal static bool IndexNeedInitialization()
+        internal static bool IndexExists()
         {
-            return !LuceneOutputFolder.Directory.Exists;
+            return LuceneOutputFolder.Directory.Exists;
         }
+
     }
 
     public class LuceneIndexItem

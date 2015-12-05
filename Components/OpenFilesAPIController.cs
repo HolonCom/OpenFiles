@@ -30,7 +30,6 @@ namespace Satrabel.OpenFiles.Components
     // [SupportedModules("OpenFiles")]
     public class OpenFilesAPIController : DnnApiController
     {
-        private static readonly ILog Logger = LoggerSource.Instance.GetLogger(typeof(OpenFilesAPIController));
         public string BaseDir
         {
             get
@@ -66,7 +65,7 @@ namespace Satrabel.OpenFiles.Components
             }
             catch (Exception exc)
             {
-                Logger.Error(exc);
+                Utils.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
@@ -159,14 +158,14 @@ namespace Satrabel.OpenFiles.Components
                     }
                     catch (Exception ex)
                     {
-                        Logger.Error("Settings Json Data : " + Data, ex);
+                        Utils.Logger.Error("Settings Json Data : " + Data, ex);
                     }
                 }
                 return Request.CreateResponse(HttpStatusCode.OK, json);
             }
             catch (Exception exc)
             {
-                Logger.Error(exc);
+                Utils.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
@@ -184,7 +183,7 @@ namespace Satrabel.OpenFiles.Components
             }
             catch (Exception exc)
             {
-                Logger.Error(exc);
+                Utils.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
@@ -217,7 +216,7 @@ namespace Satrabel.OpenFiles.Components
             }
             catch (Exception exc)
             {
-                Logger.Error(exc);
+                Utils.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }

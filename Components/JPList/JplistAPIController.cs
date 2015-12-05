@@ -24,8 +24,6 @@ namespace Satrabel.OpenFiles.Components.JPList
     //[SupportedModules("OpenFiles")]
     public class JplistAPIController : DnnApiController
     {
-        private static readonly ILog Logger = LoggerSource.Instance.GetLogger(typeof(JplistAPIController));
-
         [ValidateAntiForgeryToken]
         [DnnModuleAuthorize(AccessLevel = SecurityAccessLevel.View)]
         [HttpPost]
@@ -106,7 +104,7 @@ namespace Satrabel.OpenFiles.Components.JPList
             }
             catch (Exception exc)
             {
-                Logger.Error(exc);
+                Utils.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
 

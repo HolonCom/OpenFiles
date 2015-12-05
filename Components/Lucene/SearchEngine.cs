@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http.Headers;
 using DotNetNuke.Common.Utilities;
 using DotNetNuke.Data;
 using DotNetNuke.Entities.Controllers;
@@ -18,6 +19,7 @@ using DotNetNuke.Services.Search;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
+using Satrabel.OpenContent.Components;
 
 #endregion
 
@@ -25,11 +27,60 @@ namespace Satrabel.OpenFiles.Components.Lucene
 {
     internal class SearchEngine
     {
+
         public int IndexedSearchDocumentCount { get; private set; }
 
         public Dictionary<string, int> Results { get; private set; }
 
-        public int DeletedCount { get; private set; }
+        public static List<LuceneIndexItem> GetAllIndexedRecords()
+        {
+            Utils.Logger.DebugFormat("Executing ==> public static IEnumerable<LuceneIndexItem> GetAllIndexedRecords()");
+            ValidateIndex();
+            List<LuceneIndexItem> results = LuceneService.GetAllIndexedRecords();
+            Utils.Logger.DebugFormat("     Exit ==> public static IEnumerable<LuceneIndexItem> GetAllIndexedRecords().  Returning {0} records", results.Count);
+            return results;
+        }
+
+        public static List<LuceneIndexItem> Search(string input, string fieldName = "")
+        {
+            Utils.Logger.DebugFormat("Executing ==> public static IEnumerable<LuceneIndexItem> Search(string [{0}], string [{1}])", input, fieldName);
+            List<LuceneIndexItem> retval;
+            ValidateIndex();
+            if (string.IsNullOrEmpty(input))
+                retval = GetAllIndexedRecords();
+            else
+                retval = LuceneService.DoSearch(input, fieldName);
+            Utils.Logger.DebugFormat("     Exit ==> public static IEnumerable<LuceneIndexItem> Search() with {0} items found", retval.Count);
+            return retval;
+        }
+
+        public static void RemoveDocument(int fileId)
+        {
+            Utils.Logger.DebugFormat("Executing ==> public static void RemoveDocument(int [{0}])", fileId);
+            if (LuceneService.IndexExists())
+            {
+                LuceneService.RemoveLuceneIndexRecord(fileId);
+            }
+            Utils.Logger.DebugFormat("     Exit ==> public static void RemoveDocument(int [{0}])", fileId);
+        }
+
+        #region Private
+
+        /// <summary>
+        /// Reindex all portal files.
+        /// </summary>
+        private static void ValidateIndex()
+        {
+            if (LuceneService.IndexExists()) return;
+
+            var indexer = new SearchEngine();
+            indexer.ReIndexContent();
+        }
+
+        internal void ReIndexContent()
+        {
+            IndexFiles(null);
+        }
 
         /// -----------------------------------------------------------------------------
         /// <summary>
@@ -44,39 +95,6 @@ namespace Satrabel.OpenFiles.Components.Lucene
             IndexFiles(startDate);
         }
 
-        /// <summary>
-        /// Reindex all portal files.
-        /// </summary>
-        internal void ReIndexContent()
-        {
-            IndexFiles(null);
-        }
-
-        public static IEnumerable<LuceneIndexItem> GetAllIndexedRecords()
-        {
-            return LuceneService.GetAllIndexedRecords();
-        }
-
-        public static IEnumerable<LuceneIndexItem> Search(string input, string fieldName = "")
-        {
-            if (String.IsNullOrEmpty(input)) return new List<LuceneIndexItem>();
-
-            if(LuceneService.IndexNeedInitialization())
-            {
-                var indexer = new SearchEngine();
-                indexer.ReIndexContent();
-            }
-
-            return LuceneService.DoSearch(input, fieldName);
-        }
-
-        public static void RemoveDocument(int fileId)
-        {
-            LuceneService.RemoveLuceneIndexRecord(fileId);
-        }
-
-        #region Private
-
         private void IndexFiles(DateTime? startDate)
         {
             var fileIndexer = new FileIndexer();
@@ -90,10 +108,15 @@ namespace Satrabel.OpenFiles.Components.Lucene
             var portals = PortalController.Instance.GetPortals();
             foreach (var portal in portals.Cast<PortalInfo>())
             {
+                if (!startDate.HasValue)
+                {
+                    Utils.Logger.InfoFormat("Reindexing all documents from Portal {0}", portal.PortalID);
+                }
                 var indexSince = FixedIndexingStartDate(portal.PortalID, startDate ?? DateTime.MinValue);
-                var searchDocs = fileIndexer.GetPortalSearchDocuments(portal.PortalID, indexSince);
+                List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portal.PortalID, indexSince).ToList();
                 LuceneService.IndexItem(searchDocs);
                 IndexedSearchDocumentCount += searchDocs.Count();
+                Utils.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
             }
             if (IndexedSearchDocumentCount > 10)
                 LuceneService.Optimize();
