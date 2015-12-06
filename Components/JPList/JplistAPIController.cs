@@ -16,6 +16,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web;
 using System.Web.Http;
+using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.TemplateHelpers;
 using TemplateHelper = Satrabel.OpenFiles.Components.Template.TemplateHelper;
 
@@ -72,7 +73,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 var data = new List<FileDTO>();
                 foreach (var doc in docs)
                 {
-                    var f = fileManager.GetFile(doc.FileId);
+                    IFileInfo f = fileManager.GetFile(doc.FileId);
                     if (f == null)
                     {
                         //file seems to have been deleted
@@ -86,10 +87,11 @@ namespace Satrabel.OpenFiles.Components.JPList
                             FileName = f.FileName,
                             FolderName = f.Folder,
                             Url = fileManager.GetUrl(f),
+                            IsImage = fileManager.IsImageFile(f),
                             ImageUrl = ImageHelper.GetImageUrl(f, new Ratio(100, 100)),
                             Custom = GetCustomFileDataAsDynamic(f),
-                            IsImage = fileManager.IsImageFile(f),
-                            IconUrl = GetFileIconUrl(f.Extension)
+                            IconUrl = GetFileIconUrl(f.Extension),
+                            EditUrl = GetFileEditUrl(f)
                         });
                     }
                 }
@@ -110,6 +112,9 @@ namespace Satrabel.OpenFiles.Components.JPList
 
         }
 
+
+        #region Private Methods
+
         private string NormalizePath(string filePath)
         {
             filePath = filePath.Replace("\\", "/");
@@ -119,7 +124,12 @@ namespace Satrabel.OpenFiles.Components.JPList
             return filePath;
         }
 
-        #region Private Methods
+        private string GetFileEditUrl(IFileInfo f)
+        {
+            if (f == null) return "";
+            var portalFileUri = new PortalFileUri(f);
+            return portalFileUri.EditUrl();
+        }
 
         private static string GetFileIconUrl(string extension)
         {

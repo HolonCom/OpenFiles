@@ -11,12 +11,14 @@ namespace Satrabel.OpenFiles.Components.Template
         public string FolderName { get; set; }
         public string Url { get; set; }
         public dynamic Custom { get; set; }
-        public bool IsImage { get; set; }
 
         public string IconUrl { get; set; }
 
         public int FileId { get; set; }
 
+        public bool IsImage { get; set; }
         public string ImageUrl { get; set; }
+        public string EditUrl { get; set; }
+
     }
 }
