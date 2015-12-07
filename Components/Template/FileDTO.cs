@@ -7,6 +7,7 @@ namespace Satrabel.OpenFiles.Components.Template
 {
     public class FileDTO
     {
+        public string Name { get; set; }
         public string FileName { get; set; }
         public string FolderName { get; set; }
         public string Url { get; set; }
@@ -19,6 +20,5 @@ namespace Satrabel.OpenFiles.Components.Template
         public bool IsImage { get; set; }
         public string ImageUrl { get; set; }
         public string EditUrl { get; set; }
-
     }
 }

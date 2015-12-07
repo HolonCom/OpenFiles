@@ -82,14 +82,21 @@ namespace Satrabel.OpenFiles.Components.JPList
                     }
                     else
                     {
+                        var custom = GetCustomFileDataAsDynamic(f);
+                        dynamic title = null;
+                        if (custom != null && custom.meta != null)
+                        {
+                            title = Normalize.DynamicValue(custom.meta.title, "");
+                        }
                         data.Add(new FileDTO()
                         {
+                            Name = Normalize.DynamicValue(title, f.FileName),
                             FileName = f.FileName,
                             FolderName = f.Folder,
                             Url = fileManager.GetUrl(f),
                             IsImage = fileManager.IsImageFile(f),
                             ImageUrl = ImageHelper.GetImageUrl(f, new Ratio(100, 100)),
-                            Custom = GetCustomFileDataAsDynamic(f),
+                            Custom = custom,
                             IconUrl = GetFileIconUrl(f.Extension),
                             EditUrl = GetFileEditUrl(f)
                         });
