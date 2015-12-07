@@ -20,5 +20,6 @@ namespace Satrabel.OpenFiles.Components.Template
         public bool IsImage { get; set; }
         public string ImageUrl { get; set; }
         public string EditUrl { get; set; }
+        public bool IsEditable { get; set; }
     }
 }

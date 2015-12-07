@@ -98,6 +98,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                             ImageUrl = ImageHelper.GetImageUrl(f, new Ratio(100, 100)),
                             Custom = custom,
                             IconUrl = GetFileIconUrl(f.Extension),
+                            IsEditable = true, //todo: IsEditable || (!string.IsNullOrEmpty(editRole) && OpenContentUtils.HasEditPermissions(PortalSettings, Module, editRole, -1));,
                             EditUrl = GetFileEditUrl(f)
                         });
                     }
