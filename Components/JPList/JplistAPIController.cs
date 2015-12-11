@@ -14,8 +14,12 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Web;
 using System.Web.Http;
+using DotNetNuke.Common;
+using DotNetNuke.Entities.Portals;
+using DotNetNuke.Security.Permissions;
 using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.TemplateHelpers;
 using TemplateHelper = Satrabel.OpenFiles.Components.Template.TemplateHelper;
@@ -98,8 +102,8 @@ namespace Satrabel.OpenFiles.Components.JPList
                             ImageUrl = ImageHelper.GetImageUrl(f, new Ratio(100, 100)),
                             Custom = custom,
                             IconUrl = GetFileIconUrl(f.Extension),
-                            IsEditable = true, //todo: IsEditable || (!string.IsNullOrEmpty(editRole) && OpenContentUtils.HasEditPermissions(PortalSettings, Module, editRole, -1));,
-                            EditUrl = GetFileEditUrl(f)
+                            IsEditable = IsEditable,
+                            EditUrl = IsEditable ? GetFileEditUrl(f) : ""
                         });
                     }
                 }
@@ -123,6 +127,37 @@ namespace Satrabel.OpenFiles.Components.JPList
 
         #region Private Methods
 
+        private bool? _isEditable;
+        private bool IsEditable
+        {
+            get
+            {
+                //Perform tri-state switch check to avoid having to perform a security
+                //role lookup on every property access (instead caching the result)
+                if (!_isEditable.HasValue)
+                {
+                    bool blnPreview = (PortalSettings.UserMode == PortalSettings.Mode.View);
+                    if (Globals.IsHostTab(PortalSettings.ActiveTab.TabID))
+                    {
+                        blnPreview = false;
+                    }
+                    bool blnHasModuleEditPermissions = false;
+                    if (ActiveModule != null)
+                    {
+                        blnHasModuleEditPermissions = ModulePermissionController.HasModuleAccess(SecurityAccessLevel.Edit, "CONTENT", ActiveModule);
+                    }
+                    if (blnPreview == false && blnHasModuleEditPermissions)
+                    {
+                        _isEditable = true;
+                    }
+                    else
+                    {
+                        _isEditable = false;
+                    }
+                }
+                return _isEditable.Value;
+            }
+        }
         private string NormalizePath(string filePath)
         {
             filePath = filePath.Replace("\\", "/");
