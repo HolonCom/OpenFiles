@@ -39,6 +39,10 @@ OpenFiles is a joint project of Robrecht Siera ([HolonCom](http://www.holoncom.e
 
 * not available yet
 
+##External resources
+
+* http://imageprocessor.org/imageprocessor-web/
+
 ##Coming soon ...
 
 [![Build by AppVeyor](https://ci.appveyor.com/api/projects/status/github/sachatrauwaen/OpenFiles?branch=master&svg=true)](https://ci.appveyor.com/project/sachatrauwaen/openfiles/)
