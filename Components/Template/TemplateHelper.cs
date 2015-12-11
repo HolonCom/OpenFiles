@@ -20,7 +20,7 @@ namespace Satrabel.OpenFiles.Components.Template
             string PhysicalTemplateFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenFiles/");
             dynamic model = new ExpandoObject();
             // schema
-            string schemaFilename = PhysicalTemplateFolder + "\\" + "schema.json";
+            string schemaFilename = PhysicalTemplateFolder + "schema.json";
             try
             {
                 dynamic schema = JsonUtils.JsonToDynamic(File.ReadAllText(schemaFilename));
@@ -33,7 +33,7 @@ namespace Satrabel.OpenFiles.Components.Template
             // options
             JToken optionsJson = null;
             // default options
-            string optionsFilename = PhysicalTemplateFolder + "\\" + "options.json";
+            string optionsFilename = PhysicalTemplateFolder + "options.json";
             if (File.Exists(optionsFilename))
             {
                 string fileContent = File.ReadAllText(optionsFilename);
@@ -43,7 +43,7 @@ namespace Satrabel.OpenFiles.Components.Template
                 }
             }
             // language options
-            optionsFilename = PhysicalTemplateFolder + "\\" + "options." + PortalSettings.Current.CultureCode + ".json";
+            optionsFilename = PhysicalTemplateFolder + "options." + PortalSettings.Current.CultureCode + ".json";
             if (File.Exists(optionsFilename))
             {
                 string fileContent = File.ReadAllText(optionsFilename);
