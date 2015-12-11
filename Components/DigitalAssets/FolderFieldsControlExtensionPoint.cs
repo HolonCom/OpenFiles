@@ -5,11 +5,11 @@ using DotNetNuke.ExtensionPoints;
 
 namespace Satrabel.Modules.DigitalAssets.Components.ExtensionPoint.UserControls
 {
-    [Export(typeof(IUserControlExtensionPoint))]
-    [ExportMetadata("Module", "DigitalAssets")]
-    [ExportMetadata("Name", "FolderFieldsControlExtensionPoint")]
-    [ExportMetadata("Group", "ViewProperties")]
-    [ExportMetadata("Priority", 1)]
+    //[Export(typeof(IUserControlExtensionPoint))]
+    //[ExportMetadata("Module", "DigitalAssets")]
+    //[ExportMetadata("Name", "FolderFieldsControlExtensionPoint")]
+    //[ExportMetadata("Group", "ViewProperties")]
+    //[ExportMetadata("Priority", 1)]
     public class FolderFieldsControlExtensionPoint : IUserControlExtensionPoint
     {
         public string UserControlSrc
