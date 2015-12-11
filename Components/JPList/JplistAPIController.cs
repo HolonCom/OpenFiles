@@ -71,8 +71,8 @@ namespace Satrabel.OpenFiles.Components.JPList
                 }
 
                 int total = docs.Count();
-                if (jpListQuery.Pagination.currentPage > 0)
-                    docs = docs.Skip(jpListQuery.Pagination.currentPage * jpListQuery.Pagination.number).Take(jpListQuery.Pagination.number);
+                if (jpListQuery.Pagination.number > 0)
+                    docs = docs.Skip((jpListQuery.Pagination.currentPage) * jpListQuery.Pagination.number).Take(jpListQuery.Pagination.number);
                 var fileManager = FileManager.Instance;
                 var data = new List<FileDTO>();
                 foreach (var doc in docs)
