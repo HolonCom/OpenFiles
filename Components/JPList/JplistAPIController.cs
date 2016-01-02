@@ -20,6 +20,7 @@ using System.Web.Http;
 using DotNetNuke.Common;
 using DotNetNuke.Entities.Portals;
 using DotNetNuke.Security.Permissions;
+using DotNetNuke.Services.Scheduling;
 using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.TemplateHelpers;
 using TemplateHelper = Satrabel.OpenFiles.Components.Template.TemplateHelper;
@@ -96,6 +97,8 @@ namespace Satrabel.OpenFiles.Components.JPList
                         {
                             Name = Normalize.DynamicValue(title, f.FileName),
                             FileName = f.FileName,
+                            CreatedOnDate = f.CreatedOnDate,
+                            LastModifiedOnDate = f.LastModifiedOnDate,
                             FolderName = f.Folder,
                             Url = fileManager.GetUrl(f),
                             IsImage = fileManager.IsImageFile(f),
@@ -107,6 +110,9 @@ namespace Satrabel.OpenFiles.Components.JPList
                         });
                     }
                 }
+
+                //Sort as requested
+                data = SortAsRequested(data, jpListQuery);
 
                 var res = new ResultDTO<FileDTO>()
                 {
@@ -124,8 +130,28 @@ namespace Satrabel.OpenFiles.Components.JPList
 
         }
 
-
         #region Private Methods
+
+        private List<FileDTO> SortAsRequested(List<FileDTO> data, JpListQueryDTO jpListQuery)
+        {
+            //This implementation is not more than a hack for one project.
+            //todo add support for multiple sorting field
+            //todo add support for other sorting fields
+            //todo refactor to using Func<> to support more flexible approach
+
+            List<FileDTO> newdata = null;
+            foreach (var sort in jpListQuery.Sorts)
+            {
+                if (String.Equals(sort.path, "LastModifiedOnDate", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    if (String.Equals(sort.order, "desc", StringComparison.InvariantCultureIgnoreCase))
+                        newdata = data.OrderByDescending(i => i.LastModifiedOnDate).ToList();
+                    else
+                        newdata = data.OrderBy(i => i.LastModifiedOnDate).ToList();
+                }
+            }
+            return newdata ?? data;
+        }
 
         private bool? _isEditable;
         private bool IsEditable

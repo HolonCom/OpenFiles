@@ -21,5 +21,7 @@ namespace Satrabel.OpenFiles.Components.Template
         public string ImageUrl { get; set; }
         public string EditUrl { get; set; }
         public bool IsEditable { get; set; }
+        public DateTime LastModifiedOnDate { get; set; }
+        public DateTime CreatedOnDate { get; set; }
     }
 }
