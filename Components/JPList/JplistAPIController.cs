@@ -149,6 +149,28 @@ namespace Satrabel.OpenFiles.Components.JPList
                     else
                         newdata = data.OrderBy(i => i.LastModifiedOnDate).ToList();
                 }
+                else if (String.Equals(sort.path, "Name", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    if (String.Equals(sort.order, "desc", StringComparison.InvariantCultureIgnoreCase))
+                        newdata = data.OrderByDescending(i => i.Name).ToList();
+                    else
+                        newdata = data.OrderBy(i => i.Name).ToList();
+                }
+                else if (String.Equals(sort.path, "FileName", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    if (String.Equals(sort.order, "desc", StringComparison.InvariantCultureIgnoreCase))
+                        newdata = data.OrderByDescending(i => i.FileName).ToList();
+                    else
+                        newdata = data.OrderBy(i => i.FileName).ToList();
+                }
+                //else if (String.Equals(sort.path, "Description", StringComparison.InvariantCultureIgnoreCase))
+                //{
+                //    if (String.Equals(sort.order, "desc", StringComparison.InvariantCultureIgnoreCase))
+                //        newdata = data.OrderByDescending(i => i.Custom.).ToList();
+                //    else
+                //        newdata = data.OrderBy(i => i.FileName).ToList();
+                //}
+
             }
             return newdata ?? data;
         }
