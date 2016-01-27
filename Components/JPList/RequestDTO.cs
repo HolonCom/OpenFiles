@@ -11,6 +11,7 @@ namespace Satrabel.OpenFiles.Components.JPList
     {
         public string statuses { get; set; }
         public string folder { get; set; }
+        public bool withSubFolder { get; set; }
 
         public List<StatusDTO> StatusLst
         {
@@ -22,10 +23,6 @@ namespace Satrabel.OpenFiles.Components.JPList
                     lst  = JsonConvert.DeserializeObject<List<StatusDTO>>(HttpUtility.UrlDecode(statuses));
                     if (lst != null)
                     {
-                        
-
-
-
                     }
                 }
                 return lst;

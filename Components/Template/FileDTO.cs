@@ -23,5 +23,9 @@ namespace Satrabel.OpenFiles.Components.Template
         public bool IsEditable { get; set; }
         public DateTime LastModifiedOnDate { get; set; }
         public DateTime CreatedOnDate { get; set; }
+
+        public string FolderPath { get; set; }
+
+        public bool IsFolder { get; set; }
     }
 }

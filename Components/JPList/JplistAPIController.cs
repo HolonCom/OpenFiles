@@ -40,6 +40,8 @@ namespace Satrabel.OpenFiles.Components.JPList
                 IEnumerable<LuceneIndexItem> docs;
 
                 var jpListQuery = BuildJpListQuery(req.StatusLst);
+                //var curFollder = jpListQuery.Filters.FirstOrDefault(f => f.name != "Folder");
+                string curFolder = NormalizePath(req.folder);
                 if (!string.IsNullOrEmpty(req.folder) && jpListQuery.Filters.All(f => f.name != "Folder")) // If there is no "Folder" filter active, then add one
                 {
                     jpListQuery.Filters.Add(new FilterDTO()
@@ -53,6 +55,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                     foreach (var item in jpListQuery.Filters.Where(f => f.name == "Folder"))
                     {
                         item.path = NormalizePath(item.path);
+                        curFolder = NormalizePath(item.path);
                     }
                 }
                 jpListQuery.Filters.Add(new FilterDTO()
@@ -76,6 +79,11 @@ namespace Satrabel.OpenFiles.Components.JPList
                     docs = docs.Skip((jpListQuery.Pagination.currentPage) * jpListQuery.Pagination.number).Take(jpListQuery.Pagination.number);
                 var fileManager = FileManager.Instance;
                 var data = new List<FileDTO>();
+                if (req.withSubFolder)
+                {
+                    AddFolders(curFolder, fileManager, data);
+                }
+                
                 foreach (var doc in docs)
                 {
                     IFileInfo f = fileManager.GetFile(doc.FileId);
@@ -91,7 +99,14 @@ namespace Satrabel.OpenFiles.Components.JPList
                         dynamic title = null;
                         if (custom != null && custom.meta != null)
                         {
-                            title = Normalize.DynamicValue(custom.meta.title, "");
+                            try
+                            {
+                                title = Normalize.DynamicValue(custom.meta.title, "");
+                            }
+                            catch (Exception)
+                            {
+                            }
+
                         }
                         data.Add(new FileDTO()
                         {
@@ -114,6 +129,8 @@ namespace Satrabel.OpenFiles.Components.JPList
                 //Sort as requested
                 data = SortAsRequested(data, jpListQuery);
 
+                
+
                 var res = new ResultDTO<FileDTO>()
                 {
                     data = data,
@@ -128,6 +145,52 @@ namespace Satrabel.OpenFiles.Components.JPList
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
 
+        }
+
+        private void AddFolders(string curFolder, IFileManager fileManager, List<FileDTO> data)
+        {
+            var folderManager = FolderManager.Instance;
+
+            var folder = folderManager.GetFolder(PortalSettings.PortalId, curFolder);
+            var folders = folderManager.GetFolders(folder);
+            foreach (var f in folders)
+            {
+                var dto = new FileDTO()
+                {
+                    Name = f.DisplayName,
+                    CreatedOnDate = f.CreatedOnDate,
+                    LastModifiedOnDate = f.LastModifiedOnDate,
+                    FolderName = f.FolderName,
+                    FolderPath = f.FolderPath.Trim('/'),
+                    IsFolder = true
+                };
+                data.Add(dto);
+                var firstFile = folderManager.GetFiles(f, false).OrderBy(fi => fi.FileName).FirstOrDefault();
+                if (firstFile != null)
+                {
+                    var custom = GetCustomFileDataAsDynamic(firstFile);
+                    dynamic title = null;
+                    if (custom != null && custom.meta != null)
+                    {
+                        try
+                        {
+                            title = Normalize.DynamicValue(custom.meta.title, "");
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+                    dto.FileName = firstFile.FileName;
+                    dto.Url = fileManager.GetUrl(firstFile);
+
+                    dto.IsImage = fileManager.IsImageFile(firstFile);
+                    dto.ImageUrl = ImageHelper.GetImageUrl(firstFile, new Ratio(100, 100));
+                    dto.Custom = custom;
+                    dto.IconUrl = GetFileIconUrl(firstFile.Extension);
+                    dto.IsEditable = IsEditable;
+                    dto.EditUrl = IsEditable ? GetFileEditUrl(firstFile) : "";
+                }
+            }
         }
 
         #region Private Methods
