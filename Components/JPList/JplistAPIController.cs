@@ -79,11 +79,12 @@ namespace Satrabel.OpenFiles.Components.JPList
                     docs = docs.Skip((jpListQuery.Pagination.currentPage) * jpListQuery.Pagination.number).Take(jpListQuery.Pagination.number);
                 var fileManager = FileManager.Instance;
                 var data = new List<FileDTO>();
+                var path = new List<IFolderInfo>();
                 if (req.withSubFolder)
                 {
-                    AddFolders(curFolder, fileManager, data);
+                    path = AddFolders(NormalizePath(req.folder), curFolder, fileManager, data);
                 }
-                
+
                 foreach (var doc in docs)
                 {
                     IFileInfo f = fileManager.GetFile(doc.FileId);
@@ -129,28 +130,43 @@ namespace Satrabel.OpenFiles.Components.JPList
                 //Sort as requested
                 data = SortAsRequested(data, jpListQuery);
 
-                
-
-                var res = new ResultDTO<FileDTO>()
+                if (req.withSubFolder)
                 {
-                    data = data,
-                    count = total
-                };
-
-                return Request.CreateResponse(HttpStatusCode.OK, res);
+                    var res = new ResultExtDTO<FileDTO>()
+                    {
+                        data = new ResultDataDTO<FileDTO>() 
+                        { 
+                            items = data,
+                            breadclumbs = path.Select(f=> new ResultBreadclumbDTO{
+                                name = f.FolderName,
+                                path = f.FolderPath.Trim('/')
+                            })
+                        },
+                        count = total
+                    };
+                    return Request.CreateResponse(HttpStatusCode.OK, res);
+                }
+                else
+                {
+                    var res = new ResultDTO<FileDTO>()
+                    {
+                        data = data,
+                        count = total
+                    };
+                    return Request.CreateResponse(HttpStatusCode.OK, res);
+                }
+                
             }
             catch (Exception exc)
             {
                 Utils.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
-
         }
-
-        private void AddFolders(string curFolder, IFileManager fileManager, List<FileDTO> data)
+        private List<IFolderInfo> AddFolders(string baseFolder, string curFolder, IFileManager fileManager, List<FileDTO> data)
         {
-            var folderManager = FolderManager.Instance;
 
+            var folderManager = FolderManager.Instance;
             var folder = folderManager.GetFolder(PortalSettings.PortalId, curFolder);
             var folders = folderManager.GetFolders(folder);
             foreach (var f in folders)
@@ -166,6 +182,10 @@ namespace Satrabel.OpenFiles.Components.JPList
                 };
                 data.Add(dto);
                 var firstFile = folderManager.GetFiles(f, false).OrderBy(fi => fi.FileName).FirstOrDefault();
+                if (firstFile == null)
+                {
+                    firstFile = folderManager.GetFiles(f, true).OrderBy(fi => fi.FileName).FirstOrDefault();
+                }
                 if (firstFile != null)
                 {
                     var custom = GetCustomFileDataAsDynamic(firstFile);
@@ -191,6 +211,18 @@ namespace Satrabel.OpenFiles.Components.JPList
                     dto.EditUrl = IsEditable ? GetFileEditUrl(firstFile) : "";
                 }
             }
+            var path = new List<IFolderInfo>();
+            path.Add(folder);
+            while (folder.ParentID > 0)
+            {
+                folder = folderManager.GetFolder(folder.ParentID);
+                if (!string.IsNullOrEmpty(folder.FolderPath) || NormalizePath(folder.FolderPath) == baseFolder)
+                {
+                    break;
+                }
+                path.Insert(0, folder);
+            }
+            return path;
         }
 
         #region Private Methods

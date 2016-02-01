@@ -5,11 +5,9 @@ using System.Text;
 
 namespace Satrabel.OpenFiles.Components.JPList
 {
-    class ResultDTO<TResultDTO>
+    class ResultBreadclumbDTO
     {
-        public IEnumerable<TResultDTO> data { get; set; }
-
-        public int count { get; set; }
-        
+        public string path { get; set; }
+        public string name { get; set; }
     }
 }

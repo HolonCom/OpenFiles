@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Satrabel.OpenFiles.Components.JPList
 {
-    class ResultDTO<TResultDTO>
+    class ResultExtDTO<TResultDTO>
     {
-        public IEnumerable<TResultDTO> data { get; set; }
+        public ResultDataDTO<TResultDTO> data { get; set; }
 
         public int count { get; set; }
         

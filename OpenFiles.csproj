@@ -7,7 +7,7 @@
     <ProductVersion>
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{B44E099E-BEF5-4CD2-BA44-91F4A1883E96}</ProjectGuid>
+    <ProjectGuid>{34A5D5F0-1B91-4F0F-B71C-D20CC782CE04}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -93,6 +93,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\bin\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="OpenContent, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\bin\OpenContent.dll</HintPath>
+    </Reference>
     <Reference Include="SharpZipLib, Version=0.81.0.1407, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\SharpZipLib.dll</HintPath>
@@ -144,9 +148,12 @@
     <Compile Include="Components\DigitalAssets\FilePropertiesTab.cs" />
     <Compile Include="Components\JPList\FilterDTO.cs" />
     <Compile Include="Components\JPList\JplistAPIController.cs" />
+    <Compile Include="Components\JPList\ResultExtDTO.cs" />
+    <Compile Include="Components\JPList\ResultDataDTO.cs" />
     <Compile Include="Components\JPList\ResultDTO.cs" />
     <Compile Include="Components\JPList\SortDTO.cs" />
     <Compile Include="Components\JPList\StatusDataDTO.cs" />
+    <Compile Include="Components\JPList\ResultBreadclumbDTO.cs" />
     <Compile Include="Components\Lucene\FileIndexer.cs" />
     <Compile Include="Components\Lucene\LuceneService.cs" />
     <Compile Include="Components\Lucene\PdfParser.cs" />
@@ -247,13 +254,13 @@
   <ItemGroup>
     <Content Include="schema.json" />
     <Content Include="options.json" />
-    <Content Include="Providers\DataProviders\SqlDataProvider\00.00.01.SqlDataProvider" />
     <Content Include="Providers\DataProviders\SqlDataProvider\Uninstall.SqlDataProvider" />
     <Content Include="images-schema.json" />
     <Content Include="images-options.json" />
     <Content Include="Config\cache.config" />
     <Content Include="Config\processing.config" />
     <Content Include="Config\security.config" />
+    <Content Include="Providers\DataProviders\SqlDataProvider\02.00.00.SqlDataProvider" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
@@ -271,12 +278,6 @@
     <Content Include="DigitalAssets\App_LocalResources\FilePropertiesTabControl.ascx.resx" />
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup>
-    <ProjectReference Include="..\OpenContent\OpenContent.csproj">
-      <Project>{7d61a32c-0f21-453f-a981-bd8e5a3a5304}</Project>
-      <Name>OpenContent</Name>
-    </ProjectReference>
-  </ItemGroup>
   <ItemGroup>
     <Content Include="DigitalAssets\App_LocalResources\FileFieldsControl.ascx.resx" />
   </ItemGroup>
