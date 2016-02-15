@@ -189,17 +189,17 @@ namespace Satrabel.OpenFiles.Components.JPList
                 if (firstFile != null)
                 {
                     var custom = GetCustomFileDataAsDynamic(firstFile);
-                    dynamic title = null;
-                    if (custom != null && custom.meta != null)
-                    {
-                        try
-                        {
-                            title = Normalize.DynamicValue(custom.meta.title, "");
-                        }
-                        catch (Exception)
-                        {
-                        }
-                    }
+                    //dynamic title = null;
+                    //if (custom != null && custom.meta != null)
+                    //{
+                    //    try
+                    //    {
+                    //        title = Normalize.DynamicValue(custom.meta.title, "");
+                    //    }
+                    //    catch (Exception)
+                    //    {
+                    //    }
+                    //}
                     dto.FileName = firstFile.FileName;
                     dto.Url = fileManager.GetUrl(firstFile);
 
