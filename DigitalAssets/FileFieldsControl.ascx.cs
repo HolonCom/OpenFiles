@@ -26,7 +26,20 @@ namespace Satrabel.Modules.DigitalAssets
         protected override void OnInit(EventArgs e)
         {
             base.OnInit(e);
-            AlpacaEngine alpaca = new AlpacaEngine(Page, ModuleContext, "DesktopModules/OpenFiles/", "");
+            string virtualFolder = "DesktopModules/OpenFiles/";
+            
+            string portalFolder = HostingEnvironment.MapPath(PortalSettings.HomeDirectory + "/OpenFiles/");
+            if (!Directory.Exists(portalFolder))
+            {
+                Directory.CreateDirectory(portalFolder);
+            }
+            
+            string schemaFilename = portalFolder + "schema.json";
+            if (System.IO.File.Exists(schemaFilename))
+            {
+                virtualFolder = PortalSettings.HomeDirectory + "OpenFiles/";
+            }
+            AlpacaEngine alpaca = new AlpacaEngine(Page, ModuleContext, virtualFolder, "");
             alpaca.RegisterAll();
         }
         protected override void OnLoad(EventArgs e)
