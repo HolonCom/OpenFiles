@@ -47,15 +47,16 @@ namespace Satrabel.OpenFiles.Components.JPList
                     jpListQuery.Filters.Add(new FilterDTO()
                     {
                         name = "Folder",
-                        value = NormalizePath(req.folder)
+                        value = "\""+NormalizePath(req.folder)+"\""
                     });
                 }
                 else
                 {
                     foreach (var item in jpListQuery.Filters.Where(f => f.name == "Folder"))
                     {
-                        item.path = NormalizePath(item.path);
                         curFolder = NormalizePath(item.path);
+                        item.path = "\"" + NormalizePath(item.path) + "\"";
+                        
                     }
                 }
                 jpListQuery.Filters.Add(new FilterDTO()
@@ -73,7 +74,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 {
                     docs = SearchEngine.Search(luceneQuery);
                 }
-
+                var ratio = string.IsNullOrEmpty(req.imageRatio) ? new Ratio(100, 100) : new Ratio(req.imageRatio);
                 int total = docs.Count();
                 if (jpListQuery.Pagination.number > 0)
                     docs = docs.Skip((jpListQuery.Pagination.currentPage) * jpListQuery.Pagination.number).Take(jpListQuery.Pagination.number);
@@ -82,9 +83,9 @@ namespace Satrabel.OpenFiles.Components.JPList
                 var path = new List<IFolderInfo>();
                 if (req.withSubFolder)
                 {
-                    path = AddFolders(NormalizePath(req.folder), curFolder, fileManager, data);
+                    path = AddFolders(NormalizePath(req.folder), curFolder, fileManager, data, ratio);
                 }
-
+                
                 foreach (var doc in docs)
                 {
                     IFileInfo f = fileManager.GetFile(doc.FileId);
@@ -96,6 +97,11 @@ namespace Satrabel.OpenFiles.Components.JPList
                     }
                     else
                     {
+                        if (f.FileName == "_folder.jpg")
+                        {
+                            // skip
+                            continue;
+                        }
                         var custom = GetCustomFileDataAsDynamic(f);
                         dynamic title = null;
                         if (custom != null && custom.meta != null)
@@ -118,7 +124,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                             FolderName = f.Folder,
                             Url = fileManager.GetUrl(f),
                             IsImage = fileManager.IsImageFile(f),
-                            ImageUrl = ImageHelper.GetImageUrl(f, new Ratio(100, 100)),
+                            ImageUrl = ImageHelper.GetImageUrl(f, ratio),
                             Custom = custom,
                             IconUrl = GetFileIconUrl(f.Extension),
                             IsEditable = IsEditable,
@@ -163,7 +169,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
-        private List<IFolderInfo> AddFolders(string baseFolder, string curFolder, IFileManager fileManager, List<FileDTO> data)
+        private List<IFolderInfo> AddFolders(string baseFolder, string curFolder, IFileManager fileManager, List<FileDTO> data, Ratio ratio)
         {
 
             var folderManager = FolderManager.Instance;
@@ -181,10 +187,12 @@ namespace Satrabel.OpenFiles.Components.JPList
                     IsFolder = true
                 };
                 data.Add(dto);
-                var firstFile = folderManager.GetFiles(f, false).OrderBy(fi => fi.FileName).FirstOrDefault();
+                var files = folderManager.GetFiles(f, false);
+                var firstFile = files.FirstOrDefault(fi=> fi.FileName == "_folder.jpg");
                 if (firstFile == null)
                 {
-                    firstFile = folderManager.GetFiles(f, true).OrderBy(fi => fi.FileName).FirstOrDefault();
+                    firstFile = files.OrderBy(fi => fi.FileName).FirstOrDefault();
+                    //firstFile = folderManager.GetFiles(f, true).OrderBy(fi => fi.FileName).FirstOrDefault();
                 }
                 if (firstFile != null)
                 {
@@ -204,7 +212,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                     dto.Url = fileManager.GetUrl(firstFile);
 
                     dto.IsImage = fileManager.IsImageFile(firstFile);
-                    dto.ImageUrl = ImageHelper.GetImageUrl(firstFile, new Ratio(100, 100));
+                    dto.ImageUrl = ImageHelper.GetImageUrl(firstFile, ratio);
                     dto.Custom = custom;
                     dto.IconUrl = GetFileIconUrl(firstFile.Extension);
                     dto.IsEditable = IsEditable;
