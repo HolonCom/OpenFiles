@@ -153,7 +153,7 @@
     <Compile Include="Components\JPList\ResultDTO.cs" />
     <Compile Include="Components\JPList\SortDTO.cs" />
     <Compile Include="Components\JPList\StatusDataDTO.cs" />
-    <Compile Include="Components\JPList\ResultBreadclumbDTO.cs" />
+    <Compile Include="Components\JPList\ResultBreadcrumbDTO.cs" />
     <Compile Include="Components\Log.cs" />
     <Compile Include="Components\Lucene\FileIndexer.cs" />
     <Compile Include="Components\Lucene\LuceneService.cs" />

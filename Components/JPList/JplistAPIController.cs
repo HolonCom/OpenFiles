@@ -152,7 +152,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                         data = new ResultDataDTO<FileDTO>()
                         {
                             items = data,
-                            breadclumbs = path.Select(f => new ResultBreadclumbDTO
+                            breadcrumbs = folderInfos.Select(f => new ResultBreadcrumbDTO
                             {
                                 name = f.FolderName,
                                 path = f.FolderPath.Trim('/')
