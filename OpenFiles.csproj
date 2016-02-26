@@ -154,6 +154,7 @@
     <Compile Include="Components\JPList\SortDTO.cs" />
     <Compile Include="Components\JPList\StatusDataDTO.cs" />
     <Compile Include="Components\JPList\ResultBreadclumbDTO.cs" />
+    <Compile Include="Components\Log.cs" />
     <Compile Include="Components\Lucene\FileIndexer.cs" />
     <Compile Include="Components\Lucene\LuceneService.cs" />
     <Compile Include="Components\Lucene\PdfParser.cs" />
@@ -168,7 +169,6 @@
     <Compile Include="Components\Template\DataDTO.cs" />
     <Compile Include="Components\Template\FileDTO.cs" />
     <Compile Include="Components\Template\TemplateHelper.cs" />
-    <Compile Include="Components\Utils.cs" />
     <Compile Include="DigitalAssets\FolderFieldsControl.ascx.cs">
       <DependentUpon>FolderFieldsControl.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
