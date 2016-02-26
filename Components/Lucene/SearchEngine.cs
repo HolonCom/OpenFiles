@@ -66,10 +66,13 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         private static void ValidateIndex()
         {
-            if (LuceneService.IndexExists()) return;
+            var reindexer = new Action(delegate()
+            {
+                var indexer = new SearchEngine();
+                indexer.ReIndexContent();
+            });
 
-            var indexer = new SearchEngine();
-            indexer.ReIndexContent();
+            LuceneService.Initialise(reindexer);
         }
 
         /// <summary>
@@ -114,7 +117,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portal.PortalID, indexSince).ToList();
                 LuceneService.IndexItem(searchDocs);
                 IndexedSearchDocumentCount += searchDocs.Count();
-                Log.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
+                Log.Logger.InfoFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
             }
             if (IndexedSearchDocumentCount > 10)
                 LuceneService.Optimize();

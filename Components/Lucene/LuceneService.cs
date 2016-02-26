@@ -30,6 +30,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
                 if (_directoryTemp != null && !System.IO.Directory.Exists(luceneOutputPath))
                 {
+                    Log.Logger.DebugFormat("Lucene index directory [{0}] seems to have been deleted. Resetting.", luceneOutputPath);
                     _directoryTemp = null;
                 }
                 if (_directoryTemp == null)
@@ -43,10 +44,19 @@ namespace Satrabel.OpenFiles.Components.Lucene
             }
         }
 
-        internal static bool IndexExists()
+        public static void Initialise(Action reindexer)
         {
-            return LuceneOutputFolder.Directory.EnumerateFiles().Any();
-            //return LuceneOutputFolder.Directory.Exists;
+            if (IndexExists()) 
+                return;
+
+            Log.Logger.DebugFormat("Lucene index directory [{0}] being initialized.", LuceneOutputFolder);
+            reindexer.Invoke();
+            Log.Logger.DebugFormat("Lucene index directory [{0}] finished initializing.", LuceneOutputFolder);
+        }
+
+        private static bool IndexExists()
+        {
+            return LuceneOutputFolder.Directory.Exists && LuceneOutputFolder.Directory.EnumerateFiles().Any();
         }
 
     
@@ -80,17 +90,17 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         internal static void IndexItem(List<LuceneIndexItem> itemlist)
         {
-            // init lucene
-            //var analyzer = new StandardAnalyzer(Version.LUCENE_30);
-
-            if (itemlist.Count() == 0) return;
+            if (!itemlist.Any()) return;
 
             var analyzer = GetCustomAnalyzer();
             using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, !IndexExists()))
             {
                 // add data to lucene search index (replaces older entries if any)
-                foreach (var sampleData in itemlist)
-                    AddToLuceneIndex(sampleData, writer);
+                foreach (var file in itemlist)
+                {
+                    Log.Logger.DebugFormat("Indexing file {0}/{1}.", file.Folder, file.FileName);
+                    AddToLuceneIndex(file, writer);
+                }
 
                 // close handles
                 analyzer.Close();
@@ -127,7 +137,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             Log.Logger.DebugFormat("Executing ==> public static bool ClearLuceneIndex()");
             try
             {
-                if (LuceneOutputFolder.Directory.Exists)
+                if (IndexExists())
                 {
                     var analyzer = GetCustomAnalyzer();
                     using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, false))
@@ -141,6 +151,10 @@ namespace Satrabel.OpenFiles.Components.Lucene
                         writer.Dispose();
                     }
                 }
+                else
+                {
+                    Log.Logger.DebugFormat("          ==> Nothing to delete: Index is missing!!");
+                }
             }
             catch (Exception ex)
             {
@@ -153,6 +167,11 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         public static void Optimize()
         {
+            if (!IndexExists())
+            {
+                Log.Logger.DebugFormat("Lucene index [{0}] can not be optimized as it does not exist.", LuceneOutputFolder.Directory.Name);
+                return;
+            }
             var analyzer = GetCustomAnalyzer();
             using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, false))
             {
