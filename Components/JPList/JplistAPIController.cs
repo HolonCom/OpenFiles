@@ -234,11 +234,12 @@ namespace Satrabel.OpenFiles.Components.JPList
             while (folder.ParentID > 0)
             {
                 folder = folderManager.GetFolder(folder.ParentID);
-                if (!string.IsNullOrEmpty(folder.FolderPath) || NormalizePath(folder.FolderPath) == baseFolder)
+                path.Insert(0, folder);
+                if (string.IsNullOrEmpty(folder.FolderPath) || NormalizePath(folder.FolderPath) == baseFolder)
                 {
                     break;
                 }
-                path.Insert(0, folder);
+                
             }
             return path;
         }
