@@ -43,7 +43,6 @@ namespace Satrabel.OpenFiles.Components.JPList
                 IEnumerable<LuceneIndexItem> docs;
 
                 var jpListQuery = BuildJpListQuery(req.StatusLst);
-                //var curFollder = jpListQuery.Filters.FirstOrDefault(f => f.name != "Folder");
                 string curFolder = NormalizePath(req.folder);
                 if (!string.IsNullOrEmpty(req.folder) && jpListQuery.Filters.All(f => f.name != "Folder")) // If there is no "Folder" filter active, then add one
                 {
@@ -87,10 +86,10 @@ namespace Satrabel.OpenFiles.Components.JPList
                     docs = docs.Skip((jpListQuery.Pagination.currentPage) * jpListQuery.Pagination.number).Take(jpListQuery.Pagination.number);
                 var fileManager = FileManager.Instance;
                 var data = new List<FileDTO>();
-                var path = new List<IFolderInfo>();
+                var folderInfos = new List<IFolderInfo>();
                 if (req.withSubFolder)
                 {
-                    path = AddFolders(NormalizePath(req.folder), curFolder, fileManager, data, ratio);
+                    folderInfos = AddFolders(NormalizePath(req.folder), curFolder, fileManager, data, ratio);
                 }
 
                 foreach (var doc in docs)
@@ -121,7 +120,6 @@ namespace Satrabel.OpenFiles.Components.JPList
                             {
                                 Log.Logger.Debug("OpenFiles.JplistApiController.List() Failed to get title.", ex);
                             }
-
                         }
 
                         data.Add(new FileDTO()

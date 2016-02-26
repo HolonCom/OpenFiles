@@ -49,6 +49,8 @@ namespace Satrabel.OpenFiles.Components.Lucene
             //return LuceneOutputFolder.Directory.Exists;
         }
 
+    
+
         // search methods
         internal static List<LuceneIndexItem> GetAllIndexedRecords()
         {
@@ -84,7 +86,6 @@ namespace Satrabel.OpenFiles.Components.Lucene
             if (itemlist.Count() == 0) return;
 
             var analyzer = GetCustomAnalyzer();
-
             using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, !IndexExists()))
             {
                 // add data to lucene search index (replaces older entries if any)
@@ -128,7 +129,6 @@ namespace Satrabel.OpenFiles.Components.Lucene
             {
                 if (LuceneOutputFolder.Directory.Exists)
                 {
-
                     var analyzer = GetCustomAnalyzer();
                     using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, false))
                     {
@@ -336,8 +336,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         #endregion
 
-
-
+       
     }
 
     public class LuceneIndexItem
