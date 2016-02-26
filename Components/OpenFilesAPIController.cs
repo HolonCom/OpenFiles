@@ -65,7 +65,7 @@ namespace Satrabel.OpenFiles.Components
             }
             catch (Exception exc)
             {
-                Utils.Logger.Error(exc);
+                Log.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
@@ -158,14 +158,14 @@ namespace Satrabel.OpenFiles.Components
                     }
                     catch (Exception ex)
                     {
-                        Utils.Logger.Error("Settings Json Data : " + Data, ex);
+                        Log.Logger.Error("Settings Json Data : " + Data, ex);
                     }
                 }
                 return Request.CreateResponse(HttpStatusCode.OK, json);
             }
             catch (Exception exc)
             {
-                Utils.Logger.Error(exc);
+                Log.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
@@ -183,7 +183,7 @@ namespace Satrabel.OpenFiles.Components
             }
             catch (Exception exc)
             {
-                Utils.Logger.Error(exc);
+                Log.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
@@ -216,7 +216,7 @@ namespace Satrabel.OpenFiles.Components
             }
             catch (Exception exc)
             {
-                Utils.Logger.Error(exc);
+                Log.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }

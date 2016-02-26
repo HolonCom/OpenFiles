@@ -34,41 +34,36 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         public static List<LuceneIndexItem> GetAllIndexedRecords()
         {
-            Utils.Logger.DebugFormat("Executing ==> public static IEnumerable<LuceneIndexItem> GetAllIndexedRecords()");
+            Log.Logger.DebugFormat("Executing ==> public static IEnumerable<LuceneIndexItem> GetAllIndexedRecords()");
             ValidateIndex();
             List<LuceneIndexItem> results = LuceneService.GetAllIndexedRecords();
-            Utils.Logger.DebugFormat("     Exit ==> public static IEnumerable<LuceneIndexItem> GetAllIndexedRecords().  Returning {0} records", results.Count);
+            Log.Logger.DebugFormat("     Exit ==> public static IEnumerable<LuceneIndexItem> GetAllIndexedRecords().  Returning {0} records", results.Count);
             return results;
         }
 
         public static List<LuceneIndexItem> Search(string input, string fieldName = "")
         {
-            Utils.Logger.DebugFormat("Executing ==> public static IEnumerable<LuceneIndexItem> Search(string [{0}], string [{1}])", input, fieldName);
+            Log.Logger.DebugFormat("Executing ==> public static IEnumerable<LuceneIndexItem> Search(string [{0}], string [{1}])", input, fieldName);
             List<LuceneIndexItem> retval;
             ValidateIndex();
             if (string.IsNullOrEmpty(input))
                 retval = GetAllIndexedRecords();
             else
                 retval = LuceneService.DoSearch(input, fieldName);
-            Utils.Logger.DebugFormat("     Exit ==> public static IEnumerable<LuceneIndexItem> Search() with {0} items found", retval.Count);
+            Log.Logger.DebugFormat("     Exit ==> public static IEnumerable<LuceneIndexItem> Search() with {0} items found", retval.Count);
             return retval;
         }
 
         public static void RemoveDocument(int fileId)
         {
-            Utils.Logger.DebugFormat("Executing ==> public static void RemoveDocument(int [{0}])", fileId);
-            if (LuceneService.IndexExists())
-            {
-                LuceneService.RemoveLuceneIndexRecord(fileId);
-            }
-            Utils.Logger.DebugFormat("     Exit ==> public static void RemoveDocument(int [{0}])", fileId);
+            Log.Logger.DebugFormat("Executing ==> public static void RemoveDocument(int [{0}])", fileId);
+            LuceneService.RemoveLuceneIndexRecord(fileId);
+            Log.Logger.DebugFormat("     Exit ==> public static void RemoveDocument(int [{0}])", fileId);
         }
 
         #region Private
 
-        /// <summary>
-        /// Reindex all portal files.
-        /// </summary>
+
         private static void ValidateIndex()
         {
             if (LuceneService.IndexExists()) return;
@@ -77,6 +72,9 @@ namespace Satrabel.OpenFiles.Components.Lucene
             indexer.ReIndexContent();
         }
 
+        /// <summary>
+        /// Reindex all portal files.
+        /// </summary>
         internal void ReIndexContent()
         {
             IndexFiles(null);
@@ -110,13 +108,13 @@ namespace Satrabel.OpenFiles.Components.Lucene
             {
                 if (!startDate.HasValue)
                 {
-                    Utils.Logger.InfoFormat("Reindexing all documents from Portal {0}", portal.PortalID);
+                    Log.Logger.InfoFormat("Reindexing all documents from Portal {0}", portal.PortalID);
                 }
                 var indexSince = FixedIndexingStartDate(portal.PortalID, startDate ?? DateTime.MinValue);
                 List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portal.PortalID, indexSince).ToList();
                 LuceneService.IndexItem(searchDocs);
                 IndexedSearchDocumentCount += searchDocs.Count();
-                Utils.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
+                Log.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
             }
             if (IndexedSearchDocumentCount > 10)
                 LuceneService.Optimize();

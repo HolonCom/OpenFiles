@@ -35,7 +35,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             try
             {
                 var lastSuccessFulDateTime = SearchHelper.Instance.GetLastSuccessfulIndexingDateTime(ScheduleHistoryItem.ScheduleID);
-                Utils.Logger.Trace("Search: File Crawler - Starting. Content change start time " + lastSuccessFulDateTime.ToString("g"));
+                Log.Logger.Trace("Search: File Crawler - Starting. Content change start time " + lastSuccessFulDateTime.ToString("g"));
                 ScheduleHistoryItem.AddLogNote(string.Format("Starting. Content change start time <b>{0:g}</b>", lastSuccessFulDateTime));
 
                 var searchEngine = new SearchEngine();
@@ -57,7 +57,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 ScheduleHistoryItem.AddLogNote("<br/><b>Indexing Successful</b>");
                 SearchHelper.Instance.SetLastSuccessfulIndexingDateTime(ScheduleHistoryItem.ScheduleID, ScheduleHistoryItem.StartDate);
 
-                Utils.Logger.Trace("Search: File Crawler - Indexing Successful");
+                Log.Logger.Trace("Search: File Crawler - Indexing Successful");
             }
             catch (Exception ex)
             {

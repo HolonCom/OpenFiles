@@ -6,7 +6,7 @@ using DotNetNuke.Instrumentation;
 
 namespace Satrabel.OpenFiles.Components
 {
-    public static class Utils
+    public static class Log
     {
         public static ILog Logger
         {

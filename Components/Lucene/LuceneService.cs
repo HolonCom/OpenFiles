@@ -72,7 +72,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             if (itemlist.Count() == 0) return;
 
             var analyzer = GetCustomAnalyzer();
-            
+
             using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, !IndexExists()))
             {
                 // add data to lucene search index (replaces older entries if any)
@@ -87,24 +87,31 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         public static void RemoveLuceneIndexRecord(int indexId)
         {
-            // init lucene
-            var analyzer = GetCustomAnalyzer();
-            using (var writer = new IndexWriter(LuceneOutputFolder, analyzer, IndexWriter.MaxFieldLength.UNLIMITED))
+            if (LuceneService.IndexExists())
             {
-                // remove older index entry
-                var searchQuery = new TermQuery(new Term(GetIndexField(), indexId.ToString()));
-                writer.DeleteDocuments(searchQuery);
+                // init lucene
+                var analyzer = GetCustomAnalyzer();
+                using (var writer = new IndexWriter(LuceneOutputFolder, analyzer, IndexWriter.MaxFieldLength.UNLIMITED))
+                {
+                    // remove older index entry
+                    var searchQuery = new TermQuery(new Term(GetIndexField(), indexId.ToString()));
+                    writer.DeleteDocuments(searchQuery);
 
-                // close handles
-                analyzer.Close();
-                writer.Dispose();
+                    // close handles
+                    analyzer.Close();
+                    writer.Dispose();
+                }
+            }
+            else
+            {
+                Log.Logger.DebugFormat("Failed to remove record from {0} Lucene index. Index does not exist. ", indexId);
             }
         }
 
         public static bool ClearLuceneIndex()
         {
             var retval = true;
-            Utils.Logger.DebugFormat("Executing ==> public static bool ClearLuceneIndex()");
+            Log.Logger.DebugFormat("Executing ==> public static bool ClearLuceneIndex()");
             try
             {
                 if (LuceneOutputFolder.Directory.Exists)
@@ -113,7 +120,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                     var analyzer = GetCustomAnalyzer();
                     using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, false))
                     {
-                        Utils.Logger.DebugFormat("          ==> Deleting all documents from index");
+                        Log.Logger.DebugFormat("          ==> Deleting all documents from index");
                         // remove older index entries
                         writer.DeleteAll();
 
@@ -125,10 +132,10 @@ namespace Satrabel.OpenFiles.Components.Lucene
             }
             catch (Exception ex)
             {
-                Utils.Logger.DebugFormat("          ==> Deleting documents failed with {0}", ex.Message);
+                Log.Logger.DebugFormat("          ==> Deleting documents failed with {0}", ex.Message);
                 retval = false;
             }
-            Utils.Logger.DebugFormat("     Exit ==> public static bool ClearLuceneIndex() with {0}", retval);
+            Log.Logger.DebugFormat("     Exit ==> public static bool ClearLuceneIndex() with {0}", retval);
             return retval;
         }
 
@@ -298,7 +305,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             }
             catch (Exception ex)
             {
-                Utils.Logger.Error(string.Format("Failed to index File [{0}:{1}]", item.FileId, item.Title), ex);
+                Log.Logger.Error(string.Format("Failed to index File [{0}:{1}]", item.FileId, item.Title), ex);
             }
         }
 

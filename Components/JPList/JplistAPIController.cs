@@ -37,6 +37,8 @@ namespace Satrabel.OpenFiles.Components.JPList
         {
             try
             {
+                Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() called with request [{0}].", req.ToJson());
+
                 IEnumerable<LuceneIndexItem> docs;
 
                 var jpListQuery = BuildJpListQuery(req.StatusLst);
@@ -69,13 +71,17 @@ namespace Satrabel.OpenFiles.Components.JPList
                 if (string.IsNullOrEmpty(luceneQuery))
                 {
                     docs = SearchEngine.GetAllIndexedRecords();
+                    Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found 0 items, returning all [{1}] items", luceneQuery.ToJson(), docs.Count());
                 }
                 else
                 {
                     docs = SearchEngine.Search(luceneQuery);
+                    Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", luceneQuery.ToJson(), docs.Count());
                 }
                 var ratio = string.IsNullOrEmpty(req.imageRatio) ? new Ratio(100, 100) : new Ratio(req.imageRatio);
                 int total = docs.Count();
+                Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", luceneQuery.ToJson(), total);
+
                 if (jpListQuery.Pagination.number > 0)
                     docs = docs.Skip((jpListQuery.Pagination.currentPage) * jpListQuery.Pagination.number).Take(jpListQuery.Pagination.number);
                 var fileManager = FileManager.Instance;
@@ -110,11 +116,13 @@ namespace Satrabel.OpenFiles.Components.JPList
                             {
                                 title = Normalize.DynamicValue(custom.meta.title, "");
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
+                                Log.Logger.Debug("OpenFiles.JplistApiController.List() Failed to get title.", ex);
                             }
 
                         }
+
                         data.Add(new FileDTO()
                         {
                             Name = Normalize.DynamicValue(title, f.FileName),
@@ -161,11 +169,11 @@ namespace Satrabel.OpenFiles.Components.JPList
                     };
                     return Request.CreateResponse(HttpStatusCode.OK, res);
                 }
-                
+
             }
             catch (Exception exc)
             {
-                Utils.Logger.Error(exc);
+                Log.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
