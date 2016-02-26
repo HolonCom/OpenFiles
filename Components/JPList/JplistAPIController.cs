@@ -18,6 +18,7 @@ using System.Runtime.CompilerServices;
 using System.Web;
 using System.Web.Http;
 using DotNetNuke.Common;
+using DotNetNuke.Common.Utilities;
 using DotNetNuke.Entities.Portals;
 using DotNetNuke.Security.Permissions;
 using DotNetNuke.Services.Scheduling;
@@ -49,7 +50,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                     jpListQuery.Filters.Add(new FilterDTO()
                     {
                         name = "Folder",
-                        value = "\""+NormalizePath(req.folder)+"\""
+                        value = "\"" + NormalizePath(req.folder) + "\""
                     });
                 }
                 else
@@ -58,7 +59,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                     {
                         curFolder = NormalizePath(item.path);
                         item.path = "\"" + NormalizePath(item.path) + "\"";
-                        
+
                     }
                 }
                 jpListQuery.Filters.Add(new FilterDTO()
@@ -91,7 +92,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 {
                     path = AddFolders(NormalizePath(req.folder), curFolder, fileManager, data, ratio);
                 }
-                
+
                 foreach (var doc in docs)
                 {
                     IFileInfo f = fileManager.GetFile(doc.FileId);
@@ -148,10 +149,11 @@ namespace Satrabel.OpenFiles.Components.JPList
                 {
                     var res = new ResultExtDTO<FileDTO>()
                     {
-                        data = new ResultDataDTO<FileDTO>() 
-                        { 
+                        data = new ResultDataDTO<FileDTO>()
+                        {
                             items = data,
-                            breadclumbs = path.Select(f=> new ResultBreadclumbDTO{
+                            breadclumbs = path.Select(f => new ResultBreadclumbDTO
+                            {
                                 name = f.FolderName,
                                 path = f.FolderPath.Trim('/')
                             })
@@ -196,7 +198,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 };
                 data.Add(dto);
                 var files = folderManager.GetFiles(f, false);
-                var firstFile = files.FirstOrDefault(fi=> fi.FileName == "_folder.jpg");
+                var firstFile = files.FirstOrDefault(fi => fi.FileName == "_folder.jpg");
                 if (firstFile == null)
                 {
                     firstFile = files.OrderBy(fi => fi.FileName).FirstOrDefault();

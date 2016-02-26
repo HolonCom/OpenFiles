@@ -20,29 +20,41 @@ namespace Satrabel.OpenFiles.Components.Lucene
     public static class LuceneService
     {
         // properties
-        private static readonly string LuceneOutputPath = Path.Combine(Globals.ApplicationMapPath, "App_Data\\OpenFiles\\LuceneIndex");
         private static FSDirectory _directoryTemp;
 
         private static FSDirectory LuceneOutputFolder
         {
             get
             {
+                string luceneOutputPath = Path.Combine(Globals.ApplicationMapPath, "App_Data\\OpenFiles\\LuceneIndex");
+
+                if (_directoryTemp != null && !System.IO.Directory.Exists(luceneOutputPath))
+                {
+                    _directoryTemp = null;
+                }
                 if (_directoryTemp == null)
-                    _directoryTemp = FSDirectory.Open(new DirectoryInfo(LuceneOutputPath));
+                    _directoryTemp = FSDirectory.Open(new DirectoryInfo(luceneOutputPath));
                 if (IndexWriter.IsLocked(_directoryTemp))
                     IndexWriter.Unlock(_directoryTemp);
-                var lockFilePath = Path.Combine(LuceneOutputPath, "write.lock");
+                var lockFilePath = Path.Combine(luceneOutputPath, "write.lock");
                 if (File.Exists(lockFilePath))
                     File.Delete(lockFilePath);
                 return _directoryTemp;
             }
         }
 
+        internal static bool IndexExists()
+        {
+            return LuceneOutputFolder.Directory.EnumerateFiles().Any();
+            //return LuceneOutputFolder.Directory.Exists;
+        }
+
         // search methods
         internal static List<LuceneIndexItem> GetAllIndexedRecords()
         {
             // validate search index
-            if (!System.IO.Directory.EnumerateFiles(LuceneOutputPath).Any()) return new List<LuceneIndexItem>();
+            if (!IndexExists())
+                return new List<LuceneIndexItem>();
 
             // set up lucene searcher
             var searcher = new IndexSearcher(LuceneOutputFolder, false);
@@ -324,10 +336,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         #endregion
 
-        internal static bool IndexExists()
-        {
-            return LuceneOutputFolder.Directory.Exists;
-        }
+
 
     }
 
