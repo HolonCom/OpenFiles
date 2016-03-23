@@ -202,6 +202,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
             // validation
             if (string.IsNullOrEmpty(searchQuery.Replace("*", "").Replace("?", ""))) return new List<LuceneIndexItem>();
+            searchQuery = searchQuery.Replace("*", "").Replace("?", "");  //don't allow wilcard?! Well, for finding folders, wildcards are not allowed (Demetris)
 
             // set up lucene searcher
             using (var searcher = new IndexSearcher(LuceneOutputFolder, true))
