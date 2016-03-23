@@ -110,6 +110,13 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 analyzer.Close();
                 writer.Dispose();
             }
+            var counter = 0;
+            while (!LuceneService.ValidateIndexFolder() && counter<20)
+            {
+                counter += 1;
+                Log.Logger.DebugFormat("checking IndexExists {0}", counter);
+                Thread.Sleep(200); //give lucene some time to write everything to disk
+            }
         }
 
         public static void RemoveLuceneIndexRecord(int indexId)
