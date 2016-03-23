@@ -86,10 +86,10 @@ namespace Satrabel.OpenFiles.Components.JPList
                     docs = docs.Skip((jpListQuery.Pagination.currentPage) * jpListQuery.Pagination.number).Take(jpListQuery.Pagination.number);
                 var fileManager = FileManager.Instance;
                 var data = new List<FileDTO>();
-                var folderInfos = new List<IFolderInfo>();
+                var breadcrumbs = new List<IFolderInfo>();
                 if (req.withSubFolder)
                 {
-                    folderInfos = AddFolders(NormalizePath(req.folder), curFolder, fileManager, data, ratio);
+                    breadcrumbs = AddFolders(NormalizePath(req.folder), curFolder, fileManager, data, ratio);
                 }
 
                 foreach (var doc in docs)
@@ -150,7 +150,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                         data = new ResultDataDTO<FileDTO>()
                         {
                             items = data,
-                            breadcrumbs = folderInfos.Select(f => new ResultBreadcrumbDTO
+                            breadcrumbs = breadcrumbs.Select(f => new ResultBreadcrumbDTO
                             {
                                 name = f.FolderName,
                                 path = f.FolderPath.Trim('/')
@@ -237,7 +237,6 @@ namespace Satrabel.OpenFiles.Components.JPList
                 {
                     break;
                 }
-                
             }
             return path;
         }

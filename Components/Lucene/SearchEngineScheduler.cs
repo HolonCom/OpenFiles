@@ -11,7 +11,7 @@ using DotNetNuke.Services.Exceptions;
 
 namespace Satrabel.OpenFiles.Components.Lucene
 {
-  
+
     public class SearchEngineScheduler : SchedulerClient
     {
         public SearchEngineScheduler(ScheduleHistoryItem objScheduleHistoryItem)
@@ -46,7 +46,11 @@ namespace Satrabel.OpenFiles.Components.Lucene
                     {
                         ScheduleHistoryItem.AddLogNote(string.Format("<br/>&nbsp;&nbsp;{0} Indexed: {1}", result.Key, result.Value));
                     }
-                                        
+
+                }
+                catch (Exception ex)
+                {
+                    Log.Logger.ErrorFormat("Failed executing Scheduled Reindexing. Error: {0}", ex.Message);
                 }
                 finally
                 {

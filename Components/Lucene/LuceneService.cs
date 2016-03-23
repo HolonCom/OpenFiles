@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Web;
 using DotNetNuke.Instrumentation;
 using Lucene.Net.Analysis.Standard;
@@ -46,7 +48,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         public static void Initialise(Action reindexer)
         {
-            if (IndexExists()) 
+            if (ValidateIndexFolder())
                 return;
 
             Log.Logger.DebugFormat("Lucene index directory [{0}] being initialized.", LuceneOutputFolder);
@@ -54,18 +56,20 @@ namespace Satrabel.OpenFiles.Components.Lucene
             Log.Logger.DebugFormat("Lucene index directory [{0}] finished initializing.", LuceneOutputFolder);
         }
 
-        private static bool IndexExists()
+        private static bool ValidateIndexFolder()
         {
-            return LuceneOutputFolder.Directory.Exists && LuceneOutputFolder.Directory.EnumerateFiles().Any();
+            return LuceneOutputFolder.Directory.Exists && 
+                   LuceneOutputFolder.Directory.EnumerateFiles().Any();
         }
 
-    
+
 
         // search methods
         internal static List<LuceneIndexItem> GetAllIndexedRecords()
         {
+            Log.Logger.DebugFormat("Executing ==> internal static List<LuceneIndexItem> GetAllIndexedRecords()");
             // validate search index
-            if (!IndexExists())
+            if (!ValidateIndexFolder())
                 return new List<LuceneIndexItem>();
 
             // set up lucene searcher
@@ -93,7 +97,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             if (!itemlist.Any()) return;
 
             var analyzer = GetCustomAnalyzer();
-            using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, !IndexExists()))
+            using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, !ValidateIndexFolder()))
             {
                 // add data to lucene search index (replaces older entries if any)
                 foreach (var file in itemlist)
@@ -110,7 +114,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         public static void RemoveLuceneIndexRecord(int indexId)
         {
-            if (LuceneService.IndexExists())
+            if (LuceneService.ValidateIndexFolder())
             {
                 // init lucene
                 var analyzer = GetCustomAnalyzer();
@@ -137,7 +141,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             Log.Logger.DebugFormat("Executing ==> public static bool ClearLuceneIndex()");
             try
             {
-                if (IndexExists())
+                if (ValidateIndexFolder())
                 {
                     var analyzer = GetCustomAnalyzer();
                     using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, false))
@@ -167,7 +171,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         public static void Optimize()
         {
-            if (!IndexExists())
+            if (!ValidateIndexFolder())
             {
                 Log.Logger.DebugFormat("Lucene index [{0}] can not be optimized as it does not exist.", LuceneOutputFolder.Directory.Name);
                 return;
@@ -204,15 +208,18 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 {
                     var parser = new QueryParser(Version.LUCENE_30, searchField, analyzer);
                     var query = ParseQuery(searchQuery, parser);
+                    Log.Logger.DebugFormat("Querying 1 Lucene Index with: [{0}]", query.ToString());
                     hits = searcher.Search(query, hitsLimit).ScoreDocs;
                 }
-                // search by multiple fields (ordered by RELEVANCE)
+                // search by multiple fields (ordered by INDEXORDER)
                 else
                 {
                     var parser = new MultiFieldQueryParser(Version.LUCENE_30, GetSearchAllFieldList(), analyzer);
                     var query = ParseQuery(searchQuery, parser);
+                    Log.Logger.DebugFormat("Querying 2 Lucene Index with: [{0}]", query.ToString());
                     hits = searcher.Search(query, null, hitsLimit, Sort.INDEXORDER).ScoreDocs;
                 }
+                Log.Logger.DebugFormat("Querying resulted in [{0}] hits from {1}", hits.Length, LuceneOutputFolder.Directory.FullName);
                 var results = MapLuceneToDataList(hits, searcher);
                 analyzer.Close();
                 searcher.Dispose();
@@ -355,7 +362,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         #endregion
 
-       
+
     }
 
     public class LuceneIndexItem

@@ -73,6 +73,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             });
 
             LuceneService.Initialise(reindexer);
+            Log.Logger.DebugFormat("Exiting ValidateIndex");
         }
 
         /// <summary>
@@ -81,6 +82,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
         internal void ReIndexContent()
         {
             IndexFiles(null);
+            Log.Logger.DebugFormat("Exiting ReIndexContent");
         }
 
         /// -----------------------------------------------------------------------------
@@ -93,6 +95,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
         /// -----------------------------------------------------------------------------
         internal void IndexContent(DateTime startDate)
         {
+            ValidateIndex();
             IndexFiles(startDate);
         }
 
@@ -115,9 +118,10 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 }
                 var indexSince = FixedIndexingStartDate(portal.PortalID, startDate ?? DateTime.MinValue);
                 List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portal.PortalID, indexSince).ToList();
+                Log.Logger.DebugFormat("Found {1} documents from Portal {0} to index", portal.PortalID, searchDocs.Count());
                 LuceneService.IndexItem(searchDocs);
                 IndexedSearchDocumentCount += searchDocs.Count();
-                Log.Logger.InfoFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
+                Log.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
             }
             if (IndexedSearchDocumentCount > 10)
                 LuceneService.Optimize();
