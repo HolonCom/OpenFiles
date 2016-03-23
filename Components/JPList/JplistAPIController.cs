@@ -49,7 +49,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                     jpListQuery.Filters.Add(new FilterDTO()
                     {
                         name = "Folder",
-                        value = "\"" + NormalizePath(req.folder) + "\""
+                        value = NormalizePath(req.folder)
                     });
                 }
                 else
@@ -57,7 +57,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                     foreach (var item in jpListQuery.Filters.Where(f => f.name == "Folder"))
                     {
                         curFolder = NormalizePath(item.path);
-                        item.path = "\"" + NormalizePath(item.path) + "\"";
+                        item.path = NormalizePath(item.path);
 
                     }
                 }
@@ -448,7 +448,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                         string pathStr = "";
                         foreach (var p in f.pathGroup)
                         {
-                            pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + f.name + ":" + p;
+                            pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + f.name + ":\"" + p + "\"";
                         }
 
                         queryStr += "+" + "(" + pathStr + ")";
@@ -461,11 +461,11 @@ namespace Satrabel.OpenFiles.Components.JPList
                         {
                             if (!string.IsNullOrEmpty(f.path))
                             {
-                                pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + n + ":" + f.path;  //for dropdownlists; value is keyword => never partial search
+                                pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + n + ":\"" + f.path + "\"";  //for dropdownlists; value is keyword => never partial search
                             }
                             else
                             {
-                                pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + n + ":" + f.value + "*";   //textbox
+                                pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + n + ":\"" + f.value + "*\"";   //textbox
                             }
                         }
                         queryStr += "+" + "(" + pathStr + ")";
