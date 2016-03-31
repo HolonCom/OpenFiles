@@ -25,7 +25,7 @@ using Satrabel.OpenContent.Components;
 
 namespace Satrabel.OpenFiles.Components.Lucene
 {
-    internal class SearchEngine
+    internal class LuceneController
     {
 
         public int IndexedSearchDocumentCount { get; private set; }
@@ -49,7 +49,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             if (string.IsNullOrEmpty(input))
                 retval = GetAllIndexedRecords();
             else
-                retval = LuceneService.DoSearch(input, fieldName);
+                retval = LuceneService.Search(input, fieldName);
             Log.Logger.DebugFormat("     Exit ==> public static IEnumerable<LuceneIndexItem> Search() with {0} items found", retval.Count);
             return retval;
         }
@@ -57,7 +57,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
         public static void RemoveDocument(int fileId)
         {
             Log.Logger.DebugFormat("Executing ==> public static void RemoveDocument(int [{0}])", fileId);
-            LuceneService.RemoveLuceneIndexRecord(fileId);
+            LuceneService.Delete(fileId);
             Log.Logger.DebugFormat("     Exit ==> public static void RemoveDocument(int [{0}])", fileId);
         }
 
@@ -68,7 +68,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
         {
             var reindexer = new Action(delegate()
             {
-                var indexer = new SearchEngine();
+                var indexer = new LuceneController();
                 indexer.ReIndexContent();
             });
 
@@ -106,7 +106,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             Results = new Dictionary<string, int>();
 
             if (!startDate.HasValue)
-                if (!LuceneService.ClearLuceneIndex())
+                if (!LuceneService.DeleteAll())
                     return;
 
             var portals = PortalController.Instance.GetPortals();
@@ -119,7 +119,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 var indexSince = FixedIndexingStartDate(portal.PortalID, startDate ?? DateTime.MinValue);
                 List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portal.PortalID, indexSince).ToList();
                 Log.Logger.DebugFormat("Found {1} documents from Portal {0} to index", portal.PortalID, searchDocs.Count());
-                LuceneService.IndexItem(searchDocs);
+                LuceneService.Add(searchDocs);
                 IndexedSearchDocumentCount += searchDocs.Count();
                 Log.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
             }

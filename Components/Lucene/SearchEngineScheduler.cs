@@ -38,7 +38,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 Log.Logger.Trace("Search: File Crawler - Starting. Content change start time " + lastSuccessFulDateTime.ToString("g"));
                 ScheduleHistoryItem.AddLogNote(string.Format("Starting. Content change start time <b>{0:g}</b>", lastSuccessFulDateTime));
 
-                var searchEngine = new SearchEngine();
+                var searchEngine = new LuceneController();
                 try
                 {
                     searchEngine.IndexContent(lastSuccessFulDateTime);

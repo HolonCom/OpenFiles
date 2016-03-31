@@ -1,18 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Satrabel.OpenFiles.Components.JPList
 {
     public class FilterDTO
     {
-        public string name { get; set; }
+        public FilterDTO()
+        {
+            Names = new List<string>();
+            ExactSearchMultiValue = new List<string>();
+        }
 
-        public string value { get; set; }
+        public string Name
+        {
+            get
+            {
+                return string.Join(",", Names.ToArray());
+            }
+            set
+            {
+                Names = value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            }
+        }
+        public List<string> Names { get; set; }
 
-        public string path { get; set; }
+        public string WildCardSearchValue { get; set; }
 
-        public List<string> pathGroup { get; set; }
+        public string ExactSearchValue { get; set; }
+
+        public List<string> ExactSearchMultiValue { get; set; }
     }
 }

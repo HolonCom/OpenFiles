@@ -44,38 +44,38 @@ namespace Satrabel.OpenFiles.Components.JPList
 
                 var jpListQuery = BuildJpListQuery(req.StatusLst);
                 string curFolder = NormalizePath(req.folder);
-                if (!string.IsNullOrEmpty(req.folder) && jpListQuery.Filters.All(f => f.name != "Folder")) // If there is no "Folder" filter active, then add one
+                if (!string.IsNullOrEmpty(req.folder) && jpListQuery.Filters.All(f => f.Name != "Folder")) // If there is no "Folder" filter active, then add one
                 {
                     jpListQuery.Filters.Add(new FilterDTO()
                     {
-                        name = "Folder",
-                        value = NormalizePath(req.folder)
+                        Name = "Folder",
+                        WildCardSearchValue = NormalizePath(req.folder)
                     });
                 }
                 else
                 {
-                    foreach (var item in jpListQuery.Filters.Where(f => f.name == "Folder"))
+                    foreach (var item in jpListQuery.Filters.Where(f => f.Name == "Folder"))
                     {
-                        curFolder = NormalizePath(item.path);
-                        item.path = NormalizePath(item.path);
+                        curFolder = NormalizePath(item.ExactSearchValue);
+                        item.ExactSearchValue = NormalizePath(item.ExactSearchValue);
 
                     }
                 }
                 jpListQuery.Filters.Add(new FilterDTO()
                 {
-                    name = "PortalId",
-                    path = PortalSettings.PortalId.ToString()
+                    Name = "PortalId",
+                    ExactSearchValue = PortalSettings.PortalId.ToString()
                 });
 
                 string luceneQuery = BuildLuceneQuery(jpListQuery);
                 if (string.IsNullOrEmpty(luceneQuery))
                 {
-                    docs = SearchEngine.GetAllIndexedRecords();
+                    docs = LuceneController.GetAllIndexedRecords();
                     Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found 0 items, returning all [{1}] items", luceneQuery.ToJson(), docs.Count());
                 }
                 else
                 {
-                    docs = SearchEngine.Search(luceneQuery);
+                    docs = LuceneController.Search(luceneQuery);
                     Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", luceneQuery.ToJson(), docs.Count());
                 }
                 var ratio = string.IsNullOrEmpty(req.imageRatio) ? new Ratio(100, 100) : new Ratio(req.imageRatio);
@@ -98,7 +98,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                     if (f == null)
                     {
                         //file seems to have been deleted
-                        SearchEngine.RemoveDocument(doc.FileId);
+                        LuceneController.RemoveDocument(doc.FileId);
                         total -= 1;
                     }
                     else
@@ -356,7 +356,7 @@ namespace Satrabel.OpenFiles.Components.JPList
             }
         }
 
-        private JpListQueryDTO BuildJpListQuery(List<StatusDTO> statuses)
+        private static JpListQueryDTO BuildJpListQuery(List<StatusDTO> statuses)
         {
             var query = new JpListQueryDTO();
             foreach (StatusDTO status in statuses)
@@ -378,42 +378,34 @@ namespace Satrabel.OpenFiles.Components.JPList
 
                     case "filter":
                         {
-                            if (status.type == "textbox" && status.data != null && !String.IsNullOrEmpty(status.name) && !String.IsNullOrEmpty(status.data.value))
+                            if (status.type == "textbox" && status.data != null && !string.IsNullOrEmpty(status.name) && !string.IsNullOrEmpty(status.data.value))
                             {
                                 query.Filters.Add(new FilterDTO()
                                 {
-                                    name = status.name,
-                                    value = status.data.value,
-                                    pathGroup = status.data.pathGroup
-
+                                    Name = status.name,
+                                    WildCardSearchValue = status.data.value,
                                 });
                             }
-
-                            else if (status.type == "checkbox-group-filter" && status.data != null && !String.IsNullOrEmpty(status.name))
+                            else if ((status.type == "checkbox-group-filter" || status.type == "button-filter-group")
+                                        && status.data != null && !string.IsNullOrEmpty(status.name))
                             {
                                 if (status.data.filterType == "pathGroup" && status.data.pathGroup != null && status.data.pathGroup.Count > 0)
                                 {
-                                    foreach (var path in status.data.pathGroup)
+                                    query.Filters.Add(new FilterDTO()
                                     {
-                                        query.Filters.Add(new FilterDTO()
-                                        {
-                                            name = status.name,
-                                            value = status.data.value,
-                                            path = status.data.path,
-                                            pathGroup = status.data.pathGroup
-
-                                        });
-                                    }
+                                        Name = status.name,
+                                        ExactSearchMultiValue = status.data.pathGroup
+                                    });
                                 }
                             }
-                            else if (status.type == "filter-select" && status.data != null && !String.IsNullOrEmpty(status.name))
+                            else if (status.type == "filter-select" && status.data != null && !string.IsNullOrEmpty(status.name))
                             {
                                 if (status.data.filterType == "path" && status.data.path != null)
                                 {
                                     query.Filters.Add(new FilterDTO()
                                     {
-                                        name = status.name,
-                                        path = status.data.path,
+                                        Name = status.name,
+                                        ExactSearchValue = status.data.path,
                                     });
                                 }
                             }
@@ -424,7 +416,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                         {
                             query.Sorts.Add(new SortDTO()
                             {
-                                path = status.data.path,
+                                path = status.data.path, // field name
                                 order = status.data.order
                             });
                             break;
@@ -443,29 +435,29 @@ namespace Satrabel.OpenFiles.Components.JPList
             {
                 foreach (FilterDTO f in jpListQuery.Filters)
                 {
-                    if (f.pathGroup != null && f.pathGroup.Any()) //group is bv multicheckbox, vb categories where(categy="" OR category="")
+                    if (f.ExactSearchMultiValue != null && f.ExactSearchMultiValue.Any()) //group is bv multicheckbox, vb categories where(categy="" OR category="")
                     {
                         string pathStr = "";
-                        foreach (var p in f.pathGroup)
+                        foreach (var p in f.ExactSearchMultiValue)
                         {
-                            pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + f.name + ":\"" + p + "\"";
+                            pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + f.Name + ":\"" + p + "\"";
                         }
 
                         queryStr += "+" + "(" + pathStr + ")";
                     }
                     else
                     {
-                        string[] names = f.name.Split(',');
+                        var names = f.Names;
                         string pathStr = "";
                         foreach (var n in names)
                         {
-                            if (!string.IsNullOrEmpty(f.path))
+                            if (!string.IsNullOrEmpty(f.ExactSearchValue))
                             {
-                                pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + n + ":\"" + f.path + "\"";  //for dropdownlists; value is keyword => never partial search
+                                pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + n + ":\"" + f.ExactSearchValue + "\"";  //for dropdownlists; value is keyword => never partial search
                             }
                             else
                             {
-                                pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + n + ":\"" + f.value + "*\"";   //textbox
+                                pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + n + ":\"" + f.WildCardSearchValue + "*\"";   //textbox
                             }
                         }
                         queryStr += "+" + "(" + pathStr + ")";
