@@ -125,20 +125,86 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 var indexSince = FixedIndexingStartDate(portal.PortalID, startDate ?? DateTime.MinValue);
                 List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portal.PortalID, indexSince).ToList();
                 Log.Logger.DebugFormat("Found {1} documents from Portal {0} to index", portal.PortalID, searchDocs.Count());
-                Store.Add(searchDocs);
+                Store.AddOld(searchDocs);
                 Log.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
             }
-            Store.Optimize();
+            Store.OptimizeOld();
+
+
+            using (LuceneController lc = LuceneController.Instance)
+            {
+                var portals = PortalController.Instance.GetPortals();
+                foreach (var portal in portals.Cast<PortalInfo>())
+                {
+                    if (!startDate.HasValue)
+                    {
+                        Log.Logger.InfoFormat("Reindexing all documents from Portal {0}", portal.PortalID);
+                    }
+                    lc.Store.Delete(new TermQuery(new Term("$type", portal.PortalID.ToString())));
+
+                    var indexSince = FixedIndexingStartDate(portal.PortalID, startDate ?? DateTime.MinValue);
+                    List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portal.PortalID, indexSince).ToList();
+                    Log.Logger.DebugFormat("Found {1} documents from Portal {0} to index", portal.PortalID, searchDocs.Count());
+                    foreach (var indexItem in searchDocs)
+                    {
+                        lc.Add(indexItem, indexConfig);
+                    }
+                    Store.AddOld(searchDocs);
+                    Log.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
+                }
+                lc.Store.Commit();
+                lc.Store.OptimizeSearchIndex(true);
+                LuceneController.ClearInstance();
+            }
+
         }
 
         #endregion
 
         #region Operations
 
-        public void Delete(int fileId)
+        public void Add(LuceneIndexItem data, FieldConfig config)
+        {
+            if (null == data)
+            {
+                throw new ArgumentNullException("data");
+            }
+
+            _serviceInstance.Add(DnnFilesMappingUtils.DataItemToLuceneDocument(data.PortalId.ToString(),data.FileId.ToString(), data, config));
+        }
+
+        public void Update(LuceneIndexItem data, FieldConfig config)
+        {
+            if (null == data)
+            {
+                throw new ArgumentNullException("data");
+            }
+            Delete(data);
+            Add(data, config);
+        }
+
+        /// <summary>
+        /// Deletes the matching objects in the IndexWriter.
+        /// </summary>
+        /// <param name="data"></param>
+        public void Delete(LuceneIndexItem data)
+        {
+            if (null == data)
+            {
+                throw new ArgumentNullException("data");
+            }
+
+            //var selection = new TermQuery(new Term(JsonMappingUtils.FieldId, data.ContentId.ToString()));
+            var selection = new TermQuery(new Term(DnnFilesMappingUtils.GetIndexFieldName(), DnnFilesMappingUtils.GetIndexFieldValue(data)));
+
+            Query deleteQuery = new FilteredQuery(selection, DnnFilesMappingUtils.GetTypeFilter(data.PortalId.ToString()));
+            _serviceInstance.Delete(deleteQuery);
+        }
+
+        public void DeleteOld(int fileId)
         {
             Log.Logger.DebugFormat("Executing ==> public static void RemoveDocument(int [{0}])", fileId);
-            Store.Delete(fileId);
+            Store.DeleteOld(fileId);
             Log.Logger.DebugFormat("     Exit ==> public static void RemoveDocument(int [{0}])", fileId);
         }
 

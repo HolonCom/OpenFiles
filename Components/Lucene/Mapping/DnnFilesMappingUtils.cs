@@ -3,15 +3,37 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web;
+using DotNetNuke.Common.Utilities;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
+using Lucene.Net.Index;
+using Lucene.Net.Search;
+using Satrabel.OpenContent.Components.Lucene.Config;
+using Satrabel.OpenContent.Components.Lucene.Mapping;
 using Version = Lucene.Net.Util.Version;
 
 namespace Satrabel.OpenFiles.Components.Lucene.Mapping
 {
     public static class DnnFilesMappingUtils
     {
+        #region Consts
+        /// <summary>
+        /// The name of the field which holds the type.
+        /// </summary>
+        public static readonly string FieldType = "$type";
+        /// <summary>
+        /// The name of the field which holds the JSON-serialized source of the object.
+        /// </summary>
+        public static readonly string FieldSource = "$source";
+
+        /// <summary>
+        /// The name of the field which holds the timestamp when the document was created.
+        /// </summary>
+        public static readonly string FieldTimestamp = "$timestamp";
+        public static readonly string FieldId = "$id";
+        #endregion
+
         internal static PerFieldAnalyzerWrapper GetAnalyser()
         {
             var analyzerList = new List<KeyValuePair<string, Analyzer>>
@@ -55,10 +77,57 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
                 FileContent = doc.Get("FileContent")
             };
         }
+        public static Document DataItemToLuceneDocument(string type, string id, LuceneIndexItem item, FieldConfig config, bool storeSource = false)
+        {
+            Document luceneDoc = new Document();
+            luceneDoc.Add(new Field(FieldType, type, Field.Store.YES, Field.Index.NOT_ANALYZED));
+            luceneDoc.Add(new Field(FieldId, id, Field.Store.YES, Field.Index.NOT_ANALYZED));
+            if (storeSource)
+            {
+                luceneDoc.Add(new Field(FieldSource, item.ToJson(), Field.Store.YES, Field.Index.NO));
+            }
+            luceneDoc.Add(new NumericField(FieldTimestamp, Field.Store.YES, true).SetLongValue(DateTime.UtcNow.Ticks));
 
-        internal static string GetIndexField()
+
+            //var objectMapper = new JsonObjectMapper();
+            //objectMapper.AddJsonToDocument(json, luceneDoc, config);
+            luceneDoc.Add(new Field("PortalId", item.PortalId.ToString(), Field.Store.NO, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field("FileId", item.FileId.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
+            luceneDoc.Add(new Field("FileName", item.FileName, Field.Store.NO, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field("Folder", item.Folder, Field.Store.NO, Field.Index.ANALYZED));
+            if (!string.IsNullOrEmpty(item.Title))
+                luceneDoc.Add(new Field("Title", item.Title, Field.Store.NO, Field.Index.ANALYZED));
+            if (!string.IsNullOrEmpty(item.Description))
+                luceneDoc.Add(new Field("Description", item.Description, Field.Store.NO, Field.Index.ANALYZED));
+            if (!string.IsNullOrEmpty(item.FileContent))
+                luceneDoc.Add(new Field("FileContent", item.FileContent, Field.Store.NO, Field.Index.ANALYZED));
+
+            if (item.Categories != null)
+            {
+                foreach (var cat in item.Categories)
+                {
+                    luceneDoc.Add(new Field("Category", cat, Field.Store.NO, Field.Index.ANALYZED));
+                }
+            }
+
+
+            return luceneDoc;
+        }
+        internal static string GetIndexFieldName()
         {
             return "FileId";
+        }
+        internal static string GetIndexFieldValue(LuceneIndexItem data)
+        {
+            return data.FileId.ToString();
+        }
+        public static Filter GetTypeFilter(string type)
+        {
+            var typeTermQuery = new TermQuery(new Term(FieldType, type));
+            BooleanQuery query = new BooleanQuery();
+            query.Add(typeTermQuery, Occur.MUST);
+            Filter filter = new QueryWrapperFilter(query);
+            return filter;
         }
     }
 }

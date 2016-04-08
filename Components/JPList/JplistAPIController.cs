@@ -96,7 +96,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                     if (f == null)
                     {
                         //file seems to have been deleted
-                        LuceneController.Instance.Delete(doc.FileId);
+                        LuceneController.Instance.DeleteOld(doc.FileId);
                         total -= 1;
                     }
                     else

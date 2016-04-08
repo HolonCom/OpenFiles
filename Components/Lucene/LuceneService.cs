@@ -255,14 +255,80 @@ namespace Satrabel.OpenFiles.Components.Lucene
             return MapLuceneToDataList(docs);
         }
 
-        #region Write
+        #region Operations
 
-        internal void Add(LuceneIndexItem item)
+        public void Add(Document doc)
         {
-            Add(new List<LuceneIndexItem> { item });
+            Requires.NotNull("searchDocument", doc);
+            if (doc.GetFields().Count > 0)
+            {
+                try
+                {
+                    Writer.AddDocument(doc);
+                }
+                catch (OutOfMemoryException)
+                {
+                    lock (_writerLock)
+                    {
+                        // as suggested by Lucene's doc
+                        DisposeWriter();
+                        Writer.AddDocument(doc);
+                    }
+                }
+            }
         }
 
-        internal void Add(List<LuceneIndexItem> itemlist)
+        public void Delete(Query query)
+        {
+            Requires.NotNull("luceneQuery", query);
+            Writer.DeleteDocuments(query);
+        }
+
+        public void DeleteOld(int indexId)
+        {
+            if (ValidateIndexFolder())
+            {
+                // init lucene
+                var analyzer = DnnFilesMappingUtils.GetAnalyser();
+                using (var writer = new IndexWriter(LuceneOutputFolder, analyzer, IndexWriter.MaxFieldLength.UNLIMITED))
+                {
+                    // remove older index entry
+                    var searchQuery = new TermQuery(new Term(DnnFilesMappingUtils.GetIndexFieldName(), indexId.ToString()));
+                    writer.DeleteDocuments(searchQuery);
+
+                    // close handles
+                    analyzer.Close();
+                    writer.Dispose();
+                }
+            }
+            else
+            {
+                Log.Logger.DebugFormat("Failed to remove record from {0} Lucene index. Index does not exist. ", indexId);
+            }
+        }
+
+        public void Commit()
+        {
+            if (_writer != null)
+            {
+                lock (_writerLock)
+                {
+                    if (_writer != null)
+                    {
+                        CheckDisposed();
+                        _writer.Commit();
+                        RescheduleAccessTimes();
+                    }
+                }
+            }
+        }
+
+        internal void AddOld(LuceneIndexItem item)
+        {
+            AddOld(new List<LuceneIndexItem> { item });
+        }
+
+        internal void AddOld(List<LuceneIndexItem> itemlist)
         {
             if (!itemlist.Any()) return;
 
@@ -292,7 +358,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
         private static void AddToLuceneIndex(LuceneIndexItem item, IndexWriter writer)
         {
             // remove older index entry
-            var searchQuery = new TermQuery(new Term(DnnFilesMappingUtils.GetIndexField(), GetIndexFieldValue(item)));
+            var searchQuery = new TermQuery(new Term(DnnFilesMappingUtils.GetIndexFieldName(), GetIndexFieldValue(item)));
             writer.DeleteDocuments(searchQuery);
 
             // add new index entry
@@ -325,29 +391,6 @@ namespace Satrabel.OpenFiles.Components.Lucene
             catch (Exception ex)
             {
                 Log.Logger.Error(string.Format("Failed to index File [{0}:{1}]", item.FileId, item.Title), ex);
-            }
-        }
-
-        public void Delete(int indexId)
-        {
-            if (ValidateIndexFolder())
-            {
-                // init lucene
-                var analyzer = DnnFilesMappingUtils.GetAnalyser();
-                using (var writer = new IndexWriter(LuceneOutputFolder, analyzer, IndexWriter.MaxFieldLength.UNLIMITED))
-                {
-                    // remove older index entry
-                    var searchQuery = new TermQuery(new Term(DnnFilesMappingUtils.GetIndexField(), indexId.ToString()));
-                    writer.DeleteDocuments(searchQuery);
-
-                    // close handles
-                    analyzer.Close();
-                    writer.Dispose();
-                }
-            }
-            else
-            {
-                Log.Logger.DebugFormat("Failed to remove record from {0} Lucene index. Index does not exist. ", indexId);
             }
         }
 
@@ -384,8 +427,33 @@ namespace Satrabel.OpenFiles.Components.Lucene
             Log.Logger.DebugFormat("     Exit ==> public static bool ClearLuceneIndex() with {0}", retval);
             return retval;
         }
+        public bool OptimizeSearchIndex(bool doWait)
+        {
+            var writer = _writer;
+            if (writer != null && writer.HasDeletions())
+            {
+                if (doWait)
+                {
+                    OpenContent.Components.Log.Logger.Debug("Compacting Search Index - started");
+                }
 
-        public void Optimize()
+                CheckDisposed();
+                //optimize down to "> 1 segments" for better performance than down to 1
+                _writer.Optimize(4, doWait);
+
+                if (doWait)
+                {
+                    Commit();
+                    OpenContent.Components.Log.Logger.Debug("Compacting Search Index - finished");
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public void OptimizeOld()
         {
             if (!ValidateIndexFolder())
             {
