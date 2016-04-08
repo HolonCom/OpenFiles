@@ -360,29 +360,10 @@ namespace Satrabel.OpenFiles.Components.Lucene
             // remove older index entry
             var searchQuery = new TermQuery(new Term(DnnFilesMappingUtils.GetIndexFieldName(), GetIndexFieldValue(item)));
             writer.DeleteDocuments(searchQuery);
-
+            
             // add new index entry
-            var luceneDoc = new Document();
+            var luceneDoc = DnnFilesMappingUtils.DataItemToLuceneDocument(item);
 
-            // add lucene fields mapped to db fields
-            luceneDoc.Add(new Field("PortalId", item.PortalId.ToString(), Field.Store.NO, Field.Index.ANALYZED));
-            luceneDoc.Add(new Field("FileId", item.FileId.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-            luceneDoc.Add(new Field("FileName", item.FileName, Field.Store.NO, Field.Index.ANALYZED));
-            luceneDoc.Add(new Field("Folder", item.Folder, Field.Store.NO, Field.Index.ANALYZED));
-            if (!string.IsNullOrEmpty(item.Title))
-                luceneDoc.Add(new Field("Title", item.Title, Field.Store.NO, Field.Index.ANALYZED));
-            if (!string.IsNullOrEmpty(item.Description))
-                luceneDoc.Add(new Field("Description", item.Description, Field.Store.NO, Field.Index.ANALYZED));
-            if (!string.IsNullOrEmpty(item.FileContent))
-                luceneDoc.Add(new Field("FileContent", item.FileContent, Field.Store.NO, Field.Index.ANALYZED));
-
-            if (item.Categories != null)
-            {
-                foreach (var cat in item.Categories)
-                {
-                    luceneDoc.Add(new Field("Category", cat, Field.Store.NO, Field.Index.ANALYZED));
-                }
-            }
             // add entry to index
             try
             {

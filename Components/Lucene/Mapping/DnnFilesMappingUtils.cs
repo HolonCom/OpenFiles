@@ -77,6 +77,13 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
                 FileContent = doc.Get("FileContent")
             };
         }
+
+
+        public static Document DataItemToLuceneDocument(LuceneIndexItem data, bool storeSource = false)
+        {
+            return DataItemToLuceneDocument(data.PortalId.ToString(), data.FileId.ToString(), data, null);
+        }
+
         public static Document DataItemToLuceneDocument(string type, string id, LuceneIndexItem item, FieldConfig config, bool storeSource = false)
         {
             Document luceneDoc = new Document();

@@ -131,31 +131,31 @@ namespace Satrabel.OpenFiles.Components.Lucene
             Store.OptimizeOld();
 
 
-            using (LuceneController lc = LuceneController.Instance)
-            {
-                var portals = PortalController.Instance.GetPortals();
-                foreach (var portal in portals.Cast<PortalInfo>())
-                {
-                    if (!startDate.HasValue)
-                    {
-                        Log.Logger.InfoFormat("Reindexing all documents from Portal {0}", portal.PortalID);
-                    }
-                    lc.Store.Delete(new TermQuery(new Term("$type", portal.PortalID.ToString())));
+            //using (LuceneController lc = LuceneController.Instance)
+            //{
+            //    var portals = PortalController.Instance.GetPortals();
+            //    foreach (var portal in portals.Cast<PortalInfo>())
+            //    {
+            //        if (!startDate.HasValue)
+            //        {
+            //            Log.Logger.InfoFormat("Reindexing all documents from Portal {0}", portal.PortalID);
+            //        }
+            //        lc.Store.Delete(new TermQuery(new Term("$type", portal.PortalID.ToString())));
 
-                    var indexSince = FixedIndexingStartDate(portal.PortalID, startDate ?? DateTime.MinValue);
-                    List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portal.PortalID, indexSince).ToList();
-                    Log.Logger.DebugFormat("Found {1} documents from Portal {0} to index", portal.PortalID, searchDocs.Count());
-                    foreach (var indexItem in searchDocs)
-                    {
-                        lc.Add(indexItem, indexConfig);
-                    }
-                    Store.AddOld(searchDocs);
-                    Log.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
-                }
-                lc.Store.Commit();
-                lc.Store.OptimizeSearchIndex(true);
-                LuceneController.ClearInstance();
-            }
+            //        var indexSince = FixedIndexingStartDate(portal.PortalID, startDate ?? DateTime.MinValue);
+            //        List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portal.PortalID, indexSince).ToList();
+            //        Log.Logger.DebugFormat("Found {1} documents from Portal {0} to index", portal.PortalID, searchDocs.Count());
+            //        foreach (var indexItem in searchDocs)
+            //        {
+            //            lc.Add(indexItem, indexConfig);
+            //        }
+            //        Store.AddOld(searchDocs);
+            //        Log.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
+            //    }
+            //    lc.Store.Commit();
+            //    lc.Store.OptimizeSearchIndex(true);
+            //    LuceneController.ClearInstance();
+            //}
 
         }
 
