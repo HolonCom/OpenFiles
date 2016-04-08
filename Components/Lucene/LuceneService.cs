@@ -23,17 +23,18 @@ namespace Satrabel.OpenFiles.Components.Lucene
     {
 
         #region Constants
-        private const string DefaultSearchFolder = @"App_Data\OpenFiles\LuceneIndex"; //todo: parameter
         private const string WriteLockFile = "write.lock";
-        internal const int DefaultRereadTimeSpan = 10; // in seconds (initialy 30sec)
+        private const int DefaultRereadTimeSpan = 10; // in seconds (initialy 30sec)
         private const int DISPOSED = 1;
         private const int UNDISPOSED = 0;
         #endregion
 
         #region Private Properties
 
-        internal string IndexFolder { get; private set; }
-        private static FSDirectory _directoryTemp;
+        private readonly string _searchFolder;
+        private readonly Analyzer _analyser;
+
+        private string IndexFolder { get; set; }
 
         private IndexWriter _writer;
         private IndexReader _idxReader;
@@ -43,37 +44,23 @@ namespace Satrabel.OpenFiles.Components.Lucene
         private readonly List<CachedReader> _oldReaders = new List<CachedReader>();
         private int _isDisposed = UNDISPOSED;
 
-        private static LuceneService _instance = new LuceneService();
-        public static LuceneService Instance
-        {
-            get
-            {
-                return _instance;
-            }
-        }
-        public static void ClearInstance()
-        {
-            _instance.Dispose();
-            _instance = null;
-            _instance = new LuceneService();
-        }
+        private static FSDirectory _directoryTemp;
 
         #region constructor
-        private LuceneService()
+        internal LuceneService(string searchFolder, Analyzer analyser)
         {
-            //var hostController = HostController.Instance;
-
-            var folder = DefaultSearchFolder; // hostController.GetString(Constants.SearchIndexFolderKey, DefaultSearchFolder);
-
-            if (string.IsNullOrEmpty(folder)) folder = DefaultSearchFolder;
-            IndexFolder = Path.Combine(Globals.ApplicationMapPath, folder);
+            _searchFolder = searchFolder;
+            _analyser = analyser;
+            if (string.IsNullOrEmpty(_searchFolder))
+                throw new ArgumentNullException("searchFolder");
+            IndexFolder = Path.Combine(Globals.ApplicationMapPath, _searchFolder);
             _readerTimeSpan = DefaultRereadTimeSpan; //  hostController.GetDouble(Constants.SearchReaderRefreshTimeKey, DefaultRereadTimeSpan);
         }
 
         private void CheckDisposed()
         {
             if (Thread.VolatileRead(ref _isDisposed) == DISPOSED)
-                throw new ObjectDisposedException("OpenFiles LuceneController is disposed and cannot be used anymore");
+                throw new ObjectDisposedException(string.Format("LuceneController [{0}] is disposed and cannot be used anymore", _searchFolder));
         }
         #endregion
 
@@ -87,7 +74,6 @@ namespace Satrabel.OpenFiles.Components.Lucene
         {
             get
             {
-                Analyzer analyser = DnnFilesMappingUtils.GetAnalyser(); //todo: parameter
                 if (_writer == null)
                 {
                     lock (_writerLock)
@@ -112,7 +98,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                             }
 
                             CheckDisposed();
-                            var writer = new IndexWriter(FSDirectory.Open(IndexFolder), analyser, IndexWriter.MaxFieldLength.UNLIMITED);
+                            var writer = new IndexWriter(FSDirectory.Open(IndexFolder), _analyser, IndexWriter.MaxFieldLength.UNLIMITED);
                             _idxReader = writer.GetReader();
                             Thread.MemoryBarrier();
                             _writer = writer;
@@ -204,7 +190,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
         private void CheckValidIndexFolder()
         {
             if (!ValidateIndexFolder())
-                throw new Exception("OpenContent Search indexing directory is either empty or does not exist");
+                throw new Exception(string.Format("OpenFiles Search indexing directory [{0}] is either empty or does not exist", _searchFolder));
         }
 
         private static FSDirectory LuceneOutputFolder
@@ -229,7 +215,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             }
         }
 
-        public static void Initialise(Action reindexer)
+        public void Initialise(Action reindexer)
         {
             if (ValidateIndexFolder())
                 return;
@@ -239,17 +225,17 @@ namespace Satrabel.OpenFiles.Components.Lucene
             Log.Logger.DebugFormat("Lucene index directory [{0}] finished initializing.", LuceneOutputFolder);
         }
 
-        private static bool ValidateIndexFolder()
+        internal bool ValidateIndexFolder()
         {
-            return LuceneOutputFolder.Directory.Exists &&
-                   LuceneOutputFolder.Directory.EnumerateFiles().Any();
+            return System.IO.Directory.Exists(IndexFolder) &&
+                   System.IO.Directory.GetFiles(IndexFolder, "*.*").Length > 0;
         }
 
         #endregion
 
 
         // search methods
-        internal static List<LuceneIndexItem> GetAllIndexedRecords()
+        internal List<LuceneIndexItem> GetAllIndexedRecords()
         {
             Log.Logger.DebugFormat("Executing ==> internal static List<LuceneIndexItem> GetAllIndexedRecords()");
             // validate search index
@@ -271,12 +257,12 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         #region Write
 
-        internal static void Add(LuceneIndexItem item)
+        internal void Add(LuceneIndexItem item)
         {
             Add(new List<LuceneIndexItem> { item });
         }
 
-        internal static void Add(List<LuceneIndexItem> itemlist)
+        internal void Add(List<LuceneIndexItem> itemlist)
         {
             if (!itemlist.Any()) return;
 
@@ -295,7 +281,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 writer.Dispose();
             }
             var counter = 0;
-            while (!LuceneService.ValidateIndexFolder() && counter < 20)
+            while (!ValidateIndexFolder() && counter < 20)
             {
                 counter += 1;
                 Log.Logger.DebugFormat("checking IndexExists {0}", counter);
@@ -342,9 +328,9 @@ namespace Satrabel.OpenFiles.Components.Lucene
             }
         }
 
-        public static void Delete(int indexId)
+        public void Delete(int indexId)
         {
-            if (LuceneService.ValidateIndexFolder())
+            if (ValidateIndexFolder())
             {
                 // init lucene
                 var analyzer = DnnFilesMappingUtils.GetAnalyser();
@@ -365,7 +351,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             }
         }
 
-        public static bool DeleteAll()
+        public bool DeleteAll()
         {
             var retval = true;
             Log.Logger.DebugFormat("Executing ==> public static bool ClearLuceneIndex()");
@@ -399,7 +385,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             return retval;
         }
 
-        public static void Optimize()
+        public void Optimize()
         {
             if (!ValidateIndexFolder())
             {
@@ -419,14 +405,14 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         #region Private Methods
 
-        internal static List<LuceneIndexItem> Search(string searchQuery, string searchField = "")
+        internal List<LuceneIndexItem> Search(string searchQuery, string searchField = "")
         {
             var fieldlist = DnnFilesMappingUtils.GetSearchAllFieldList(); //todo param
             // main search method
 
             // validation
             if (string.IsNullOrEmpty(searchQuery.Replace("*", "").Replace("?", ""))) return new List<LuceneIndexItem>();
-            searchQuery = searchQuery.Replace("*", "").Replace("?", "");  //don't allow wilcard?! Well, for finding folders, wildcards are not allowed (Demetris)
+            //searchQuery = searchQuery.Replace("*", "").Replace("?", "");  //don't allow wilcard?! Well, for finding folders, wildcards are not allowed (Demetris)
 
             // set up lucene searcher
             using (var searcher = new IndexSearcher(LuceneOutputFolder, true))
@@ -510,6 +496,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 DisposeReaders();
             }
         }
+
         private void DisposeWriter()
         {
             if (_writer != null)
@@ -541,48 +528,34 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 _reader = null;
             }
         }
-    }
-    class CachedReader : IDisposable
-    {
-        public DateTime LastUsed { get; private set; }
-        private readonly IndexSearcher _searcher;
 
-        public CachedReader(IndexSearcher searcher)
+        class CachedReader : IDisposable
         {
-            _searcher = searcher;
-            UpdateLastUsed();
-        }
+            public DateTime LastUsed { get; private set; }
+            private readonly IndexSearcher _searcher;
 
-        public IndexSearcher GetSearcher()
-        {
-            UpdateLastUsed();
-            return _searcher;
-        }
+            public CachedReader(IndexSearcher searcher)
+            {
+                _searcher = searcher;
+                UpdateLastUsed();
+            }
 
-        private void UpdateLastUsed()
-        {
-            LastUsed = DateTime.Now;
-        }
+            public IndexSearcher GetSearcher()
+            {
+                UpdateLastUsed();
+                return _searcher;
+            }
 
-        public void Dispose()
-        {
-            _searcher.Dispose();
-            _searcher.IndexReader.Dispose();
+            private void UpdateLastUsed()
+            {
+                LastUsed = DateTime.Now;
+            }
+
+            public void Dispose()
+            {
+                _searcher.Dispose();
+                _searcher.IndexReader.Dispose();
+            }
         }
-    }
-    public class LuceneIndexItem
-    {
-        public LuceneIndexItem()
-        {
-            Categories = new List<string>();
-        }
-        public int PortalId { get; set; }
-        public int FileId { get; set; }
-        public string FileName { get; set; }
-        public string Folder { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public string FileContent { get; set; }
-        public List<string> Categories { get; private set; }
     }
 }

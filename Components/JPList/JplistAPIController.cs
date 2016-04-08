@@ -40,7 +40,7 @@ namespace Satrabel.OpenFiles.Components.JPList
             {
                 Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() called with request [{0}].", req.ToJson());
 
-                IEnumerable<LuceneIndexItem> docs;
+                SearchResults docs;
 
                 var jpListQuery = BuildJpListQuery(req.StatusLst);
                 string curFolder = NormalizePath(req.folder);
@@ -49,7 +49,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                     jpListQuery.Filters.Add(new FilterDTO()
                     {
                         Name = "Folder",
-                        WildCardSearchValue = NormalizePath(req.folder)
+                        WildCardSearchValue = NormalizePath(req.folder) //any file of current folder or subfolders
                     });
                 }
                 else
@@ -57,7 +57,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                     foreach (var item in jpListQuery.Filters.Where(f => f.Name == "Folder"))
                     {
                         curFolder = NormalizePath(item.ExactSearchValue);
-                        item.ExactSearchValue = NormalizePath(item.ExactSearchValue);
+                        item.ExactSearchValue = NormalizePath(item.ExactSearchValue); //any file of current folder
 
                     }
                 }
@@ -67,23 +67,21 @@ namespace Satrabel.OpenFiles.Components.JPList
                     ExactSearchValue = PortalSettings.PortalId.ToString()
                 });
 
-                string luceneQuery = BuildLuceneQuery(jpListQuery);
+                string luceneQuery = LuceneQueryBuilder.BuildLuceneQuery(jpListQuery);
                 if (string.IsNullOrEmpty(luceneQuery))
                 {
-                    docs = LuceneController.GetAllIndexedRecords();
-                    Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found 0 items, returning all [{1}] items", luceneQuery.ToJson(), docs.Count());
+                    docs = LuceneController.Instance.GetAllIndexedRecords();
+                    Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found 0 items, returning all [{1}] items", luceneQuery.ToJson(), docs.TotalResults);
                 }
                 else
                 {
-                    docs = LuceneController.Search(luceneQuery);
-                    Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", luceneQuery.ToJson(), docs.Count());
+                    docs = LuceneController.Instance.Search(luceneQuery);
+                    Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", luceneQuery.ToJson(), docs.TotalResults);
                 }
                 var ratio = string.IsNullOrEmpty(req.imageRatio) ? new Ratio(100, 100) : new Ratio(req.imageRatio);
-                int total = docs.Count();
+                int total = docs.TotalResults;
                 Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", luceneQuery.ToJson(), total);
 
-                if (jpListQuery.Pagination.number > 0)
-                    docs = docs.Skip((jpListQuery.Pagination.currentPage) * jpListQuery.Pagination.number).Take(jpListQuery.Pagination.number);
                 var fileManager = FileManager.Instance;
                 var data = new List<FileDTO>();
                 var breadcrumbs = new List<IFolderInfo>();
@@ -92,13 +90,13 @@ namespace Satrabel.OpenFiles.Components.JPList
                     breadcrumbs = AddFolders(NormalizePath(req.folder), curFolder, fileManager, data, ratio);
                 }
 
-                foreach (var doc in docs)
+                foreach (var doc in docs.ids)
                 {
                     IFileInfo f = fileManager.GetFile(doc.FileId);
                     if (f == null)
                     {
                         //file seems to have been deleted
-                        LuceneController.RemoveDocument(doc.FileId);
+                        LuceneController.Instance.Delete(doc.FileId);
                         total -= 1;
                     }
                     else
@@ -142,6 +140,10 @@ namespace Satrabel.OpenFiles.Components.JPList
 
                 //Sort as requested
                 data = SortAsRequested(data, jpListQuery);
+
+                //Page as requested
+                if (jpListQuery.Pagination.number > 0)
+                    data = data.Skip((jpListQuery.Pagination.currentPage) * jpListQuery.Pagination.number).Take(jpListQuery.Pagination.number).ToList();
 
                 if (req.withSubFolder)
                 {
@@ -250,37 +252,39 @@ namespace Satrabel.OpenFiles.Components.JPList
             //todo add support for other sorting fields
             //todo refactor to using Func<> to support more flexible approach
 
+            if (data.Count == 0) return data;
+
             List<FileDTO> newdata = null;
             foreach (var sort in jpListQuery.Sorts)
             {
-                if (String.Equals(sort.path, "LastModifiedOnDate", StringComparison.InvariantCultureIgnoreCase))
+                if (string.Equals(sort.path, "LastModifiedOnDate", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    if (String.Equals(sort.order, "desc", StringComparison.InvariantCultureIgnoreCase))
+                    if (string.Equals(sort.order, "desc", StringComparison.InvariantCultureIgnoreCase))
                         newdata = data.OrderByDescending(i => i.LastModifiedOnDate).ToList();
                     else
                         newdata = data.OrderBy(i => i.LastModifiedOnDate).ToList();
                 }
-                else if (String.Equals(sort.path, "Name", StringComparison.InvariantCultureIgnoreCase))
+                else if (string.Equals(sort.path, "Name", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    if (String.Equals(sort.order, "desc", StringComparison.InvariantCultureIgnoreCase))
+                    if (string.Equals(sort.order, "desc", StringComparison.InvariantCultureIgnoreCase))
                         newdata = data.OrderByDescending(i => i.Name).ToList();
                     else
                         newdata = data.OrderBy(i => i.Name).ToList();
                 }
-                else if (String.Equals(sort.path, "FileName", StringComparison.InvariantCultureIgnoreCase))
+                else if (string.Equals(sort.path, "FileName", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    if (String.Equals(sort.order, "desc", StringComparison.InvariantCultureIgnoreCase))
+                    if (string.Equals(sort.order, "desc", StringComparison.InvariantCultureIgnoreCase))
                         newdata = data.OrderByDescending(i => i.FileName).ToList();
                     else
                         newdata = data.OrderBy(i => i.FileName).ToList();
                 }
-                //else if (String.Equals(sort.path, "Description", StringComparison.InvariantCultureIgnoreCase))
-                //{
-                //    if (String.Equals(sort.order, "desc", StringComparison.InvariantCultureIgnoreCase))
-                //        newdata = data.OrderByDescending(i => i.Custom.).ToList();
-                //    else
-                //        newdata = data.OrderBy(i => i.FileName).ToList();
-                //}
+                else if (string.Equals(sort.path, "Description", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    if (string.Equals(sort.order, "desc", StringComparison.InvariantCultureIgnoreCase))
+                        newdata = data.OrderByDescending(i => i.Custom.Description).ToList();
+                    else
+                        newdata = data.OrderBy(i => i.FileName).ToList();
+                }
 
             }
             return newdata ?? data;
@@ -427,45 +431,6 @@ namespace Satrabel.OpenFiles.Components.JPList
             return query;
         }
 
-        private string BuildLuceneQuery(JpListQueryDTO jpListQuery)
-        {
-
-            string queryStr = "";
-            if (jpListQuery.Filters.Any())
-            {
-                foreach (FilterDTO f in jpListQuery.Filters)
-                {
-                    if (f.ExactSearchMultiValue != null && f.ExactSearchMultiValue.Any()) //group is bv multicheckbox, vb categories where(categy="" OR category="")
-                    {
-                        string pathStr = "";
-                        foreach (var p in f.ExactSearchMultiValue)
-                        {
-                            pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + f.Name + ":\"" + p + "\"";
-                        }
-
-                        queryStr += "+" + "(" + pathStr + ")";
-                    }
-                    else
-                    {
-                        var names = f.Names;
-                        string pathStr = "";
-                        foreach (var n in names)
-                        {
-                            if (!string.IsNullOrEmpty(f.ExactSearchValue))
-                            {
-                                pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + n + ":\"" + f.ExactSearchValue + "\"";  //for dropdownlists; value is keyword => never partial search
-                            }
-                            else
-                            {
-                                pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + n + ":\"" + f.WildCardSearchValue + "*\"";   //textbox
-                            }
-                        }
-                        queryStr += "+" + "(" + pathStr + ")";
-                    }
-                }
-            }
-            return queryStr;
-        }
 
         #endregion
     }

@@ -37,8 +37,8 @@ namespace Satrabel.OpenFiles
         }
         protected void bIndex_Click(object sender, EventArgs e)
         {
-            var searchEngine = new LuceneController();
-            searchEngine.ReIndexContent();
+            var searchEngine = LuceneController.Instance;
+            searchEngine.IndexAll();
         }
         protected void bScheduleTask_Click(object sender, EventArgs e)
         {

@@ -38,14 +38,14 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 Log.Logger.Trace("Search: File Crawler - Starting. Content change start time " + lastSuccessFulDateTime.ToString("g"));
                 ScheduleHistoryItem.AddLogNote(string.Format("Starting. Content change start time <b>{0:g}</b>", lastSuccessFulDateTime));
 
-                var searchEngine = new LuceneController();
+                var searchEngine = LuceneController.Instance;
                 try
                 {
                     searchEngine.IndexContent(lastSuccessFulDateTime);
-                    foreach (var result in searchEngine.Results)
-                    {
-                        ScheduleHistoryItem.AddLogNote(string.Format("<br/>&nbsp;&nbsp;{0} Indexed: {1}", result.Key, result.Value));
-                    }
+                    //foreach (var result in searchEngine.Results)
+                    //{
+                    //    ScheduleHistoryItem.AddLogNote(string.Format("<br/>&nbsp;&nbsp;{0} Indexed: {1}", result.Key, result.Value));
+                    //}
 
                 }
                 catch (Exception ex)

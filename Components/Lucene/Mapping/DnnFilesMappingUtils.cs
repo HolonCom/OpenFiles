@@ -30,7 +30,6 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
 
         private class LowercaseKeywordAnalyzer : Analyzer
         {
-
             public override TokenStream TokenStream(string fieldName, TextReader reader)
             {
                 TokenStream tokenStream = new KeywordTokenizer(reader);
