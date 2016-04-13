@@ -67,9 +67,27 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 retval = new SearchResults(Store.GetAllIndexedRecords());
             else
                 retval = new SearchResults(Store.Search(input, fieldName));
+            retval.TotalResults = retval.ids.Count;
             Log.Logger.DebugFormat("     Exit ==> public static IEnumerable<LuceneIndexItem> Search() with {0} items found", retval.TotalResults);
             return retval;
         }
+        //private SearchResults Search(string type, Query filter, Query query, Sort sort, int pageSize, int pageIndex)
+        //{
+
+        //    //validate whether index folder is exist and contains index files, otherwise return null.
+        //    ValidateIndex();
+
+        //    var searcher = Store.GetSearcher();
+        //    TopDocs topDocs;
+        //    if (filter == null)
+        //        topDocs = searcher.Search(type, query, (pageIndex + 1) * pageSize, sort);
+        //    else
+        //        topDocs = searcher.Search(type, filter, query, (pageIndex + 1) * pageSize, sort);
+        //    var luceneResults = new SearchResults(topDocs.ScoreDocs.Skip(pageIndex * pageSize).Select(d => searcher.Doc(d.Doc).GetField(DnnFilesMappingUtils.FieldId).StringValue).ToArray(), topDocs.TotalHits);
+        //    luceneResults.TotalResults = topDocs.TotalHits;
+        //    luceneResults.ids = topDocs.ScoreDocs.Skip(pageIndex * pageSize).Select(d => searcher.Doc(d.Doc).GetField(DnnFilesMappingUtils.FieldId).StringValue).ToArray();
+        //    return luceneResults;
+        //}
 
         public SearchResults GetAllIndexedRecords()
         {

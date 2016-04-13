@@ -109,9 +109,14 @@ namespace Satrabel.OpenFiles.Components.Lucene
             }
         }
 
-        // made internal to be used in unit tests only; otherwise could be made private
+        private IndexSearcher GetSearcher(FSDirectory luceneOutputFolder, bool readonlyIndex)
+        {
+            return new IndexSearcher(luceneOutputFolder, readonlyIndex);
+        }
+
         internal IndexSearcher GetSearcher()
         {
+            // made internal to be used in unit tests only; otherwise could be made private
             if (_reader == null || MustRereadIndex)
             {
                 CheckValidIndexFolder();
@@ -235,6 +240,8 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
 
         // search methods
+        #region Search
+
         internal List<LuceneIndexItem> GetAllIndexedRecords()
         {
             Log.Logger.DebugFormat("Executing ==> internal static List<LuceneIndexItem> GetAllIndexedRecords()");
@@ -243,7 +250,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 return new List<LuceneIndexItem>();
 
             // set up lucene searcher
-            var searcher = new IndexSearcher(LuceneOutputFolder, false);
+            var searcher = GetSearcher(LuceneOutputFolder, false);
             var reader = IndexReader.Open(LuceneOutputFolder, false);
             var docs = new List<Document>();
             var term = reader.TermDocs();
@@ -254,6 +261,61 @@ namespace Satrabel.OpenFiles.Components.Lucene
             searcher.Dispose();
             return MapLuceneToDataList(docs);
         }
+
+        internal List<LuceneIndexItem> Search(string searchQuery, string searchField = "")
+        {
+            var fieldlist = DnnFilesMappingUtils.GetSearchAllFieldList(); //todo param
+            // main search method
+
+            // validation
+            if (string.IsNullOrEmpty(searchQuery.Replace("*", "").Replace("?", ""))) return new List<LuceneIndexItem>();
+            //searchQuery = searchQuery.Replace("*", "").Replace("?", "");  //don't allow wilcard?! Well, for finding folders, wildcards are not allowed (Demetris)
+
+            // set up lucene searcher
+            using (var searcher = GetSearcher(LuceneOutputFolder, true))
+            {
+                ScoreDoc[] scoreDocs;
+                const int hitsLimit = 1000;
+                var analyzer = DnnFilesMappingUtils.GetAnalyser();
+
+                // search by single field
+                if (!string.IsNullOrEmpty(searchField))
+                {
+                    var parser = new QueryParser(Version.LUCENE_30, searchField, analyzer);
+                    var query = ParseQuery(searchQuery, parser);
+                    Log.Logger.DebugFormat("Querying 1 Lucene Index with: [{0}]", query.ToString());
+                    scoreDocs = searcher.Search(query, hitsLimit).ScoreDocs;
+                }
+                // search by multiple fields (ordered by INDEXORDER)
+                else
+                {
+                    var parser = new MultiFieldQueryParser(Version.LUCENE_30, fieldlist, analyzer);
+                    var query = ParseQuery(searchQuery, parser);
+                    Log.Logger.DebugFormat("Querying 2 Lucene Index with: [{0}]", query.ToString());
+                    scoreDocs = searcher.Search(query, null, hitsLimit, Sort.INDEXORDER).ScoreDocs;
+                }
+                Log.Logger.DebugFormat("Querying resulted in [{0}] hits from {1}", scoreDocs.Length, LuceneOutputFolder.Directory.FullName);
+                var results = MapLuceneToDataList(scoreDocs, searcher);
+                analyzer.Close();
+                searcher.Dispose();
+                return results;
+            }
+        }
+
+        internal SearchResults Search(string type, Query filter, Query query, Sort sort, int pageSize, int pageIndex)
+        {
+            var searcher = GetSearcher();
+            TopDocs topDocs;
+            if (filter == null)
+                topDocs = searcher.Search(type, query, (pageIndex + 1) * pageSize, sort);
+            else
+                topDocs = searcher.Search(type, filter, query, (pageIndex + 1) * pageSize, sort);
+            var results = MapLuceneToDataList(topDocs.ScoreDocs.Skip(pageIndex * pageSize), searcher);
+            var luceneResults = new SearchResults(results, topDocs.TotalHits);
+            return luceneResults;
+        }
+
+        #endregion
 
         #region Operations
 
@@ -453,46 +515,6 @@ namespace Satrabel.OpenFiles.Components.Lucene
         #endregion
 
         #region Private Methods
-
-        internal List<LuceneIndexItem> Search(string searchQuery, string searchField = "")
-        {
-            var fieldlist = DnnFilesMappingUtils.GetSearchAllFieldList(); //todo param
-            // main search method
-
-            // validation
-            if (string.IsNullOrEmpty(searchQuery.Replace("*", "").Replace("?", ""))) return new List<LuceneIndexItem>();
-            //searchQuery = searchQuery.Replace("*", "").Replace("?", "");  //don't allow wilcard?! Well, for finding folders, wildcards are not allowed (Demetris)
-
-            // set up lucene searcher
-            using (var searcher = new IndexSearcher(LuceneOutputFolder, true))
-            {
-                ScoreDoc[] hits;
-                const int hitsLimit = 1000;
-                var analyzer = DnnFilesMappingUtils.GetAnalyser();
-
-                // search by single field
-                if (!string.IsNullOrEmpty(searchField))
-                {
-                    var parser = new QueryParser(Version.LUCENE_30, searchField, analyzer);
-                    var query = ParseQuery(searchQuery, parser);
-                    Log.Logger.DebugFormat("Querying 1 Lucene Index with: [{0}]", query.ToString());
-                    hits = searcher.Search(query, hitsLimit).ScoreDocs;
-                }
-                // search by multiple fields (ordered by INDEXORDER)
-                else
-                {
-                    var parser = new MultiFieldQueryParser(Version.LUCENE_30, fieldlist, analyzer);
-                    var query = ParseQuery(searchQuery, parser);
-                    Log.Logger.DebugFormat("Querying 2 Lucene Index with: [{0}]", query.ToString());
-                    hits = searcher.Search(query, null, hitsLimit, Sort.INDEXORDER).ScoreDocs;
-                }
-                Log.Logger.DebugFormat("Querying resulted in [{0}] hits from {1}", hits.Length, LuceneOutputFolder.Directory.FullName);
-                var results = MapLuceneToDataList(hits, searcher);
-                analyzer.Close();
-                searcher.Dispose();
-                return results;
-            }
-        }
 
         private static Query ParseQuery(string searchQuery, QueryParser parser)
         {

@@ -102,12 +102,9 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
             luceneDoc.Add(new Field("FileId", item.FileId.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
             luceneDoc.Add(new Field("FileName", item.FileName, Field.Store.NO, Field.Index.ANALYZED));
             luceneDoc.Add(new Field("Folder", item.Folder, Field.Store.NO, Field.Index.ANALYZED));
-            if (!string.IsNullOrEmpty(item.Title))
-                luceneDoc.Add(new Field("Title", item.Title, Field.Store.NO, Field.Index.ANALYZED));
-            if (!string.IsNullOrEmpty(item.Description))
-                luceneDoc.Add(new Field("Description", item.Description, Field.Store.NO, Field.Index.ANALYZED));
-            if (!string.IsNullOrEmpty(item.FileContent))
-                luceneDoc.Add(new Field("FileContent", item.FileContent, Field.Store.NO, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field("Title", string.IsNullOrEmpty(item.Title) ? "" : item.Title, Field.Store.NO, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field("Description", string.IsNullOrEmpty(item.Description) ? "" : item.Description, Field.Store.NO, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field("FileContent", string.IsNullOrEmpty(item.FileContent) ? "" : item.FileContent, Field.Store.NO, Field.Index.ANALYZED));
 
             if (item.Categories != null)
             {
