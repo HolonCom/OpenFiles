@@ -25,6 +25,9 @@ using DotNetNuke.Services.Scheduling;
 using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.TemplateHelpers;
 using TemplateHelper = Satrabel.OpenFiles.Components.Template.TemplateHelper;
+using Satrabel.OpenContent.Components.JPList;
+using Satrabel.OpenContent.Components.Datasource.search;
+using Satrabel.OpenContent.Components.Lucene.Config;
 
 namespace Satrabel.OpenFiles.Components.JPList
 {
@@ -42,45 +45,65 @@ namespace Satrabel.OpenFiles.Components.JPList
 
                 SearchResults docs;
 
-                var jpListQuery = JpListQueryBuilder.MergeJpListQuery(req.StatusLst);
+
+                QueryBuilder queryBuilder = new QueryBuilder();
+                queryBuilder.BuildFilter(PortalSettings.PortalId, req.folder);
+                queryBuilder.MergeJpListQuery(req.StatusLst, req.folder);
+                //JplistQueryBuilder.MergeJpListQuery(queryBuilder.Select, req.StatusLst);
+
                 string curFolder = NormalizePath(req.folder);
-                if (!string.IsNullOrEmpty(req.folder) && jpListQuery.Filters.All(f => f.Name != "Folder")) // If there is no "Folder" filter active, then add one
+                foreach (var item in queryBuilder.Select.Query.FilterRules.Where(f => f.Field == "Folder"))
                 {
-                    jpListQuery.Filters.Add(new FilterDTO()
-                    {
-                        Name = "Folder",
-                        WildCardSearchValue = NormalizePath(req.folder) //any file of current folder or subfolders
-                    });
+                    curFolder = NormalizePath(item.Value.AsString);
+                    item.Value = new StringRuleValue(NormalizePath(item.Value.AsString)); //any file of current folder
                 }
-                else
-                {
-                    foreach (var item in jpListQuery.Filters.Where(f => f.Name == "Folder"))
-                    {
-                        curFolder = NormalizePath(item.ExactSearchValue);
-                        item.ExactSearchValue = NormalizePath(item.ExactSearchValue); //any file of current folder
 
-                    }
-                }
-                jpListQuery.Filters.Add(new FilterDTO()
-                {
-                    Name = "PortalId",
-                    ExactSearchValue = PortalSettings.PortalId.ToString()
-                });
 
-                string luceneQuery = LuceneQueryBuilder.BuildLuceneQuery(jpListQuery);
-                if (string.IsNullOrEmpty(luceneQuery))
-                {
-                    docs = LuceneController.Instance.GetAllIndexedRecords();
-                    Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found 0 items, returning all [{1}] items", luceneQuery.ToJson(), docs.TotalResults);
-                }
-                else
-                {
-                    docs = LuceneController.Instance.Search(luceneQuery);
-                    Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", luceneQuery.ToJson(), docs.TotalResults);
-                }
-                var ratio = string.IsNullOrEmpty(req.imageRatio) ? new Ratio(100, 100) : new Ratio(req.imageRatio);
+                ////var jpListQuery = JpListQueryBuilder.MergeJpListQuery(req.StatusLst);
+                //string curFolder = NormalizePath(req.folder);
+                //if (!string.IsNullOrEmpty(req.folder) && jpListQuery.Filters.All(f => f.Name != "Folder")) // If there is no "Folder" filter active, then add one
+                //{
+                //    jpListQuery.Filters.Add(new FilterDTO()
+                //    {
+                //        Name = "Folder",
+                //        WildCardSearchValue = NormalizePath(req.folder) //any file of current folder or subfolders
+                //    });
+                //}
+                //else
+                //{
+                //    foreach (var item in jpListQuery.Filters.Where(f => f.Name == "Folder"))
+                //    {
+                //        curFolder = NormalizePath(item.ExactSearchValue);
+                //        item.ExactSearchValue = NormalizePath(item.ExactSearchValue); //any file of current folder
+
+                //    }
+                //}
+                //jpListQuery.Filters.Add(new FilterDTO()
+                //{
+                //    Name = "PortalId",
+                //    ExactSearchValue = PortalSettings.PortalId.ToString()
+                //});
+
+                SelectQueryDefinition def = new SelectQueryDefinition();
+                def.Build(queryBuilder.Select);
+
+                docs = LuceneController.Instance.Search(def.Filter, def.Query, def.Sort, def.PageSize, def.PageIndex);
                 int total = docs.TotalResults;
-                Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", luceneQuery.ToJson(), total);
+
+                //string luceneQuery = LuceneQueryBuilder.BuildLuceneQuery(jpListQuery);
+                //if (string.IsNullOrEmpty(luceneQuery))
+                //{
+                //    docs = LuceneController.Instance.GetAllIndexedRecords();
+                //    Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found 0 items, returning all [{1}] items", luceneQuery.ToJson(), docs.TotalResults);
+                //}
+                //else
+                //{
+                //    docs = LuceneController.Instance.Search(luceneQuery);
+                //    Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", luceneQuery.ToJson(), docs.TotalResults);
+                //}
+                var ratio = string.IsNullOrEmpty(req.imageRatio) ? new Ratio(100, 100) : new Ratio(req.imageRatio);
+
+                Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", def.Filter.ToJson()+" / "+def.Query.ToJson(), total);
 
                 var fileManager = FileManager.Instance;
                 var data = new List<FileDTO>();
@@ -139,11 +162,11 @@ namespace Satrabel.OpenFiles.Components.JPList
                 }
 
                 //Sort as requested
-                data = SortAsRequested(data, jpListQuery);
+                //data = SortAsRequested(data, jpListQuery);
 
                 //Page as requested
-                if (jpListQuery.Pagination.number > 0)
-                    data = data.Skip((jpListQuery.Pagination.currentPage) * jpListQuery.Pagination.number).Take(jpListQuery.Pagination.number).ToList();
+                //if (jpListQuery.Pagination.number > 0)
+                //    data = data.Skip((jpListQuery.Pagination.currentPage) * jpListQuery.Pagination.number).Take(jpListQuery.Pagination.number).ToList();
 
                 if (req.withSubFolder)
                 {

@@ -10,6 +10,8 @@ namespace Satrabel.OpenFiles.Components.JPList
         public IEnumerable<TResultDTO> data { get; set; }
 
         public int count { get; set; }
+
+        public string query  { get; set; }
         
     }
 }

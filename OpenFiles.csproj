@@ -149,6 +149,7 @@
     <Compile Include="Components\JPList\FilterDTO.cs" />
     <Compile Include="Components\JPList\JplistAPIController.cs" />
     <Compile Include="Components\JPList\JpListQueryBuilder.cs" />
+    <Compile Include="Components\JPList\QueryBuilder.cs" />
     <Compile Include="Components\JPList\ResultExtDTO.cs" />
     <Compile Include="Components\JPList\ResultDataDTO.cs" />
     <Compile Include="Components\JPList\ResultDTO.cs" />

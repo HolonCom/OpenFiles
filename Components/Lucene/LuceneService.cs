@@ -302,14 +302,14 @@ namespace Satrabel.OpenFiles.Components.Lucene
             }
         }
 
-        internal SearchResults Search(string type, Query filter, Query query, Sort sort, int pageSize, int pageIndex)
+        internal SearchResults Search(Query filter, Query query, Sort sort, int pageSize, int pageIndex)
         {
             var searcher = GetSearcher();
             TopDocs topDocs;
             if (filter == null)
-                topDocs = searcher.Search(type, query, (pageIndex + 1) * pageSize, sort);
+                topDocs = searcher.Search(query, null, (pageIndex + 1) * pageSize, sort);
             else
-                topDocs = searcher.Search(type, filter, query, (pageIndex + 1) * pageSize, sort);
+                topDocs = searcher.Search(query, new QueryWrapperFilter(filter), (pageIndex + 1) * pageSize, sort);
             var results = MapLuceneToDataList(topDocs.ScoreDocs.Skip(pageIndex * pageSize), searcher);
             var luceneResults = new SearchResults(results, topDocs.TotalHits);
             return luceneResults;

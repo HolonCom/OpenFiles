@@ -71,23 +71,25 @@ namespace Satrabel.OpenFiles.Components.Lucene
             Log.Logger.DebugFormat("     Exit ==> public static IEnumerable<LuceneIndexItem> Search() with {0} items found", retval.TotalResults);
             return retval;
         }
-        //private SearchResults Search(string type, Query filter, Query query, Sort sort, int pageSize, int pageIndex)
-        //{
+        public SearchResults Search(Query filter, Query query, Sort sort, int pageSize, int pageIndex)
+        {
+            var luceneResults = new SearchResults();
 
-        //    //validate whether index folder is exist and contains index files, otherwise return null.
-        //    ValidateIndex();
-
-        //    var searcher = Store.GetSearcher();
-        //    TopDocs topDocs;
-        //    if (filter == null)
-        //        topDocs = searcher.Search(type, query, (pageIndex + 1) * pageSize, sort);
-        //    else
-        //        topDocs = searcher.Search(type, filter, query, (pageIndex + 1) * pageSize, sort);
-        //    var luceneResults = new SearchResults(topDocs.ScoreDocs.Skip(pageIndex * pageSize).Select(d => searcher.Doc(d.Doc).GetField(DnnFilesMappingUtils.FieldId).StringValue).ToArray(), topDocs.TotalHits);
-        //    luceneResults.TotalResults = topDocs.TotalHits;
-        //    luceneResults.ids = topDocs.ScoreDocs.Skip(pageIndex * pageSize).Select(d => searcher.Doc(d.Doc).GetField(DnnFilesMappingUtils.FieldId).StringValue).ToArray();
-        //    return luceneResults;
-        //}
+            //validate whether index folder is exist and contains index files, otherwise return null.
+            if (!Store.ValidateIndexFolder())
+            {
+                IndexAll();
+                return luceneResults;
+            }            
+            var searcher = Store.GetSearcher();            
+            if (filter == null)
+                luceneResults = Store.Search(null, query, sort,  pageSize, pageIndex);
+            else
+                luceneResults = Store.Search(filter, query, sort,  pageSize, pageIndex);
+                
+            return luceneResults;
+        }
+      
 
         public SearchResults GetAllIndexedRecords()
         {
