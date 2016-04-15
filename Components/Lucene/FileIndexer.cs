@@ -82,25 +82,32 @@ namespace Satrabel.OpenFiles.Components.Lucene
             string extension = Path.GetExtension(p);
             if (extension == ".pdf")
             {
-                var fileContent = FileManager.Instance.GetFileContent(file);
-                if (fileContent != null)
+                if (File.Exists(file.PhysicalPath))
                 {
-                    return PdfParser.ReadPdfFile(fileContent);
+                    var fileContent = FileManager.Instance.GetFileContent(file);
+                    if (fileContent != null)
+                    {
+                        return PdfParser.ReadPdfFile(fileContent);
+                    }
                 }
             }
             else if (extension == ".txt")
             {
-                var fileContent = FileManager.Instance.GetFileContent(file);
-                if (fileContent != null)
+                if (File.Exists(file.PhysicalPath))
                 {
-                    using (var reader = new StreamReader(fileContent, Encoding.UTF8))
+                    var fileContent = FileManager.Instance.GetFileContent(file);
+                    if (fileContent != null)
                     {
-                        return reader.ReadToEnd();
+                        using (var reader = new StreamReader(fileContent, Encoding.UTF8))
+                        {
+                            return reader.ReadToEnd();
+                        }
                     }
                 }
             }
             return "";
         }
+
         private static JObject GetCustomFileData(IFileInfo f)
         {
             if (f.ContentItemID > 0)
