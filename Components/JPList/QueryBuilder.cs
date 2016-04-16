@@ -16,13 +16,13 @@ namespace Satrabel.OpenFiles.Components.JPList
         }
         internal void BuildFilter(int portalId, string folder)
         {
-            
+
             var Filter = Select.Filter;
             Filter.AddRule(new FilterRule()
             {
                 Field = "PortalId",
-                FieldType=FieldTypeEnum.INTEGER,
-                FieldOperator=OperatorEnum.EQUAL,
+                FieldType = FieldTypeEnum.INTEGER,
+                FieldOperator = OperatorEnum.EQUAL,
                 Value = new IntegerRuleValue(portalId)
             });
             if (!string.IsNullOrEmpty(folder))
@@ -47,7 +47,7 @@ namespace Satrabel.OpenFiles.Components.JPList
             return filePath;
         }
 
-        internal Select MergeJpListQuery(List<StatusDTO> statuses, string folder)
+        internal Select MergeJpListQuery(List<StatusDTO> statuses)
         {
             var select = Select;
             var query = select.Query;
@@ -68,12 +68,30 @@ namespace Satrabel.OpenFiles.Components.JPList
                         {
                             if (status.type == "textbox" && status.data != null && !string.IsNullOrEmpty(status.name) && !string.IsNullOrEmpty(status.data.value))
                             {
-                                query.AddRule(new FilterRule()
+                                var names = status.name.Split(',');
+                                if (names.Length == 1)
                                 {
-                                    Field = status.name,
-                                    FieldOperator = OperatorEnum.START_WITH,
-                                    Value = new StringRuleValue(status.data.value),
-                                });
+                                    query.AddRule(new FilterRule()
+                                    {
+                                        Field = status.name,
+                                        FieldOperator = OperatorEnum.START_WITH,
+                                        Value = new StringRuleValue(status.data.value),
+                                    });
+                                }
+                                else
+                                {
+                                    var group = new FilterGroup() { Condition=ConditionEnum.OR};
+                                    foreach (var n in names)
+                                    {
+                                        group.AddRule(new FilterRule()
+                                        {
+                                            Field = n,
+                                            FieldOperator = OperatorEnum.START_WITH,
+                                            Value = new StringRuleValue(status.data.value),
+                                        });
+                                    }
+                                    query.FilterGroups.Add(group);
+                                }
                             }
                             else if ((status.type == "checkbox-group-filter" || status.type == "button-filter-group")
                                         && status.data != null && !string.IsNullOrEmpty(status.name))
@@ -90,7 +108,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                             }
                             else if (status.type == "filter-select" && status.data != null && !string.IsNullOrEmpty(status.name))
                             {
-                                if (status.data.filterType == "path" && status.data.path != null)
+                                if (status.data.filterType == "path" && !string.IsNullOrEmpty(status.data.path))
                                 {
                                     query.AddRule(new FilterRule()
                                     {
