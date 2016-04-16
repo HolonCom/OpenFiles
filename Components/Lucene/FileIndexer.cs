@@ -41,23 +41,29 @@ namespace Satrabel.OpenFiles.Components.Lucene
             {
                 foreach (var file in files)
                 {
-                    var custom = GetCustomFileData(file);
                     var indexData = new LuceneIndexItem()
                     {
                         PortalId = portalId,
                         FileId = file.FileId,
                         FileName = file.FileName,
                         Folder = file.Folder.TrimEnd('/'),
-                        Title = custom["title"] == null ? "" : custom["title"].ToString(),
-                        Description = custom["description"] == null ? "" : custom["description"].ToString(),
+                        Title = "",
+                        Description = "",
                         FileContent = GetFileContent(file.FileName, file)
                     };
-                    if (custom["category"] != null)
+
+                    var custom = GetCustomFileData(file);
+                    if (custom["meta"] != null && custom["meta"].HasValues)
                     {
-                        foreach (dynamic item in custom["category"])
-                        {
-                            indexData.Categories.Add(item);
-                        }
+                        if (custom["meta"]["title"] != null)
+                            indexData.Title = custom["meta"]["title"].ToString();
+                        if (custom["meta"]["description"] != null)
+                            indexData.Description = custom["meta"]["description"].ToString();
+                        if (custom["meta"]["category"] != null)
+                            foreach (dynamic item in custom["meta"]["category"])
+                            {
+                                indexData.Categories.Add(item);
+                            }
                     }
                     searchDocuments.Add(indexData);
                 }

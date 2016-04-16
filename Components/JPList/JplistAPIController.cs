@@ -78,7 +78,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 var def = new SelectQueryDefinition();
                 def.Build(queryBuilder.Select);
 
-                var docs = LuceneController.Instance.Search(def.Filter, def.Query, def.Sort, def.PageSize, def.PageIndex);
+                var docs = LuceneController.Instance.Search(def);
                 int total = docs.TotalResults;
 
                 //string luceneQuery = LuceneQueryBuilder.BuildLuceneQuery(jpListQuery);

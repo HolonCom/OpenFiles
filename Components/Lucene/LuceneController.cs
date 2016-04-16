@@ -9,6 +9,7 @@ using Lucene.Net.Search;
 using DotNetNuke.Entities.Portals;
 using DotNetNuke.Services.Search.Internals;
 using Lucene.Net.Documents;
+using Satrabel.OpenContent.Components.Lucene.Config;
 using Satrabel.OpenFiles.Components.Lucene.Mapping;
 
 #endregion
@@ -56,7 +57,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         #region Search
 
-        internal SearchResults Search(Query filter, Query query, Sort sort, int pageSize, int pageIndex)
+        internal SearchResults Search(SelectQueryDefinition def)
         {
             if (!Store.ValidateIndexFolder())
             {
@@ -64,7 +65,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 return new SearchResults();
             }
             Func<Document, LuceneIndexItem> resultMapper = DnnFilesMappingUtils.MapLuceneDocumentToData;
-            var luceneResults = Store.Search(filter, query, sort, pageSize, pageIndex, resultMapper);
+            var luceneResults = Store.Search(def.Filter, def.Query, def.Sort, def.PageSize, def.PageIndex, resultMapper);
             return luceneResults;
         }
 
@@ -122,7 +123,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
                         foreach (var indexItem in searchDocs)
                         {
-                            lc.Store.Add(DnnFilesMappingUtils.DataItemToLuceneDocument(indexItem.PortalId.ToString(), indexItem.FileId.ToString(), indexItem));
+                            lc.Store.Add(DnnFilesMappingUtils.DataItemToLuceneDocument(indexItem));
                         }
                         Log.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
                     }
@@ -147,7 +148,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 throw new ArgumentNullException("data");
             }
 
-            Store.Add(DnnFilesMappingUtils.DataItemToLuceneDocument(data.PortalId.ToString(), data.FileId.ToString(), data));
+            Store.Add(DnnFilesMappingUtils.DataItemToLuceneDocument(data));
         }
 
         public void Update(LuceneIndexItem data)

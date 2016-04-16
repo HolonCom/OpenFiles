@@ -74,10 +74,9 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
             };
         }
 
-
         public static Document DataItemToLuceneDocument(LuceneIndexItem data, bool storeSource = false)
         {
-            return DataItemToLuceneDocument(data.PortalId.ToString(), data.FileId.ToString(), data);
+            return DataItemToLuceneDocument(data.Type, data.FileId.ToString(), data, storeSource);
         }
 
         public static Document DataItemToLuceneDocument(string type, string id, LuceneIndexItem item, bool storeSource = false)
@@ -91,9 +90,6 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
             }
             luceneDoc.Add(new NumericField(FieldTimestamp, Field.Store.YES, true).SetLongValue(DateTime.UtcNow.Ticks));
 
-
-            //var objectMapper = new JsonObjectMapper();
-            //objectMapper.AddJsonToDocument(json, luceneDoc, config);
             luceneDoc.Add(new Field("PortalId", item.PortalId.ToString(), Field.Store.NO, Field.Index.ANALYZED));
             luceneDoc.Add(new Field("FileId", item.FileId.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
             luceneDoc.Add(new Field("FileName", item.FileName, Field.Store.NO, Field.Index.ANALYZED));
@@ -109,7 +105,6 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
                     luceneDoc.Add(new Field("Category", cat, Field.Store.NO, Field.Index.ANALYZED));
                 }
             }
-
 
             return luceneDoc;
         }
