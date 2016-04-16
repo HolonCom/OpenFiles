@@ -55,13 +55,13 @@ namespace Satrabel.OpenFiles.Components.Lucene
                         FileId = file.FileId,
                         FileName = file.FileName,
                         Folder = file.Folder.TrimEnd('/'),
-                        Title = custom["Title"] == null ? "" : custom["Title"].ToString(),
-                        Description = custom["Description"] == null ? "" : custom["Description"].ToString(),
+                        Title = custom["title"] == null ? "" : custom["title"].ToString(),
+                        Description = custom["description"] == null ? "" : custom["description"].ToString(),
                         FileContent = GetFileContent(file.FileName, file)
                     };
-                    if (custom["Category"] != null)
+                    if (custom["category"] != null)
                     {
-                        foreach (dynamic item in custom["Category"])
+                        foreach (dynamic item in custom["category"])
                         {
                             indexData.Categories.Add(item);
                         }
