@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
@@ -178,6 +179,24 @@ namespace Satrabel.OpenFiles.Components.Lucene
         #endregion
 
         #region Search
+
+        internal SearchResults Search(Query filter, Query query, Sort sort, int pageSize, int pageIndex, Func<Document, LuceneIndexItem> mapper)
+        {
+            var searcher = GetSearcher();
+            TopDocs topDocs;
+            if (filter == null)
+                topDocs = searcher.Search(query, null, (pageIndex + 1) * pageSize, sort);
+            else
+                topDocs = searcher.Search(query, new QueryWrapperFilter(filter), (pageIndex + 1) * pageSize, sort);
+            var results = MapLuceneToDataList(topDocs.ScoreDocs.Skip(pageIndex * pageSize), searcher, mapper);
+            var luceneResults = new SearchResults(results, topDocs.TotalHits);
+            return luceneResults;
+        }
+
+        private static List<LuceneIndexItem> MapLuceneToDataList(IEnumerable<ScoreDoc> hits, IndexSearcher searcher, Func<Document, LuceneIndexItem> mapper)
+        {
+            return hits.Select(hit => mapper(searcher.Doc(hit.Doc))).ToList();
+        }
 
         internal IndexSearcher GetSearcher()
         {

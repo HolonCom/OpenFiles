@@ -13,6 +13,7 @@ using Satrabel.OpenContent.Components.Lucene.Config;
 using DotNetNuke.Entities.Portals;
 using DotNetNuke.Entities.Modules;
 using DotNetNuke.Services.Search.Internals;
+using Lucene.Net.Documents;
 using Satrabel.OpenFiles.Components.Lucene.Mapping;
 using Version = Lucene.Net.Util.Version;
 
@@ -66,23 +67,11 @@ namespace Satrabel.OpenFiles.Components.Lucene
         internal SearchResults Search(Query filter, Query query, Sort sort, int pageSize, int pageIndex)
         {
             ValidateIndex();
-            var searcher = Store.GetSearcher();
-            TopDocs topDocs;
-            if (filter == null)
-                topDocs = searcher.Search(query, null, (pageIndex + 1) * pageSize, sort);
-            else
-                topDocs = searcher.Search(query, new QueryWrapperFilter(filter), (pageIndex + 1) * pageSize, sort);
-            var results = MapLuceneToDataList(topDocs.ScoreDocs.Skip(pageIndex * pageSize), searcher);
-            var luceneResults = new SearchResults(results, topDocs.TotalHits);
+            Func<Document, LuceneIndexItem> resultMapper = DnnFilesMappingUtils.MapLuceneDocumentToData;
+            var luceneResults = Store.Search(filter, query, sort, pageSize, pageIndex, resultMapper);
             return luceneResults;
         }
 
-        private static List<LuceneIndexItem> MapLuceneToDataList(IEnumerable<ScoreDoc> hits, IndexSearcher searcher)
-        {
-            // v 2.9.4: use 'hit.doc'
-            // v 3.0.3: use 'hit.Doc'
-            return hits.Select(hit => DnnFilesMappingUtils.MapLuceneDocumentToData(searcher.Doc(hit.Doc))).ToList(); //todo param
-        }
         #endregion
 
         #region Index
@@ -222,8 +211,11 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         public void Dispose()
         {
-            _serviceInstance.Dispose();
-            _serviceInstance = null;
+            if (_serviceInstance != null)
+            {
+                _serviceInstance.Dispose();
+                _serviceInstance = null;
+            }
         }
 
     }
