@@ -8,11 +8,6 @@ namespace Satrabel.OpenFiles.Components.Lucene
         {
             ids = new List<LuceneIndexItem>();
         }
-        public SearchResults(List<LuceneIndexItem> results)
-        {
-            ids = results;
-            TotalResults = ids.Count;
-        }
         public SearchResults(List<LuceneIndexItem> results, int totalResults)
         {
             ids = results;
