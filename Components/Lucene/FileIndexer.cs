@@ -105,13 +105,17 @@ namespace Satrabel.OpenFiles.Components.Lucene
         {
             if (f.ContentItemID > 0)
             {
-                var item = Util.GetContentController().GetContentItem(f.ContentItemID);
-                return JObject.Parse(item.Content);
+                try
+                {
+                    var item = Util.GetContentController().GetContentItem(f.ContentItemID);
+                    return JObject.Parse(item.Content);
+                }
+                catch (Exception ex)
+                {
+                    Exceptions.LogException(ex);
+                }
             }
-            else
-            {
-                return new JObject();
-            }
+            return new JObject();
         }
     }
 }

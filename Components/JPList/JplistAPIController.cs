@@ -48,7 +48,7 @@ namespace Satrabel.OpenFiles.Components.JPList
 
                 QueryBuilder queryBuilder = new QueryBuilder();
                 queryBuilder.BuildFilter(PortalSettings.PortalId, req.folder);
-                queryBuilder.MergeJpListQuery(req.StatusLst, req.folder);
+                queryBuilder.MergeJpListQuery(req.StatusLst);
                 //JplistQueryBuilder.MergeJpListQuery(queryBuilder.Select, req.StatusLst);
 
                 string curFolder = NormalizePath(req.folder);
