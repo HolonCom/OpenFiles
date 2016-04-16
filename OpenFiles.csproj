@@ -139,6 +139,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\Config.cs" />
     <Compile Include="Components\DigitalAssets\DigitalAssetsScriptItemExtensionPoint.cs" />
     <Compile Include="Components\DigitalAssets\PreviewInfoPanelExtensionPoint.cs" />
     <Compile Include="Components\FeatureController.cs" />
@@ -258,11 +259,11 @@
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="schema.json" />
-    <Content Include="options.json" />
+    <Content Include="Templates\Schema\schema.json" />
+    <Content Include="Templates\Schema\options.json" />
     <Content Include="Providers\DataProviders\SqlDataProvider\Uninstall.SqlDataProvider" />
-    <Content Include="images-schema.json" />
-    <Content Include="images-options.json" />
+    <Content Include="Templates\Schema\images-schema.json" />
+    <Content Include="Templates\Schema\images-options.json" />
     <Content Include="Config\cache.config" />
     <Content Include="Config\processing.config" />
     <Content Include="Config\security.config" />
