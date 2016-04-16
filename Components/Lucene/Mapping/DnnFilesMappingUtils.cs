@@ -81,10 +81,10 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
 
         public static Document DataItemToLuceneDocument(LuceneIndexItem data, bool storeSource = false)
         {
-            return DataItemToLuceneDocument(data.PortalId.ToString(), data.FileId.ToString(), data, null);
+            return DataItemToLuceneDocument(data.PortalId.ToString(), data.FileId.ToString(), data);
         }
 
-        public static Document DataItemToLuceneDocument(string type, string id, LuceneIndexItem item, FieldConfig config, bool storeSource = false)
+        public static Document DataItemToLuceneDocument(string type, string id, LuceneIndexItem item, bool storeSource = false)
         {
             Document luceneDoc = new Document();
             luceneDoc.Add(new Field(FieldType, type, Field.Store.YES, Field.Index.NOT_ANALYZED));

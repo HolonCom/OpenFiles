@@ -43,9 +43,6 @@ namespace Satrabel.OpenFiles.Components.JPList
             {
                 Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() called with request [{0}].", req.ToJson());
 
-                SearchResults docs;
-
-
                 QueryBuilder queryBuilder = new QueryBuilder();
                 queryBuilder.BuildFilter(PortalSettings.PortalId, req.folder);
                 queryBuilder.MergeJpListQuery(req.StatusLst);
@@ -57,7 +54,6 @@ namespace Satrabel.OpenFiles.Components.JPList
                     curFolder = NormalizePath(item.Value.AsString);
                     item.Value = new StringRuleValue(NormalizePath(item.Value.AsString)); //any file of current folder
                 }
-
 
                 ////var jpListQuery = JpListQueryBuilder.MergeJpListQuery(req.StatusLst);
                 //string curFolder = NormalizePath(req.folder);
@@ -84,10 +80,10 @@ namespace Satrabel.OpenFiles.Components.JPList
                 //    ExactSearchValue = PortalSettings.PortalId.ToString()
                 //});
 
-                SelectQueryDefinition def = new SelectQueryDefinition();
+                var def = new SelectQueryDefinition();
                 def.Build(queryBuilder.Select);
 
-                docs = LuceneController.Instance.Search(def.Filter, def.Query, def.Sort, def.PageSize, def.PageIndex);
+                var docs = LuceneController.Instance.Search(def.Filter, def.Query, def.Sort, def.PageSize, def.PageIndex);
                 int total = docs.TotalResults;
 
                 //string luceneQuery = LuceneQueryBuilder.BuildLuceneQuery(jpListQuery);
@@ -103,7 +99,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 //}
                 var ratio = string.IsNullOrEmpty(req.imageRatio) ? new Ratio(100, 100) : new Ratio(req.imageRatio);
 
-                Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", def.Filter.ToJson()+" / "+def.Query.ToJson(), total);
+                Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", def.Filter.ToJson() + " / " + def.Query.ToJson(), total);
 
                 var fileManager = FileManager.Instance;
                 var data = new List<FileDTO>();
@@ -119,15 +115,14 @@ namespace Satrabel.OpenFiles.Components.JPList
                     if (f == null)
                     {
                         //file seems to have been deleted
-                        LuceneController.Instance.DeleteOld(doc.FileId);
+                        LuceneController.Instance.Delete(doc.FileId, doc.PortalId);
                         total -= 1;
                     }
                     else
                     {
                         if (f.FileName == "_folder.jpg")
                         {
-                            // skip
-                            continue;
+                            continue; // skip
                         }
                         var custom = GetCustomFileDataAsDynamic(f);
                         dynamic title = null;
