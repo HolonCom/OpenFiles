@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Hosting;
+﻿using System.Web.Hosting;
 using DotNetNuke.Entities.Portals;
-using iTextSharp.text.io;
 
 namespace Satrabel.OpenFiles.Components
 {

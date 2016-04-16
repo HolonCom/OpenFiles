@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Linq;
-using System.IO;
-using System.Text.RegularExpressions;
-
 using DotNetNuke.Entities.Modules;
 using DotNetNuke.Framework;
-using DotNetNuke.Framework.JavaScriptLibraries;
 using DotNetNuke.Modules.DigitalAssets.Components.Controllers;
 using DotNetNuke.Modules.DigitalAssets.Components.Controllers.Models;
 using DotNetNuke.Modules.DigitalAssets.Components.ExtensionPoint;
 using DotNetNuke.Services.FileSystem;
 using DotNetNuke.Entities.Content;
 using DotNetNuke.Entities.Content.Common;
-using DotNetNuke.Common.Utilities;
 using DotNetNuke.Services.Localization;
 using DotNetNuke.Web.Client.ClientResourceManagement;
 using DotNetNuke.Web.Client;

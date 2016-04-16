@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Satrabel.OpenFiles.Components.JPList
+﻿namespace Satrabel.OpenFiles.Components.JPList
 {
     public class StatusDTO
     {

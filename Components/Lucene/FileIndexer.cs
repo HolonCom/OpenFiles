@@ -3,16 +3,9 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using DotNetNuke.Common;
-using DotNetNuke.Entities.Tabs;
-using DotNetNuke.Instrumentation;
-using DotNetNuke.Services.Search.Entities;
-using DotNetNuke.Services.Search.Internals;
 using DotNetNuke.Services.Exceptions;
-using DotNetNuke.Services.Search;
 using DotNetNuke.Services.FileSystem;
 using DotNetNuke.Entities.Content.Common;
-using Satrabel.OpenContent.Components.Json;
 using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Text;

@@ -17,7 +17,6 @@ using DotNetNuke.Web.Api;
 using Newtonsoft.Json.Linq;
 using System.Web.Hosting;
 using System.IO;
-using DotNetNuke.Instrumentation;
 using DotNetNuke.Security;
 using Satrabel.OpenContent.Components.Json;
 using DotNetNuke.Entities.Content.Common;
@@ -205,8 +204,6 @@ namespace Satrabel.OpenFiles.Components
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
-
     }
-
 }
 

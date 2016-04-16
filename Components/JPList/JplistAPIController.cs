@@ -1,6 +1,5 @@
 ﻿using DotNetNuke.Entities.Content.Common;
 using DotNetNuke.Entities.Icons;
-using DotNetNuke.Instrumentation;
 using DotNetNuke.Security;
 using DotNetNuke.Services.FileSystem;
 using DotNetNuke.Web.Api;
@@ -14,18 +13,14 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Web;
 using System.Web.Http;
 using DotNetNuke.Common;
 using DotNetNuke.Common.Utilities;
 using DotNetNuke.Entities.Portals;
 using DotNetNuke.Security.Permissions;
-using DotNetNuke.Services.Scheduling;
 using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.TemplateHelpers;
-using TemplateHelper = Satrabel.OpenFiles.Components.Template.TemplateHelper;
-using Satrabel.OpenContent.Components.JPList;
 using Satrabel.OpenContent.Components.Datasource.search;
 using Satrabel.OpenContent.Components.Lucene.Config;
 

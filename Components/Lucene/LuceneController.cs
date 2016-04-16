@@ -1,21 +1,15 @@
 ﻿#region Usings
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.Linq;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
-using Lucene.Net.QueryParsers;
-using Satrabel.OpenContent.Components.Lucene.Mapping;
-using Satrabel.OpenContent.Components.Lucene.Config;
 using DotNetNuke.Entities.Portals;
-using DotNetNuke.Entities.Modules;
 using DotNetNuke.Services.Search.Internals;
 using Lucene.Net.Documents;
 using Satrabel.OpenFiles.Components.Lucene.Mapping;
-using Version = Lucene.Net.Util.Version;
 
 #endregion
 
@@ -39,9 +33,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             get
             {
                 if (_serviceInstance == null)
-                {
                     throw new Exception("LuceneController not initialized properly");
-                }
                 return _serviceInstance;
             }
         }
@@ -66,7 +58,11 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         internal SearchResults Search(Query filter, Query query, Sort sort, int pageSize, int pageIndex)
         {
-            ValidateIndex();
+            if (!Store.ValidateIndexFolder())
+            {
+                IndexAll();
+                return new SearchResults();
+            }
             Func<Document, LuceneIndexItem> resultMapper = DnnFilesMappingUtils.MapLuceneDocumentToData;
             var luceneResults = Store.Search(filter, query, sort, pageSize, pageIndex, resultMapper);
             return luceneResults;
@@ -96,8 +92,10 @@ namespace Satrabel.OpenFiles.Components.Lucene
         /// -----------------------------------------------------------------------------
         internal void IndexContent(DateTime startDate)
         {
-            ValidateIndex();
-            IndexFiles(startDate);
+            if (!Store.ValidateIndexFolder())
+                IndexAll();
+            else
+                IndexFiles(startDate);
         }
 
         private void IndexFiles(DateTime? startDate)
@@ -182,12 +180,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             Store.Delete(deleteQuery);
         }
 
-        private void ValidateIndex()
-        {
-            if (Store.ValidateIndexFolder())
-                return;
-            Instance.IndexAll();
-        }
+
 
         #endregion
 
@@ -217,6 +210,5 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 _serviceInstance = null;
             }
         }
-
     }
 }
