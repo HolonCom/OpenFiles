@@ -3,10 +3,7 @@ using DotNetNuke.Entities.Content;
 using DotNetNuke.Entities.Content.Common;
 using DotNetNuke.Services.FileSystem;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace Satrabel.OpenFiles.Components.DigitalAssets
 {

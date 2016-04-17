@@ -10,15 +10,6 @@
 ' 
 */
 
-using System.Collections.Generic;
-using DotNetNuke.Entities.Modules;
-using DotNetNuke.Services.Search;
-using DotNetNuke.Common.Utilities;
-using System.Xml;
-using DotNetNuke.Common;
-using System;
-using DotNetNuke.Services.Search.Entities;
-
 namespace Satrabel.OpenFiles.Components
 {
     public class FeatureController //: ModuleSearchBase //,IPortable //, IUpgradeable

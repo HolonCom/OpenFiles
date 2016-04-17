@@ -1,21 +1,16 @@
 ﻿#region Usings
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.Linq;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
-using Lucene.Net.QueryParsers;
-using Satrabel.OpenContent.Components.Lucene.Mapping;
-using Satrabel.OpenContent.Components.Lucene.Config;
 using DotNetNuke.Entities.Portals;
-using DotNetNuke.Entities.Modules;
 using DotNetNuke.Services.Search.Internals;
 using Lucene.Net.Documents;
+using Satrabel.OpenContent.Components.Lucene.Config;
 using Satrabel.OpenFiles.Components.Lucene.Mapping;
-using Version = Lucene.Net.Util.Version;
 
 #endregion
 
@@ -39,9 +34,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             get
             {
                 if (_serviceInstance == null)
-                {
                     throw new Exception("LuceneController not initialized properly");
-                }
                 return _serviceInstance;
             }
         }
@@ -64,11 +57,15 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         #region Search
 
-        internal SearchResults Search(Query filter, Query query, Sort sort, int pageSize, int pageIndex)
+        internal SearchResults Search(SelectQueryDefinition def)
         {
-            ValidateIndex();
+            if (!Store.ValidateIndexFolder())
+            {
+                IndexAll();
+                return new SearchResults();
+            }
             Func<Document, LuceneIndexItem> resultMapper = DnnFilesMappingUtils.MapLuceneDocumentToData;
-            var luceneResults = Store.Search(filter, query, sort, pageSize, pageIndex, resultMapper);
+            var luceneResults = Store.Search(def.Filter, def.Query, def.Sort, def.PageSize, def.PageIndex, resultMapper);
             return luceneResults;
         }
 
@@ -96,8 +93,10 @@ namespace Satrabel.OpenFiles.Components.Lucene
         /// -----------------------------------------------------------------------------
         internal void IndexContent(DateTime startDate)
         {
-            ValidateIndex();
-            IndexFiles(startDate);
+            if (!Store.ValidateIndexFolder())
+                IndexAll();
+            else
+                IndexFiles(startDate);
         }
 
         private void IndexFiles(DateTime? startDate)
@@ -124,7 +123,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
                         foreach (var indexItem in searchDocs)
                         {
-                            lc.Store.Add(DnnFilesMappingUtils.DataItemToLuceneDocument(indexItem.PortalId.ToString(), indexItem.FileId.ToString(), indexItem));
+                            lc.Store.Add(DnnFilesMappingUtils.DataItemToLuceneDocument(indexItem));
                         }
                         Log.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
                     }
@@ -149,7 +148,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 throw new ArgumentNullException("data");
             }
 
-            Store.Add(DnnFilesMappingUtils.DataItemToLuceneDocument(data.PortalId.ToString(), data.FileId.ToString(), data));
+            Store.Add(DnnFilesMappingUtils.DataItemToLuceneDocument(data));
         }
 
         public void Update(LuceneIndexItem data)
@@ -182,12 +181,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             Store.Delete(deleteQuery);
         }
 
-        private void ValidateIndex()
-        {
-            if (Store.ValidateIndexFolder())
-                return;
-            Instance.IndexAll();
-        }
+
 
         #endregion
 
@@ -217,6 +211,5 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 _serviceInstance = null;
             }
         }
-
     }
 }

@@ -3,16 +3,9 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using DotNetNuke.Common;
-using DotNetNuke.Entities.Tabs;
-using DotNetNuke.Instrumentation;
-using DotNetNuke.Services.Search.Entities;
-using DotNetNuke.Services.Search.Internals;
 using DotNetNuke.Services.Exceptions;
-using DotNetNuke.Services.Search;
 using DotNetNuke.Services.FileSystem;
 using DotNetNuke.Entities.Content.Common;
-using Satrabel.OpenContent.Components.Json;
 using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Text;
@@ -48,23 +41,29 @@ namespace Satrabel.OpenFiles.Components.Lucene
             {
                 foreach (var file in files)
                 {
-                    var custom = GetCustomFileData(file);
                     var indexData = new LuceneIndexItem()
                     {
                         PortalId = portalId,
                         FileId = file.FileId,
                         FileName = file.FileName,
                         Folder = file.Folder.TrimEnd('/'),
-                        Title = custom["Title"] == null ? "" : custom["Title"].ToString(),
-                        Description = custom["Description"] == null ? "" : custom["Description"].ToString(),
+                        Title = "",
+                        Description = "",
                         FileContent = GetFileContent(file.FileName, file)
                     };
-                    if (custom["Category"] != null)
+
+                    var custom = GetCustomFileData(file);
+                    if (custom["meta"] != null && custom["meta"].HasValues)
                     {
-                        foreach (dynamic item in custom["Category"])
-                        {
-                            indexData.Categories.Add(item);
-                        }
+                        if (custom["meta"]["title"] != null)
+                            indexData.Title = custom["meta"]["title"].ToString();
+                        if (custom["meta"]["description"] != null)
+                            indexData.Description = custom["meta"]["description"].ToString();
+                        if (custom["meta"]["category"] != null)
+                            foreach (dynamic item in custom["meta"]["category"])
+                            {
+                                indexData.Categories.Add(item);
+                            }
                     }
                     searchDocuments.Add(indexData);
                 }
