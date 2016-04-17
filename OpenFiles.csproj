@@ -148,7 +148,6 @@
     <Compile Include="Components\DigitalAssets\FilePropertiesTab.cs" />
     <Compile Include="Components\JPList\FilterDTO.cs" />
     <Compile Include="Components\JPList\JplistAPIController.cs" />
-    <Compile Include="Components\JPList\JpListQueryBuilder.cs" />
     <Compile Include="Components\JPList\QueryBuilder.cs" />
     <Compile Include="Components\JPList\ResultExtDTO.cs" />
     <Compile Include="Components\JPList\ResultDataDTO.cs" />
@@ -171,7 +170,6 @@
     <Compile Include="Components\JPList\PaginationDTO.cs" />
     <Compile Include="Components\JPList\JpListQueryDTO.cs" />
     <Compile Include="Components\JPList\RequestDTO.cs" />
-    <Compile Include="Components\JPList\StatusDTO.cs" />
     <Compile Include="Components\Template\DataDTO.cs" />
     <Compile Include="Components\Template\FileDTO.cs" />
     <Compile Include="Components\Template\TemplateHelper.cs" />

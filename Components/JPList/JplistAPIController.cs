@@ -45,8 +45,8 @@ namespace Satrabel.OpenFiles.Components.JPList
 
                 QueryBuilder queryBuilder = new QueryBuilder();
                 queryBuilder.BuildFilter(PortalSettings.PortalId, req.folder);
-                queryBuilder.MergeJpListQuery(req.StatusLst);
-                //JplistQueryBuilder.MergeJpListQuery(queryBuilder.Select, req.StatusLst);
+                //queryBuilder.MergeJpListQuery(req.StatusLst);
+                JplistQueryBuilder.MergeJpListQuery(queryBuilder.Select, req.StatusLst);
 
                 string curFolder = NormalizePath(req.folder);
                 foreach (var item in queryBuilder.Select.Query.FilterRules.Where(f => f.Field == "Folder"))
