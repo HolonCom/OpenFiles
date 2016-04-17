@@ -90,13 +90,13 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
             }
             luceneDoc.Add(new NumericField(FieldTimestamp, Field.Store.YES, true).SetLongValue(DateTime.UtcNow.Ticks));
 
-            luceneDoc.Add(new Field("PortalId", item.PortalId.ToString(), Field.Store.NO, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field("PortalId", item.PortalId.ToString(), Field.Store.YES, Field.Index.ANALYZED));
             luceneDoc.Add(new Field("FileId", item.FileId.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-            luceneDoc.Add(new Field("FileName", item.FileName, Field.Store.NO, Field.Index.ANALYZED));
-            luceneDoc.Add(new Field("Folder", item.Folder, Field.Store.NO, Field.Index.NOT_ANALYZED));
-            luceneDoc.Add(new Field("Title", string.IsNullOrEmpty(item.Title) ? "" : item.Title, Field.Store.NO, Field.Index.ANALYZED));
-            luceneDoc.Add(new Field("Description", string.IsNullOrEmpty(item.Description) ? "" : item.Description, Field.Store.NO, Field.Index.ANALYZED));
-            luceneDoc.Add(new Field("FileContent", string.IsNullOrEmpty(item.FileContent) ? "" : item.FileContent, Field.Store.NO, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field("FileName", item.FileName, Field.Store.YES, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field("Folder", item.Folder, Field.Store.YES, Field.Index.NOT_ANALYZED));
+            luceneDoc.Add(new Field("Title", string.IsNullOrEmpty(item.Title) ? "" : item.Title, Field.Store.YES, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field("Description", string.IsNullOrEmpty(item.Description) ? "" : item.Description, Field.Store.YES, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field("FileContent", string.IsNullOrEmpty(item.FileContent) ? "" : item.FileContent, Field.Store.YES, Field.Index.ANALYZED));
 
             if (item.Categories != null)
             {

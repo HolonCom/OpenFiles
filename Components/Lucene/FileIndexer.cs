@@ -59,10 +59,10 @@ namespace Satrabel.OpenFiles.Components.Lucene
                             indexData.Title = custom["meta"]["title"].ToString();
                         if (custom["meta"]["description"] != null)
                             indexData.Description = custom["meta"]["description"].ToString();
-                        if (custom["meta"]["category"] != null)
-                            foreach (dynamic item in custom["meta"]["category"])
+                        if (custom["meta"]["category"] is JArray)
+                            foreach (JToken item in (custom["meta"]["category"] as JArray))
                             {
-                                indexData.Categories.Add(item);
+                                indexData.Categories.Add(item.ToString());
                             }
                     }
                     searchDocuments.Add(indexData);
