@@ -181,13 +181,18 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         internal SearchResults Search(Query filter, Query query, Sort sort, int pageSize, int pageIndex, Func<Document, LuceneIndexItem> mapper)
         {
+            if (pageSize == 0) throw new Exception("Invalid Pagesize. Pagesize is zero.");
             var searcher = GetSearcher();
             TopDocs topDocs;
             if (filter == null)
                 topDocs = searcher.Search(query, null, (pageIndex + 1) * pageSize, sort);
             else
                 topDocs = searcher.Search(query, new QueryWrapperFilter(filter), (pageIndex + 1) * pageSize, sort);
-            var results = MapLuceneToDataList(topDocs.ScoreDocs.Skip(pageIndex * pageSize), searcher, mapper);
+
+            var results = new List<LuceneIndexItem>();
+            if (topDocs.ScoreDocs.Length != 0)
+                results = MapLuceneToDataList(topDocs.ScoreDocs.Skip(pageIndex * pageSize), searcher, mapper);
+
             var luceneResults = new SearchResults(results, topDocs.TotalHits);
             return luceneResults;
         }

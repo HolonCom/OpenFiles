@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using DotNetNuke.Common.Utilities;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
+using Satrabel.OpenContent.Components.Json;
 using Version = Lucene.Net.Util.Version;
 
 namespace Satrabel.OpenFiles.Components.Lucene.Mapping
