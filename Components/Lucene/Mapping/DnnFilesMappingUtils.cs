@@ -1,17 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Web;
+using DotNetNuke.Common.Utilities;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
+using Lucene.Net.Index;
+using Lucene.Net.Search;
 using Version = Lucene.Net.Util.Version;
 
 namespace Satrabel.OpenFiles.Components.Lucene.Mapping
 {
     public static class DnnFilesMappingUtils
     {
+        #region Consts
+        /// <summary>
+        /// The name of the field which holds the type.
+        /// </summary>
+        public static readonly string FieldType = "$type";
+        /// <summary>
+        /// The name of the field which holds the JSON-serialized source of the object.
+        /// </summary>
+        public static readonly string FieldSource = "$source";
+
+        /// <summary>
+        /// The name of the field which holds the timestamp when the document was created.
+        /// </summary>
+        public static readonly string FieldTimestamp = "$timestamp";
+        public static readonly string FieldId = "$id";
+        #endregion
+
         internal static PerFieldAnalyzerWrapper GetAnalyser()
         {
             var analyzerList = new List<KeyValuePair<string, Analyzer>>
@@ -56,9 +74,55 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
             };
         }
 
-        internal static string GetIndexField()
+        public static Document DataItemToLuceneDocument(LuceneIndexItem data, bool storeSource = false)
+        {
+            return DataItemToLuceneDocument(data.Type, data.FileId.ToString(), data, storeSource);
+        }
+
+        public static Document DataItemToLuceneDocument(string type, string id, LuceneIndexItem item, bool storeSource = false)
+        {
+            Document luceneDoc = new Document();
+            luceneDoc.Add(new Field(FieldType, type, Field.Store.YES, Field.Index.NOT_ANALYZED));
+            luceneDoc.Add(new Field(FieldId, id, Field.Store.YES, Field.Index.NOT_ANALYZED));
+            if (storeSource)
+            {
+                luceneDoc.Add(new Field(FieldSource, item.ToJson(), Field.Store.YES, Field.Index.NO));
+            }
+            luceneDoc.Add(new NumericField(FieldTimestamp, Field.Store.YES, true).SetLongValue(DateTime.UtcNow.Ticks));
+
+            luceneDoc.Add(new Field("PortalId", item.PortalId.ToString(), Field.Store.YES, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field("FileId", item.FileId.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
+            luceneDoc.Add(new Field("FileName", item.FileName, Field.Store.YES, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field("Folder", item.Folder, Field.Store.YES, Field.Index.NOT_ANALYZED));
+            luceneDoc.Add(new Field("Title", string.IsNullOrEmpty(item.Title) ? "" : item.Title, Field.Store.YES, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field("Description", string.IsNullOrEmpty(item.Description) ? "" : item.Description, Field.Store.YES, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field("FileContent", string.IsNullOrEmpty(item.FileContent) ? "" : item.FileContent, Field.Store.YES, Field.Index.ANALYZED));
+
+            if (item.Categories != null)
+            {
+                foreach (var cat in item.Categories)
+                {
+                    luceneDoc.Add(new Field("Category", cat, Field.Store.NO, Field.Index.ANALYZED));
+                }
+            }
+
+            return luceneDoc;
+        }
+        internal static string GetIndexFieldName()
         {
             return "FileId";
+        }
+        internal static string GetIndexFieldValue(LuceneIndexItem data)
+        {
+            return data.FileId.ToString();
+        }
+        public static Filter GetTypeFilter(string type)
+        {
+            var typeTermQuery = new TermQuery(new Term(FieldType, type));
+            BooleanQuery query = new BooleanQuery();
+            query.Add(typeTermQuery, Occur.MUST);
+            Filter filter = new QueryWrapperFilter(query);
+            return filter;
         }
     }
 }

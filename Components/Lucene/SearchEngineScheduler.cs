@@ -1,8 +1,6 @@
 ﻿#region Usings
 
 using System;
-using DotNetNuke.Common;
-using DotNetNuke.Instrumentation;
 using DotNetNuke.Services.Scheduling;
 using DotNetNuke.Services.Search.Internals;
 using DotNetNuke.Services.Exceptions;

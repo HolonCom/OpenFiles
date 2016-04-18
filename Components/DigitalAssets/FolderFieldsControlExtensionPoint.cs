@@ -1,7 +1,4 @@
-﻿using System;
-using System.ComponentModel.Composition;
-
-using DotNetNuke.ExtensionPoints;
+﻿using DotNetNuke.ExtensionPoints;
 
 namespace Satrabel.Modules.DigitalAssets.Components.ExtensionPoint.UserControls
 {

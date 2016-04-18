@@ -1,9 +1,5 @@
 ﻿using DotNetNuke.ExtensionPoints;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Web;
 
 namespace Satrabel.OpenFiles.Components.DigitalAssets
 {

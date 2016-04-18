@@ -1,8 +1,7 @@
 ﻿using Newtonsoft.Json;
+using Satrabel.OpenContent.Components.JPList;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Web;
 
 namespace Satrabel.OpenFiles.Components.JPList
@@ -24,6 +23,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                     lst  = JsonConvert.DeserializeObject<List<StatusDTO>>(HttpUtility.UrlDecode(statuses));
                     if (lst != null)
                     {
+
                     }
                 }
                 return lst;

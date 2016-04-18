@@ -139,6 +139,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\Config.cs" />
     <Compile Include="Components\DigitalAssets\DigitalAssetsScriptItemExtensionPoint.cs" />
     <Compile Include="Components\DigitalAssets\PreviewInfoPanelExtensionPoint.cs" />
     <Compile Include="Components\FeatureController.cs" />
@@ -148,6 +149,7 @@
     <Compile Include="Components\DigitalAssets\FilePropertiesTab.cs" />
     <Compile Include="Components\JPList\FilterDTO.cs" />
     <Compile Include="Components\JPList\JplistAPIController.cs" />
+    <Compile Include="Components\JPList\QueryBuilder.cs" />
     <Compile Include="Components\JPList\ResultExtDTO.cs" />
     <Compile Include="Components\JPList\ResultDataDTO.cs" />
     <Compile Include="Components\JPList\ResultDTO.cs" />
@@ -157,7 +159,6 @@
     <Compile Include="Components\Log.cs" />
     <Compile Include="Components\Lucene\FileIndexer.cs" />
     <Compile Include="Components\Lucene\LuceneIndexItem.cs" />
-    <Compile Include="Components\Lucene\LuceneQueryBuilder.cs" />
     <Compile Include="Components\Lucene\LuceneService.cs" />
     <Compile Include="Components\Lucene\Mapping\DnnFilesMappingUtils.cs" />
     <Compile Include="Components\Lucene\PdfParser.cs" />
@@ -169,7 +170,6 @@
     <Compile Include="Components\JPList\PaginationDTO.cs" />
     <Compile Include="Components\JPList\JpListQueryDTO.cs" />
     <Compile Include="Components\JPList\RequestDTO.cs" />
-    <Compile Include="Components\JPList\StatusDTO.cs" />
     <Compile Include="Components\Template\DataDTO.cs" />
     <Compile Include="Components\Template\FileDTO.cs" />
     <Compile Include="Components\Template\TemplateHelper.cs" />
@@ -256,11 +256,11 @@
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="schema.json" />
-    <Content Include="options.json" />
+    <Content Include="Templates\Schema\schema.json" />
+    <Content Include="Templates\Schema\options.json" />
     <Content Include="Providers\DataProviders\SqlDataProvider\Uninstall.SqlDataProvider" />
-    <Content Include="images-schema.json" />
-    <Content Include="images-options.json" />
+    <Content Include="Templates\Schema\images-schema.json" />
+    <Content Include="Templates\Schema\images-options.json" />
     <Content Include="Config\cache.config" />
     <Content Include="Config\processing.config" />
     <Content Include="Config\security.config" />

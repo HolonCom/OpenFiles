@@ -17,7 +17,6 @@ using DotNetNuke.Web.Api;
 using Newtonsoft.Json.Linq;
 using System.Web.Hosting;
 using System.IO;
-using DotNetNuke.Instrumentation;
 using DotNetNuke.Security;
 using Satrabel.OpenContent.Components.Json;
 using DotNetNuke.Entities.Content.Common;
@@ -30,26 +29,15 @@ namespace Satrabel.OpenFiles.Components
     // [SupportedModules("OpenFiles")]
     public class OpenFilesAPIController : DnnApiController
     {
-        public string BaseDir
-        {
-            get
-            {
-                return PortalSettings.HomeDirectory + "/OpenFiles/Templates/";
-            }
-        }
-
         [ValidateAntiForgeryToken]
         [DnnModuleAuthorize(AccessLevel = SecurityAccessLevel.Edit)]
         [HttpGet]
         public HttpResponseMessage Edit(int id)
         {
-            //string Template = "DesktopModules/OpenFiles/";
             JObject json = new JObject();
             try
             {
-                string desktopFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenFiles/");
-                string portalFolder = HostingEnvironment.MapPath(PortalSettings.HomeDirectory + "/OpenFiles/");
-                GetJson(json, desktopFolder, portalFolder, "");
+                GetJson(json, Config.JsonSchemaFolder , Config.PortalFolder(PortalSettings), "");
                 int moduleId = ActiveModule.ModuleID;
                 if (id > 0)
                 {
@@ -139,26 +127,24 @@ namespace Satrabel.OpenFiles.Components
         [HttpGet]
         public HttpResponseMessage Settings(string Template)
         {
-            string Data = (string)ActiveModule.ModuleSettings["data"];
+            string data = (string)ActiveModule.ModuleSettings["data"];
             JObject json = new JObject();
             try
             {
-                string TemplateFilename = HostingEnvironment.MapPath("~/" + Template);
-                string prefix = Path.GetFileNameWithoutExtension(TemplateFilename) + "-";
+                string templateFilename = HostingEnvironment.MapPath("~/" + Template);
+                string prefix = Path.GetFileNameWithoutExtension(templateFilename) + "-";
 
-                string DesktopFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenFiles/");
-                string PortalFolder = HostingEnvironment.MapPath(PortalSettings.HomeDirectory + "/OpenFiles/");
-                GetJson(json, DesktopFolder, PortalFolder, prefix);
+                GetJson(json, Config.JsonSchemaFolder, Config.PortalFolder(PortalSettings), prefix);
 
-                if (!string.IsNullOrEmpty(Data))
+                if (!string.IsNullOrEmpty(data))
                 {
                     try
                     {
-                        json["data"] = JObject.Parse(Data);
+                        json["data"] = JObject.Parse(data);
                     }
                     catch (Exception ex)
                     {
-                        Log.Logger.Error("Settings Json Data : " + Data, ex);
+                        Log.Logger.Error("Settings Json Data : " + data, ex);
                     }
                 }
                 return Request.CreateResponse(HttpStatusCode.OK, json);
@@ -197,9 +183,7 @@ namespace Satrabel.OpenFiles.Components
             JObject json = new JObject();
             try
             {
-                string desktopFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenFiles/");
-                string portalFolder = HostingEnvironment.MapPath(PortalSettings.HomeDirectory + "/OpenFiles/");
-                GetJson(json, desktopFolder, portalFolder, "images");
+                GetJson(json, Config.JsonSchemaFolder, Config.PortalFolder(PortalSettings), "images");
 
                 int moduleId = ActiveModule.ModuleID;
                 if (id > 0)
@@ -220,8 +204,6 @@ namespace Satrabel.OpenFiles.Components
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
-
     }
-
 }
 

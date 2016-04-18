@@ -1,13 +1,5 @@
-﻿using DotNetNuke.Entities.Modules;
-using DotNetNuke.Modules.DigitalAssets.Components.Controllers;
-using DotNetNuke.Modules.DigitalAssets.Components.Controllers.Models;
-using DotNetNuke.Services.FileSystem;
+﻿using DotNetNuke.Services.FileSystem;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 
 namespace Satrabel.OpenFiles.DigitalAssets
 {
