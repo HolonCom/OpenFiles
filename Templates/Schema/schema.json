@@ -1,18 +1,44 @@
 ﻿{
-    "type": "object",
-    "properties": {
-        "title": {
-            "title": "Title",
-            "type": "string"
-        },
-        "description": {
-            "title": "Description",
-            "type": "string"
-        },
-        "category": {
-            "title": "Category",
-            "type": "array",
-            "enum": ["cat1","cat2","cat3"]
-        }
-    }
+	"type": "object",
+	"properties": {
+		"title": {
+			"title": "Title",
+			"type": "string"
+		},
+		"description": {
+			"title": "Description",
+			"type": "string"
+		},
+		"publicationdate": {
+			"title": "Published on",
+			"type": "string",
+			"default": "today"
+		},
+		"category": {
+			"title": "Category",
+			"type": "array",
+			"enum": ["Featured"]
+		},
+		"publishstartdate": {
+			"title": "Publication Startdate",
+			"type": "string",
+			"required": true,
+			"readonly": false,
+			"default": "today"
+		},
+		"publishenddate": {
+			"title": "Publication Enddate",
+			"type": "string",
+			"required": true,
+			"readonly": false,
+			"default": "2099/12/31"
+		},
+		"publishstatus": {
+			"title": "Publication Status",
+			"type": "string",
+			"enum": ["draft", "published"],
+			"required": false,
+			"default": "published"
+		}
+	}
 }

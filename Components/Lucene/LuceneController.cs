@@ -109,7 +109,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                     if (!startDate.HasValue)
                         lc.Store.DeleteAll();
 
-                    var fileIndexer = new FileIndexer();
+                    var fileIndexer = new FileRepository();
                     var portals = PortalController.Instance.GetPortals();
                     foreach (var portal in portals.Cast<PortalInfo>())
                     {

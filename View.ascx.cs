@@ -21,7 +21,7 @@ namespace Satrabel.OpenFiles
 {
     public partial class View : PortalModuleBase
     {
-        private int ItemId = Null.NullInteger;
+        private int _itemId = Null.NullInteger;
 
         protected override void OnInit(EventArgs e)
         {

@@ -1,13 +1,13 @@
-﻿using DotNetNuke.ExtensionPoints;
+﻿using System;
+using System.Web.UI.WebControls;
+using DotNetNuke.ExtensionPoints;
 using DotNetNuke.Modules.DigitalAssets.Components.ExtensionPoint;
 using DotNetNuke.Services.FileSystem;
 using DotNetNuke.Services.Localization;
 using Satrabel.OpenContent.Components.Alpaca;
-using Satrabel.OpenFiles.Components.DigitalAssets;
-using System;
-using System.Web.UI.WebControls;
+using Satrabel.OpenFiles.Components;
 
-namespace Satrabel.Modules.DigitalAssets
+namespace Satrabel.OpenFiles.DigitalAssets
 {
     public partial class FilePropertiesTabControl : PropertiesTabContentControl, IEditPageTabControlActions
     {

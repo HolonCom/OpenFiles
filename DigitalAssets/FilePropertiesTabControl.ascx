@@ -1,7 +1,8 @@
-﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="FilePropertiesTabControl.ascx.cs" Inherits="Satrabel.Modules.DigitalAssets.FilePropertiesTabControl" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="FilePropertiesTabControl.ascx.cs" Inherits="Satrabel.OpenFiles.DigitalAssets.FilePropertiesTabControl" %>
 
 <%@ Register TagPrefix="dnn" Namespace="DotNetNuke.Web.Client.ClientResourceManagement" Assembly="DotNetNuke.Web.Client" %>
 <dnn:DnnJsInclude runat="server" FilePath="~/DesktopModules/OpenFiles/js/ImageCropperField.js" Priority="130" />
+<dnn:DnnCssInclude ID="DnnCssInclude2" runat="server" FilePath="~/DesktopModules/OpenFiles/module.css" AddTag="false" />
 
 <asp:Label runat="server" ID="lblNoImage" Visible="False">File is not an image. No Metadata to set.</asp:Label>
 <asp:Panel runat="server" ID="ScopeWrapper">

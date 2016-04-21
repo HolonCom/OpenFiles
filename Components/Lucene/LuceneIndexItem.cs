@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Satrabel.OpenFiles.Components.Lucene
@@ -18,5 +19,6 @@ namespace Satrabel.OpenFiles.Components.Lucene
         public string Description { get; set; }
         public string FileContent { get; set; }
         public List<string> Categories { get; private set; }
+        public DateTime? PublicationDate { get; set; }
     }
 }

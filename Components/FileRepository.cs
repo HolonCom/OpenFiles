@@ -14,7 +14,7 @@ using System.Text;
 
 namespace Satrabel.OpenFiles.Components.Lucene
 {
-    public class FileIndexer
+    public class FileRepository
     {
         /// -----------------------------------------------------------------------------
         /// <summary>
@@ -49,6 +49,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                         Folder = file.Folder.TrimEnd('/'),
                         Title = "",
                         Description = "",
+                        PublicationDate = DateTime.MinValue,
                         FileContent = GetFileContent(file.FileName, file)
                     };
 
@@ -59,6 +60,8 @@ namespace Satrabel.OpenFiles.Components.Lucene
                             indexData.Title = custom["meta"]["title"].ToString();
                         if (custom["meta"]["description"] != null)
                             indexData.Description = custom["meta"]["description"].ToString();
+                        if (custom["meta"]["publicationdate"] != null)
+                            indexData.PublicationDate = DateTime.Parse(custom["meta"]["publicationdate"].ToString());
                         if (custom["meta"]["category"] is JArray)
                             foreach (JToken item in (custom["meta"]["category"] as JArray))
                             {
@@ -76,7 +79,15 @@ namespace Satrabel.OpenFiles.Components.Lucene
             return searchDocuments;
         }
 
-        private string GetFileContent(string p, IFileInfo file)
+        //public IEnumerable<LuceneIndexItem> GetPortalFiles(int portalId, DateTime? startDateLocal)
+        //{
+        //    var folderManager = FolderManager.Instance;
+        //    var folder = folderManager.GetFolder(portalId, "");
+        //    var files = folderManager.GetFiles(folder, true);
+
+        //}
+
+        internal static string GetFileContent(string p, IFileInfo file)
         {
             string extension = Path.GetExtension(p);
             if (extension == ".pdf")
@@ -107,7 +118,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             return "";
         }
 
-        private static JObject GetCustomFileData(IFileInfo f)
+        internal static JObject GetCustomFileData(IFileInfo f)
         {
             if (f.ContentItemID > 0)
             {

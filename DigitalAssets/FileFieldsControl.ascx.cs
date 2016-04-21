@@ -1,12 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Web.Hosting;
 using DotNetNuke.Modules.DigitalAssets.Components.ExtensionPoint;
 using DotNetNuke.Services.Localization;
-using System.Web.Hosting;
 using Satrabel.OpenContent.Components.Alpaca;
-using Satrabel.OpenFiles.Components.DigitalAssets;
+using Satrabel.OpenFiles.Components;
 
-namespace Satrabel.Modules.DigitalAssets
+namespace Satrabel.OpenFiles.DigitalAssets
 {
     public partial class FileFieldsControl : DotNetNuke.Modules.DigitalAssets.FileFieldsControl, IFieldsControl
     {
@@ -44,7 +44,6 @@ namespace Satrabel.Modules.DigitalAssets
         public override object SaveProperties()
         {
             var file = base.SaveProperties();
-            //File.Title = TitleInput.Text;
             ContentItemUtils.Save(File, "meta", hfAlpacaData.Value);
             return file;
         }

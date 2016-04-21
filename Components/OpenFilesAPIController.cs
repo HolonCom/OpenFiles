@@ -34,11 +34,10 @@ namespace Satrabel.OpenFiles.Components
         [HttpGet]
         public HttpResponseMessage Edit(int id)
         {
-            JObject json = new JObject();
             try
             {
-                GetJson(json, Config.JsonSchemaFolder , Config.PortalFolder(PortalSettings), "");
-                int moduleId = ActiveModule.ModuleID;
+                JObject json = GetJson(Config.JsonSchemaFolder, Config.PortalFolder(PortalSettings), "");
+                //int moduleId = ActiveModule.ModuleID;
                 if (id > 0)
                 {
                     var item = Util.GetContentController().GetContentItem(id);
@@ -58,8 +57,10 @@ namespace Satrabel.OpenFiles.Components
             }
         }
 
-        private void GetJson(JObject json, string desktopFolder, string portalFolder, string prefix)
+        private JObject GetJson(string desktopFolder, string portalFolder, string prefix)
         {
+            JObject json = new JObject();
+
             if (!Directory.Exists(portalFolder))
             {
                 Directory.CreateDirectory(portalFolder);
@@ -106,19 +107,7 @@ namespace Satrabel.OpenFiles.Components
                     json["options"] = json["options"].JsonMerge(optionsJson);
                 }
             }
-            // view
-            /*
-            string viewFilename = TemplateFolder + "\\" + Prefix +"view.json";
-            if (File.Exists(optionsFilename))
-            {
-                string fileContent = File.ReadAllText(viewFilename);
-                if (!string.IsNullOrWhiteSpace(fileContent))
-                {
-                    JObject optionsJson = JObject.Parse(fileContent);
-                    json["view"] = optionsJson;
-                }
-            }
-            */
+            return json;
         }
 
 
@@ -128,13 +117,12 @@ namespace Satrabel.OpenFiles.Components
         public HttpResponseMessage Settings(string Template)
         {
             string data = (string)ActiveModule.ModuleSettings["data"];
-            JObject json = new JObject();
             try
             {
                 string templateFilename = HostingEnvironment.MapPath("~/" + Template);
                 string prefix = Path.GetFileNameWithoutExtension(templateFilename) + "-";
 
-                GetJson(json, Config.JsonSchemaFolder, Config.PortalFolder(PortalSettings), prefix);
+                JObject json = GetJson(Config.JsonSchemaFolder, Config.PortalFolder(PortalSettings), prefix);
 
                 if (!string.IsNullOrEmpty(data))
                 {
@@ -180,12 +168,11 @@ namespace Satrabel.OpenFiles.Components
         public HttpResponseMessage EditImages(int id)
         {
             //string Template = "DesktopModules/OpenFiles/";
-            JObject json = new JObject();
             try
             {
-                GetJson(json, Config.JsonSchemaFolder, Config.PortalFolder(PortalSettings), "images");
+                JObject json = GetJson(Config.JsonSchemaFolder, Config.PortalFolder(PortalSettings), "images");
 
-                int moduleId = ActiveModule.ModuleID;
+                //int moduleId = ActiveModule.ModuleID;
                 if (id > 0)
                 {
                     var item = Util.GetContentController().GetContentItem(id);

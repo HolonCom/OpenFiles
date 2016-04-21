@@ -1,3 +1,43 @@
 .aspNetDisabled, a.aspNetDisabled, .dnnDisabled, a.dnnDisabled {
     color: #ccc !important;
 }
+
+#dnnModuleDigitalAssetsGeneral .dnnFormItem input[type="text"], 
+.dnnFormItem select, 
+.dnnFormItem textarea, 
+.dnnFormItem input[type="email"], 
+.dnnFormItem input[type="search"], 
+.dnnFormItem input[type="password"], 
+.RadComboBox_Default .rcbInput
+{
+	max-width: 95%;
+}
+
+.dnnLabel {
+    display: block;
+    float: none;
+    width: 100%;
+    padding-right: 0;
+    margin-right: 0;
+    overflow: visible;
+    text-align: left;
+	font-weight: bold;
+}
+
+a.dnnFormHelp{
+	position: relative;
+}
+
+.dnnForm .dnnFormItem {
+    clear: both;
+    width: 100%;
+    display: block;
+    position: relative;
+    text-align: left;
+    margin-left: 36px;
+}
+
+#dnnModuleDigitalAssetsButtonPane .dnnActions {
+    margin-left: 312px;
+    width: 60%;
+}
