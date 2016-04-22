@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
@@ -7,7 +6,6 @@ using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
 using Satrabel.OpenContent.Components.Json;
-using Version = Lucene.Net.Util.Version;
 
 namespace Satrabel.OpenFiles.Components.Lucene.Mapping
 {
@@ -30,49 +28,10 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
         public static readonly string FieldId = "$id";
         #endregion
 
-        internal static PerFieldAnalyzerWrapper GetAnalyser()
-        {
-            var analyzerList = new List<KeyValuePair<string, Analyzer>>
-            {
-                new KeyValuePair<string, Analyzer>("PortalId", new KeywordAnalyzer()),
-                new KeyValuePair<string, Analyzer>("FileId", new KeywordAnalyzer()),
-                new KeyValuePair<string, Analyzer>("Title", new SimpleAnalyzer()),
-                new KeyValuePair<string, Analyzer>("FileName", new SimpleAnalyzer()),
-                new KeyValuePair<string, Analyzer>("Description", new StandardAnalyzer(Version.LUCENE_30)),
-                new KeyValuePair<string, Analyzer>("FileContent", new StandardAnalyzer(Version.LUCENE_30)),
-                new KeyValuePair<string, Analyzer>("Folder", new LowercaseKeywordAnalyzer()),
-                new KeyValuePair<string, Analyzer>("Category", new KeywordAnalyzer())
-            };
-            return new PerFieldAnalyzerWrapper(new KeywordAnalyzer(), analyzerList);
-        }
-
-        private class LowercaseKeywordAnalyzer : Analyzer
-        {
-            public override TokenStream TokenStream(string fieldName, TextReader reader)
-            {
-                TokenStream tokenStream = new KeywordTokenizer(reader);
-                tokenStream = new LowerCaseFilter(tokenStream);
-                return tokenStream;
-            }
-        }
-
-        internal static string[] GetSearchAllFieldList()
-        {
-            return new[] { "PortalId", "FileId", "FileName", "Title", "Description", "FileContent", "Category" };
-        }
-
-        internal static LuceneIndexItem MapLuceneDocumentToData(Document doc)
-        {
-            return new LuceneIndexItem
-            {
-                PortalId = Convert.ToInt32(doc.Get("PortalId")),
-                FileId = Convert.ToInt32(doc.Get("FileId")),
-                Title = doc.Get("Title"),
-                FileName = doc.Get("FileName"),
-                Description = doc.Get("Description"),
-                FileContent = doc.Get("FileContent")
-            };
-        }
+        //internal static string[] GetSearchAllFieldList()
+        //{
+        //    return new[] { "PortalId", "FileId", "FileName", "Title", "Description", "PublicationDate", "FileContent", "Category" };
+        //}
 
         public static Document DataItemToLuceneDocument(LuceneIndexItem data, bool storeSource = false)
         {
@@ -96,6 +55,7 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
             luceneDoc.Add(new Field("Folder", item.Folder, Field.Store.YES, Field.Index.NOT_ANALYZED));
             luceneDoc.Add(new Field("Title", string.IsNullOrEmpty(item.Title) ? "" : item.Title, Field.Store.YES, Field.Index.ANALYZED));
             luceneDoc.Add(new Field("Description", string.IsNullOrEmpty(item.Description) ? "" : item.Description, Field.Store.YES, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field("PublicationDate", string.IsNullOrEmpty(item.PublicationDate) ? "" : item.PublicationDate, Field.Store.YES, Field.Index.ANALYZED));
             luceneDoc.Add(new Field("FileContent", string.IsNullOrEmpty(item.FileContent) ? "" : item.FileContent, Field.Store.YES, Field.Index.ANALYZED));
 
             if (item.Categories != null)
@@ -124,5 +84,52 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
             Filter filter = new QueryWrapperFilter(query);
             return filter;
         }
+
+        public static Analyzer GetAnalyser()
+        {
+            var analyser = new StandardAnalyzer(global::Lucene.Net.Util.Version.LUCENE_30);
+            return analyser;
+        }
+
+        //private class LowercaseKeywordAnalyzer : Analyzer
+        //{
+        //    public override TokenStream TokenStream(string fieldName, TextReader reader)
+        //    {
+        //        TokenStream tokenStream = new KeywordTokenizer(reader);
+        //        tokenStream = new LowerCaseFilter(tokenStream);
+        //        return tokenStream;
+        //    }
+        //}
+
+        //internal static PerFieldAnalyzerWrapper GetAnalyser()
+        //{
+        //    var analyzerList = new List<KeyValuePair<string, Analyzer>>
+        //    {
+        //        new KeyValuePair<string, Analyzer>("PortalId", new KeywordAnalyzer()),
+        //        new KeyValuePair<string, Analyzer>("FileId", new KeywordAnalyzer()),
+        //        new KeyValuePair<string, Analyzer>("Title", new SimpleAnalyzer()),
+        //        new KeyValuePair<string, Analyzer>("FileName", new SimpleAnalyzer()),
+        //        new KeyValuePair<string, Analyzer>("Description", new StandardAnalyzer(Version.LUCENE_30)),
+        //        new KeyValuePair<string, Analyzer>("FileContent", new StandardAnalyzer(Version.LUCENE_30)),
+        //        new KeyValuePair<string, Analyzer>("Folder", new LowercaseKeywordAnalyzer()),
+        //        new KeyValuePair<string, Analyzer>("PublicationDate", new LowercaseKeywordAnalyzer()),
+        //        new KeyValuePair<string, Analyzer>("Category", new KeywordAnalyzer())
+        //    };
+        //    return new PerFieldAnalyzerWrapper(new KeywordAnalyzer(), analyzerList);
+        //}
+
+        //internal static LuceneIndexItem MapLuceneDocumentToData(Document doc)
+        //{
+        //    return new LuceneIndexItem
+        //    {
+        //        PortalId = Convert.ToInt32(doc.Get("PortalId")),
+        //        FileId = Convert.ToInt32(doc.Get("FileId")),
+        //        Title = doc.Get("Title"),
+        //        FileName = doc.Get("FileName"),
+        //        Description = doc.Get("Description"),
+        //        PublicationDate = doc.Get("PublicationDate"),
+        //        FileContent = doc.Get("FileContent")
+        //    };
+        //}
     }
 }
