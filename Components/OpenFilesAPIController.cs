@@ -21,6 +21,7 @@ using DotNetNuke.Security;
 using Satrabel.OpenContent.Components.Json;
 using DotNetNuke.Entities.Content.Common;
 using Satrabel.OpenContent.Components;
+using Satrabel.OpenFiles.Components.ExternalData;
 
 #endregion
 
@@ -36,7 +37,7 @@ namespace Satrabel.OpenFiles.Components
         {
             try
             {
-                JObject json = GetJson(Config.JsonSchemaFolder, Config.PortalFolder(PortalSettings), "");
+                JObject json = FilesRepository.GetSchemaAndOptionsJson(Config.Instance.DesktopModulesFolder, Config.Instance.PortalFolder, "");
                 //int moduleId = ActiveModule.ModuleID;
                 if (id > 0)
                 {
@@ -57,58 +58,6 @@ namespace Satrabel.OpenFiles.Components
             }
         }
 
-        private JObject GetJson(string desktopFolder, string portalFolder, string prefix)
-        {
-            JObject json = new JObject();
-
-            if (!Directory.Exists(portalFolder))
-            {
-                Directory.CreateDirectory(portalFolder);
-            }
-            if (!string.IsNullOrEmpty(prefix))
-            {
-                prefix = prefix + "-";
-            }
-            // schema
-            string schemaFilename = portalFolder + "\\" + prefix + "schema.json";
-            if (!File.Exists(schemaFilename))
-            {
-                schemaFilename = desktopFolder + "\\" + prefix + "schema.json";
-            }
-            JObject schemaJson = JObject.Parse(File.ReadAllText(schemaFilename));
-            json["schema"] = schemaJson;
-            // default options
-            string optionsFilename = portalFolder + "\\" + prefix + "options.json";
-            if (!File.Exists(optionsFilename))
-            {
-                optionsFilename = desktopFolder + "\\" + prefix + "options.json";
-            }
-            if (File.Exists(optionsFilename))
-            {
-                string fileContent = File.ReadAllText(optionsFilename);
-                if (!string.IsNullOrWhiteSpace(fileContent))
-                {
-                    JObject optionsJson = JObject.Parse(fileContent);
-                    json["options"] = optionsJson;
-                }
-            }
-            // language options
-            optionsFilename = portalFolder + "\\" + prefix + "options." + DnnUtils.GetCurrentCultureCode() + ".json";
-            if (!File.Exists(optionsFilename))
-            {
-                optionsFilename = desktopFolder + "\\" + prefix + "options." + DnnUtils.GetCurrentCultureCode() + ".json";
-            }
-            if (File.Exists(optionsFilename))
-            {
-                string fileContent = File.ReadAllText(optionsFilename);
-                if (!string.IsNullOrWhiteSpace(fileContent))
-                {
-                    JObject optionsJson = JObject.Parse(fileContent);
-                    json["options"] = json["options"].JsonMerge(optionsJson);
-                }
-            }
-            return json;
-        }
 
 
         [ValidateAntiForgeryToken]
@@ -122,7 +71,7 @@ namespace Satrabel.OpenFiles.Components
                 string templateFilename = HostingEnvironment.MapPath("~/" + Template);
                 string prefix = Path.GetFileNameWithoutExtension(templateFilename) + "-";
 
-                JObject json = GetJson(Config.JsonSchemaFolder, Config.PortalFolder(PortalSettings), prefix);
+                JObject json = FilesRepository.GetSchemaAndOptionsJson(Config.Instance.DesktopModulesFolder, Config.Instance.PortalFolder, prefix);
 
                 if (!string.IsNullOrEmpty(data))
                 {
@@ -170,7 +119,7 @@ namespace Satrabel.OpenFiles.Components
             //string Template = "DesktopModules/OpenFiles/";
             try
             {
-                JObject json = GetJson(Config.JsonSchemaFolder, Config.PortalFolder(PortalSettings), "images");
+                JObject json = FilesRepository.GetSchemaAndOptionsJson(Config.Instance.DesktopModulesFolder, Config.Instance.PortalFolder, "images");
 
                 //int moduleId = ActiveModule.ModuleID;
                 if (id > 0)

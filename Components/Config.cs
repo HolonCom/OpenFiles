@@ -1,23 +1,26 @@
-﻿using System.Web.Hosting;
+﻿using System;
+using System.Web.Hosting;
 using DotNetNuke.Entities.Portals;
+using Satrabel.OpenContent.Components;
 
 namespace Satrabel.OpenFiles.Components
 {
-    public static class Config
+
+    public class Config
     {
-        public static string JsonSchemaFolder
+        private static readonly Lazy<Config> lazy = new Lazy<Config>(() => new Config());
+
+        public static Config Instance { get { return lazy.Value; } }
+
+        private Config()
         {
-            get
-            {
-                return HostingEnvironment.MapPath("~/DesktopModules/OpenFiles/Templates/Schema/");
-            }
+            PortalFolder = new FolderUri(DotNetNuke.Common.Globals.GetPortalSettings().HomeDirectory + "/OpenFiles/");
         }
 
-        public static string PortalFolder(PortalSettings portalSettings)
+        public FolderUri DesktopModulesFolder
         {
-            {
-                return HostingEnvironment.MapPath(portalSettings.HomeDirectory + "/OpenFiles/");
-            }
+            get { return new FolderUri("~/DesktopModules/OpenFiles/Templates/Schema/"); }
         }
+        public FolderUri PortalFolder { get; private set; }
     }
 }

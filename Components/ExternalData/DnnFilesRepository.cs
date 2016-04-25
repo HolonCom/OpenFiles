@@ -1,20 +1,21 @@
 ﻿#region Usings
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using DotNetNuke.Entities.Content.Common;
 using DotNetNuke.Services.Exceptions;
 using DotNetNuke.Services.FileSystem;
-using DotNetNuke.Entities.Content.Common;
 using Newtonsoft.Json.Linq;
-using System.IO;
-using System.Text;
+using Satrabel.OpenFiles.Components.Lucene;
 
 #endregion
 
-namespace Satrabel.OpenFiles.Components.Lucene
+namespace Satrabel.OpenFiles.Components.ExternalData
 {
-    public class FileRepository
+    public class DnnFilesRepository
     {
         /// -----------------------------------------------------------------------------
         /// <summary>
@@ -47,26 +48,26 @@ namespace Satrabel.OpenFiles.Components.Lucene
                         FileId = file.FileId,
                         FileName = file.FileName,
                         Folder = file.Folder.TrimEnd('/'),
-                        Title = "",
-                        Description = "",
-                        PublicationDate = DateTime.MinValue,
+                        //Title = "",
+                        //Description = "",
                         FileContent = GetFileContent(file.FileName, file)
                     };
 
-                    var custom = GetCustomFileData(file);
+                    JObject custom = GetCustomFileDataAsJObject(file);
                     if (custom["meta"] != null && custom["meta"].HasValues)
                     {
-                        if (custom["meta"]["title"] != null)
-                            indexData.Title = custom["meta"]["title"].ToString();
-                        if (custom["meta"]["description"] != null)
-                            indexData.Description = custom["meta"]["description"].ToString();
-                        if (custom["meta"]["publicationdate"] != null)
-                            indexData.PublicationDate = DateTime.Parse(custom["meta"]["publicationdate"].ToString());
-                        if (custom["meta"]["category"] is JArray)
-                            foreach (JToken item in (custom["meta"]["category"] as JArray))
-                            {
-                                indexData.Categories.Add(item.ToString());
-                            }
+                        indexData.Meta = custom["meta"].ToString();
+                        //if (custom["meta"]["title"] != null)
+                        //    indexData.Title = custom["meta"]["title"].ToString();
+                        //if (custom["meta"]["description"] != null)
+                        //    indexData.Description = custom["meta"]["description"].ToString();
+                        //if (custom["meta"]["publicationdate"] != null)
+                        //    indexData.PublicationDate = DateTime.Parse(custom["meta"]["publicationdate"].ToString());
+                        //if (custom["meta"]["category"] is JArray)
+                        //    foreach (JToken item in (custom["meta"]["category"] as JArray))
+                        //    {
+                        //        indexData.Categories.Add(item.ToString());
+                        //    }
                     }
                     searchDocuments.Add(indexData);
                 }
@@ -118,7 +119,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             return "";
         }
 
-        internal static JObject GetCustomFileData(IFileInfo f)
+        private static JObject GetCustomFileDataAsJObject(IFileInfo f)
         {
             if (f.ContentItemID > 0)
             {
@@ -133,6 +134,23 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 }
             }
             return new JObject();
+        }
+
+        private static string GetCustomFileData(IFileInfo f)
+        {
+            if (f.ContentItemID > 0)
+            {
+                try
+                {
+                    var item = Util.GetContentController().GetContentItem(f.ContentItemID);
+                    return item.Content;
+                }
+                catch (Exception ex)
+                {
+                    Exceptions.LogException(ex);
+                }
+            }
+            return "";
         }
     }
 }

@@ -10,6 +10,7 @@ using DotNetNuke.Entities.Portals;
 using DotNetNuke.Services.Search.Internals;
 using Lucene.Net.Documents;
 using Satrabel.OpenContent.Components.Lucene.Config;
+using Satrabel.OpenFiles.Components.ExternalData;
 using Satrabel.OpenFiles.Components.Lucene.Mapping;
 
 #endregion
@@ -109,7 +110,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                     if (!startDate.HasValue)
                         lc.Store.DeleteAll();
 
-                    var fileIndexer = new FileRepository();
+                    var fileIndexer = new DnnFilesRepository();
                     var portals = PortalController.Instance.GetPortals();
                     foreach (var portal in portals.Cast<PortalInfo>())
                     {
