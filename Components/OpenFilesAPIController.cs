@@ -38,7 +38,6 @@ namespace Satrabel.OpenFiles.Components
             try
             {
                 JObject json = FilesRepository.GetSchemaAndOptionsJson(Config.Instance.DesktopModulesFolder, Config.Instance.PortalFolder, "");
-                //int moduleId = ActiveModule.ModuleID;
                 if (id > 0)
                 {
                     var item = Util.GetContentController().GetContentItem(id);

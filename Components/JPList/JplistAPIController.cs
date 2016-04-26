@@ -23,6 +23,7 @@ using Satrabel.OpenContent.Components.TemplateHelpers;
 using Satrabel.OpenContent.Components.Datasource.search;
 using Satrabel.OpenContent.Components.Lucene.Config;
 using Satrabel.OpenContent.Components.JPList;
+using Satrabel.OpenFiles.Components.ExternalData;
 
 namespace Satrabel.OpenFiles.Components.JPList
 {
@@ -40,7 +41,7 @@ namespace Satrabel.OpenFiles.Components.JPList
 
                 QueryBuilder queryBuilder = new QueryBuilder();
                 queryBuilder.BuildFilter(PortalSettings.PortalId, req.folder);
-                JplistQueryBuilder.MergeJpListQuery(queryBuilder.Select, req.StatusLst);
+                JplistQueryBuilder.MergeJpListQuery(FilesRepository.GetIndexJson(), queryBuilder.Select, req.StatusLst);
 
                 string curFolder = NormalizePath(req.folder);
                 foreach (var item in queryBuilder.Select.Query.FilterRules.Where(f => f.Field == "Folder"))
