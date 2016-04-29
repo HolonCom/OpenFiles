@@ -82,7 +82,7 @@ namespace Satrabel.OpenFiles.Components.Template
             return model;
         }
 
-        private static int GetFileIdFromUrl(string url)
+        public static int GetFileIdFromUrl(string url)
         {
             int returnValue = -1;
             //add http

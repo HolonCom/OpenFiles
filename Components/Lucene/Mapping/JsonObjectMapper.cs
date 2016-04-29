@@ -6,7 +6,6 @@ using Lucene.Net.Documents;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Satrabel.OpenContent.Components.Lucene.Config;
-//using Lucene.Net.Linq;
 
 namespace Satrabel.OpenFiles.Components.Lucene.Mapping
 {

@@ -10,25 +10,29 @@
 			"sort": true
 		},
 		"publicationdate": {
+			"indexType": "datetime",
 			"index": true,
 			"sort": true
 		},
 		"category": {
 			"items": {
-				"indexType": "text",
+			    "indexType": "text", 
 				"index": true,
 				"sort": true
 			}
 		},
 		"publishstartdate": {
+			"indexType": "datetime",
 			"index": true,
 			"sort": true
 		},
 		"publishenddate": {
+			"indexType": "datetime",
 			"index": true,
 			"sort": true
 		},
 		"publishstatus": {
+		    "indexType": "text", 
 			"index": true,
 			"sort": true
 		}

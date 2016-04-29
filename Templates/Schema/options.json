@@ -2,11 +2,13 @@
     "fields": {
 
         "description": {
-            "type": "textarea"
+            "type": "textarea",
+            "label": "Description"
         },
         "publicationdate": {
             "type": "date",
-            "label": "Date on which the document was published",
+            "label": "Publication Date",
+            "helper": "Date on which the document was published",
             "hidden": false,
             "picker": {
                 "format": "DD/MM/YYYY",
@@ -42,7 +44,7 @@
             }
         },
         "publishstatus": {
-            "type": "select",
+            "type": "radio",
             "label": "Publicatie status"
         }
     }

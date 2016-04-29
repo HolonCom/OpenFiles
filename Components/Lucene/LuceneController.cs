@@ -77,7 +77,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
         /// <summary>
         /// Reindex all portal files.
         /// </summary>
-        internal void IndexAll()
+        private void IndexAll()
         {
             Log.Logger.DebugFormat("Lucene index directory [{0}] being initialized.", "OpenFiles");
             IndexFiles(null);
@@ -124,6 +124,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
                         foreach (var indexItem in searchDocs)
                         {
+                            lc.Store.Delete(new TermQuery(new Term(DnnFilesMappingUtils.GetIndexFieldName(), DnnFilesMappingUtils.GetIndexFieldValue(indexItem))));
                             lc.Store.Add(DnnFilesMappingUtils.DataItemToLuceneDocument(indexItem));
                         }
                         Log.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
