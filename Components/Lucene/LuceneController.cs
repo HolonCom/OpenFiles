@@ -77,7 +77,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
         /// <summary>
         /// Reindex all portal files.
         /// </summary>
-        private void IndexAll()
+        internal void IndexAll()
         {
             Log.Logger.DebugFormat("Lucene index directory [{0}] being initialized.", "OpenFiles");
             IndexFiles(null);
