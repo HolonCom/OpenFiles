@@ -14,7 +14,9 @@ namespace Satrabel.OpenFiles.Components
 
         private Config()
         {
-            PortalFolder = new FolderUri(DotNetNuke.Common.Globals.GetPortalSettings().HomeDirectory + "/OpenFiles/");
+            //var ps = DotNetNuke.Common.Globals.GetPortalSettings();
+            var ps = PortalSettings.Current;
+            PortalFolder = new PortalFolderUri(ps.PortalId, ps.HomeDirectory + "/OpenFiles/");
         }
 
         public FolderUri DesktopModulesFolder
