@@ -80,41 +80,40 @@ namespace Satrabel.OpenFiles.Components.ExternalData
             return searchDocuments;
         }
 
-        //public IEnumerable<LuceneIndexItem> GetPortalFiles(int portalId, DateTime? startDateLocal)
-        //{
-        //    var folderManager = FolderManager.Instance;
-        //    var folder = folderManager.GetFolder(portalId, "");
-        //    var files = folderManager.GetFiles(folder, true);
-
-        //}
-
-        internal static string GetFileContent(string p, IFileInfo file)
+        private static string GetFileContent(string filename, IFileInfo file)
         {
-            string extension = Path.GetExtension(p);
-            if (extension == ".pdf")
+            try
             {
-                if (File.Exists(file.PhysicalPath))
+                string extension = Path.GetExtension(filename);
+                if (extension == ".pdf")
                 {
-                    var fileContent = FileManager.Instance.GetFileContent(file);
-                    if (fileContent != null)
+                    if (File.Exists(file.PhysicalPath))
                     {
-                        return PdfParser.ReadPdfFile(fileContent);
-                    }
-                }
-            }
-            else if (extension == ".txt")
-            {
-                if (File.Exists(file.PhysicalPath))
-                {
-                    var fileContent = FileManager.Instance.GetFileContent(file);
-                    if (fileContent != null)
-                    {
-                        using (var reader = new StreamReader(fileContent, Encoding.UTF8))
+                        var fileContent = FileManager.Instance.GetFileContent(file);
+                        if (fileContent != null)
                         {
-                            return reader.ReadToEnd();
+                            return PdfParser.ReadPdfFile(fileContent);
                         }
                     }
                 }
+                else if (extension == ".txt")
+                {
+                    if (File.Exists(file.PhysicalPath))
+                    {
+                        var fileContent = FileManager.Instance.GetFileContent(file);
+                        if (fileContent != null)
+                        {
+                            using (var reader = new StreamReader(fileContent, Encoding.UTF8))
+                            {
+                                return reader.ReadToEnd();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.WarnFormat("Ignoring file [{0}]. Failed reading content. Error: {1}", filename, ex.Message);
             }
             return "";
         }
