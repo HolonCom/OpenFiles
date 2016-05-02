@@ -7,6 +7,7 @@ using System.Linq;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
 using DotNetNuke.Entities.Portals;
+using DotNetNuke.Services.FileSystem.Internal;
 using DotNetNuke.Services.Search.Internals;
 using Lucene.Net.Documents;
 using Satrabel.OpenContent.Components.Lucene.Config;
@@ -65,7 +66,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 IndexAll();
                 return new SearchResults();
             }
-            Func<Document, LuceneIndexItem> resultMapper = DnnFilesMappingUtils.MapLuceneDocumentToData;
+            Func<Document, LuceneIndexItem> resultMapper = DnnFilesMappingUtils.CreateLuceneItem;
             var luceneResults = Store.Search(def.Filter, def.Query, def.Sort, def.PageSize, def.PageIndex, resultMapper);
             return luceneResults;
         }
@@ -122,10 +123,10 @@ namespace Satrabel.OpenFiles.Components.Lucene
                         List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portal.PortalID, indexSince).ToList();
                         Log.Logger.DebugFormat("Found {1} documents from Portal {0} to index", portal.PortalID, searchDocs.Count());
 
-                        foreach (var indexItem in searchDocs)
+                        foreach (LuceneIndexItem indexItem in searchDocs)
                         {
-                            lc.Store.Delete(new TermQuery(new Term(DnnFilesMappingUtils.GetIndexFieldName(), DnnFilesMappingUtils.GetIndexFieldValue(indexItem))));
-                            lc.Store.Add(DnnFilesMappingUtils.DataItemToLuceneDocument(indexItem));
+                            Delete(indexItem, lc);
+                            lc.Store.Add(DnnFilesMappingUtils.CreateLuceneDocument(indexItem));
                         }
                         Log.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
                     }
@@ -143,25 +144,16 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         #region Operations
 
-        public void Add(LuceneIndexItem data)
-        {
-            if (null == data)
-            {
-                throw new ArgumentNullException("data");
-            }
-
-            Store.Add(DnnFilesMappingUtils.DataItemToLuceneDocument(data));
-        }
-
         public void Update(LuceneIndexItem data)
         {
-            if (null == data)
-            {
-                throw new ArgumentNullException("data");
-            }
-            Delete(data);
-            Add(data);
+            this.Delete(data, null);
+            this.Add(data, null);
         }
+
+        //private void Add(LuceneIndexItem data)
+        //{
+        //    this.Add(data, null);
+        //}
 
         /// <summary>
         /// Deletes the matching objects in the IndexWriter.
@@ -169,25 +161,46 @@ namespace Satrabel.OpenFiles.Components.Lucene
         /// <param name="data"></param>
         public void Delete(LuceneIndexItem data)
         {
+            Delete(data, null);
+        }
+       
+        #endregion
+
+        #region Private
+
+        private void Add(LuceneIndexItem data, LuceneController storeInstance)
+        {
             if (null == data)
             {
                 throw new ArgumentNullException("data");
             }
-            Delete(int.Parse(DnnFilesMappingUtils.GetIndexFieldValue(data)), data.PortalId);
+
+            Store.Add(DnnFilesMappingUtils.CreateLuceneDocument(data));
         }
 
-        public void Delete(int fileId, int portalId)
+        private void Update(LuceneIndexItem data, LuceneController storeInstance)
         {
-            var selection = new TermQuery(new Term(DnnFilesMappingUtils.GetIndexFieldName(), fileId.ToString()));
-            Query deleteQuery = new FilteredQuery(selection, DnnFilesMappingUtils.GetTypeFilter(portalId.ToString()));
-            Store.Delete(deleteQuery);
+            if (null == data)
+            {
+                throw new ArgumentNullException("data");
+            }
+            Delete(data, storeInstance);
+            Add(data, storeInstance);
         }
 
+        private void Delete(LuceneIndexItem data, LuceneController storeInstance)
+        {
+            if (null == data)
+            {
+                throw new ArgumentNullException("data");
+            }
 
-
-        #endregion
-
-        #region Private
+            Query deleteQuery = DnnFilesMappingUtils.GetDeleteQuery(data);
+            if (storeInstance == null)
+                Store.Delete(deleteQuery);
+            else
+                storeInstance.Store.Delete(deleteQuery);
+        }
 
         /// -----------------------------------------------------------------------------
         /// <summary>

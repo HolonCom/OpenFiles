@@ -14,12 +14,11 @@ namespace Satrabel.OpenFiles.Components
 
         private Config()
         {
-            //var ps = DotNetNuke.Common.Globals.GetPortalSettings();
             var ps = PortalSettings.Current;
             PortalFolder = new PortalFolderUri(ps.PortalId, ps.HomeDirectory + "/OpenFiles/");
         }
 
-        public FolderUri DesktopModulesFolder
+        public FolderUri SchemaFolder
         {
             get { return new FolderUri("~/DesktopModules/OpenFiles/Templates/Schema/"); }
         }

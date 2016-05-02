@@ -6,12 +6,17 @@ namespace Satrabel.OpenFiles.Components.Lucene
 {
     public class LuceneIndexItem
     {
-        public LuceneIndexItem()
+        public LuceneIndexItem(string itemType, string tenant, string itemId)
         {
-            Type = "dnnfile";
-            //Categories = new List<string>();
+            Type = itemType; ;
+            Tenant = tenant;
+            Id = itemId;
         }
+        public string Id { get; set; }
         public string Type { get; private set; }
+        public string Tenant { get; set; }
+
+
         public int PortalId { get; set; }
         public int FileId { get; set; }
         public string FileName { get; set; }

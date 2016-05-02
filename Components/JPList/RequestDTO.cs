@@ -9,6 +9,7 @@ namespace Satrabel.OpenFiles.Components.JPList
     public class RequestDTO
     {
         public string statuses { get; set; }
+
         public string folder { get; set; }
         public bool withSubFolder { get; set; }
         public string imageRatio { get; set; }

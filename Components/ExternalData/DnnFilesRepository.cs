@@ -10,6 +10,7 @@ using DotNetNuke.Services.Exceptions;
 using DotNetNuke.Services.FileSystem;
 using Newtonsoft.Json.Linq;
 using Satrabel.OpenFiles.Components.Lucene;
+using Satrabel.OpenFiles.Components.Lucene.Mapping;
 
 #endregion
 
@@ -42,33 +43,7 @@ namespace Satrabel.OpenFiles.Components.ExternalData
             {
                 foreach (var file in files)
                 {
-                    var indexData = new LuceneIndexItem()
-                    {
-                        PortalId = portalId,
-                        FileId = file.FileId,
-                        FileName = file.FileName,
-                        Folder = file.Folder.TrimEnd('/'),
-                        //Title = "",
-                        //Description = "",
-                        FileContent = GetFileContent(file.FileName, file)
-                    };
-
-                    JObject custom = GetCustomFileDataAsJObject(file);
-                    if (custom["meta"] != null && custom["meta"].HasValues)
-                    {
-                        indexData.Meta = custom["meta"].ToString();
-                        //if (custom["meta"]["title"] != null)
-                        //    indexData.Title = custom["meta"]["title"].ToString();
-                        //if (custom["meta"]["description"] != null)
-                        //    indexData.Description = custom["meta"]["description"].ToString();
-                        //if (custom["meta"]["publicationdate"] != null)
-                        //    indexData.PublicationDate = DateTime.Parse(custom["meta"]["publicationdate"].ToString());
-                        //if (custom["meta"]["category"] is JArray)
-                        //    foreach (JToken item in (custom["meta"]["category"] as JArray))
-                        //    {
-                        //        indexData.Categories.Add(item.ToString());
-                        //    }
-                    }
+                    var indexData = DnnFilesMappingUtils.CreateLuceneItem(file);
                     searchDocuments.Add(indexData);
                 }
             }
@@ -80,7 +55,9 @@ namespace Satrabel.OpenFiles.Components.ExternalData
             return searchDocuments;
         }
 
-        private static string GetFileContent(string filename, IFileInfo file)
+
+
+        internal static string GetFileContent(string filename, IFileInfo file)
         {
             try
             {
@@ -118,7 +95,7 @@ namespace Satrabel.OpenFiles.Components.ExternalData
             return "";
         }
 
-        private static JObject GetCustomFileDataAsJObject(IFileInfo f)
+        internal static JObject GetCustomFileDataAsJObject(IFileInfo f)
         {
             if (f.ContentItemID > 0)
             {

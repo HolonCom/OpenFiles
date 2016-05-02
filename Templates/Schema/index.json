@@ -1,40 +1,40 @@
 {
-	"fields": {
-		"title": {
-			"indexType": "text", /*text, date, time, datetime, boolean, float, int, double, html, key(, url, file, image)*/
-			"index": true,
-			"sort": true
-		},
-		"description": {
-			"index": true,
-			"sort": true
-		},
-		"publicationdate": {
-			"indexType": "datetime",
-			"index": true,
-			"sort": true
-		},
-		"category": {
-			"items": {
-			    "indexType": "text", 
-				"index": true,
-				"sort": true
-			}
-		},
-		"publishstartdate": {
-			"indexType": "datetime",
-			"index": true,
-			"sort": true
-		},
-		"publishenddate": {
-			"indexType": "datetime",
-			"index": true,
-			"sort": true
-		},
-		"publishstatus": {
-		    "indexType": "text", 
-			"index": true,
-			"sort": true
-		}
-	}
+    "fields": {
+        "title": {
+            "indexType": "text", /*text, date, time, datetime, boolean, float, int, double, html, key(, url, file, image)*/
+            "index": true,
+            "sort": true
+        },
+        "description": {
+            "index": true,
+            "sort": true
+        },
+        "publicationdate": {
+            "indexType": "datetime",
+            "index": true,
+            "sort": true
+        },
+        "category": {
+            "items": {
+                "indexType": "text",
+                "index": true,
+                "sort": true
+            }
+        },
+        "publishstartdate": {
+            "indexType": "datetime",
+            "index": true,
+            "sort": true
+        },
+        "publishenddate": {
+            "indexType": "datetime",
+            "index": true,
+            "sort": true
+        },
+        "publishstatus": {
+            "indexType": "text",
+            "index": true,
+            "sort": true
+        }
+    }
 }

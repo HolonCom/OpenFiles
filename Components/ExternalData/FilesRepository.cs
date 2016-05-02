@@ -14,12 +14,12 @@ namespace Satrabel.OpenFiles.Components.ExternalData
 {
     public static class FilesRepository
     {
-        internal static FieldConfig GetIndexJson()
+        internal static FieldConfig GetIndexConfig()
         {
             var file = new FileUri(Config.Instance.PortalFolder, "index.json");
             if (!file.FileExists)
             {
-                file = new FileUri(Config.Instance.DesktopModulesFolder, "index.json");
+                file = new FileUri(Config.Instance.SchemaFolder, "index.json");
             }
             if (file.FileExists)
             {

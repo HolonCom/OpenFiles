@@ -267,6 +267,7 @@
     <Content Include="Config\processing.config" />
     <Content Include="Config\security.config" />
     <Content Include="Providers\DataProviders\SqlDataProvider\02.00.00.SqlDataProvider" />
+    <Content Include="Templates\Schema\index.json" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>

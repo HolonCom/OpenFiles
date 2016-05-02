@@ -24,6 +24,7 @@ using Satrabel.OpenContent.Components.Datasource.search;
 using Satrabel.OpenContent.Components.Lucene.Config;
 using Satrabel.OpenContent.Components.JPList;
 using Satrabel.OpenFiles.Components.ExternalData;
+using Satrabel.OpenFiles.Components.Lucene.Mapping;
 
 namespace Satrabel.OpenFiles.Components.JPList
 {
@@ -41,7 +42,7 @@ namespace Satrabel.OpenFiles.Components.JPList
 
                 QueryBuilder queryBuilder = new QueryBuilder();
                 queryBuilder.BuildFilter(PortalSettings.PortalId, req.folder);
-                JplistQueryBuilder.MergeJpListQuery(FilesRepository.GetIndexJson(), queryBuilder.Select, req.StatusLst);
+                JplistQueryBuilder.MergeJpListQuery(FilesRepository.GetIndexConfig(), queryBuilder.Select, req.StatusLst);
 
                 string curFolder = NormalizePath(req.folder);
                 foreach (var item in queryBuilder.Select.Query.FilterRules.Where(f => f.Field == "Folder"))
@@ -65,6 +66,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 var breadcrumbs = new List<IFolderInfo>();
                 if (req.withSubFolder)
                 {
+                    //hier blijken we resultaten toe te voegen die niet uit lucene komen
                     breadcrumbs = AddFolders(NormalizePath(req.folder), curFolder, fileManager, data, ratio);
                 }
 
@@ -74,7 +76,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                     if (f == null)
                     {
                         //file seems to have been deleted
-                        LuceneController.Instance.Delete(doc.FileId, doc.PortalId);
+                        LuceneController.Instance.Delete(DnnFilesMappingUtils.CreateLuceneItem(doc.PortalId, doc.FileId));
                         total -= 1;
                     }
                     else
@@ -158,7 +160,6 @@ namespace Satrabel.OpenFiles.Components.JPList
         }
         private List<IFolderInfo> AddFolders(string baseFolder, string curFolder, IFileManager fileManager, List<FileDTO> data, Ratio ratio)
         {
-
             var folderManager = FolderManager.Instance;
             var folder = folderManager.GetFolder(PortalSettings.PortalId, curFolder);
             var folders = folderManager.GetFolders(folder);
@@ -179,22 +180,11 @@ namespace Satrabel.OpenFiles.Components.JPList
                 if (firstFile == null)
                 {
                     firstFile = files.OrderBy(fi => fi.FileName).FirstOrDefault();
-                    //firstFile = folderManager.GetFiles(f, true).OrderBy(fi => fi.FileName).FirstOrDefault();
                 }
                 if (firstFile != null)
                 {
                     var custom = GetCustomFileDataAsDynamic(firstFile);
-                    //dynamic title = null;
-                    //if (custom != null && custom.meta != null)
-                    //{
-                    //    try
-                    //    {
-                    //        title = Normalize.DynamicValue(custom.meta.title, "");
-                    //    }
-                    //    catch (Exception)
-                    //    {
-                    //    }
-                    //}
+                  
                     dto.FileName = firstFile.FileName;
                     dto.Url = fileManager.GetUrl(firstFile);
 
@@ -272,6 +262,9 @@ namespace Satrabel.OpenFiles.Components.JPList
         {
             get
             {
+
+
+
                 //Perform tri-state switch check to avoid having to perform a security
                 //role lookup on every property access (instead caching the result)
                 if (!_isEditable.HasValue)
