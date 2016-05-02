@@ -240,7 +240,6 @@ namespace Satrabel.OpenFiles.Components.Lucene
             }
         }
 
-
         public void Delete(Query query)
         {
             Requires.NotNull("luceneQuery", query);

@@ -43,7 +43,7 @@ namespace Satrabel.OpenFiles.Components.ExternalData
             {
                 foreach (var file in files)
                 {
-                    var indexData = DnnFilesMappingUtils.CreateLuceneItem(file);
+                    var indexData = LuceneMappingUtils.CreateLuceneItem(file);
                     searchDocuments.Add(indexData);
                 }
             }
@@ -55,41 +55,35 @@ namespace Satrabel.OpenFiles.Components.ExternalData
             return searchDocuments;
         }
 
-
-
-        internal static string GetFileContent(string filename, IFileInfo file)
+        internal static string GetFileContent(IFileInfo file)
         {
             try
             {
-                string extension = Path.GetExtension(filename);
+                string extension = Path.GetExtension(file.FileName);
+
                 if (extension == ".pdf")
                 {
-                    if (File.Exists(file.PhysicalPath))
+                    var fileContent = FileManager.Instance.GetFileContent(file);
+                    if (fileContent != null)
                     {
-                        var fileContent = FileManager.Instance.GetFileContent(file);
-                        if (fileContent != null)
-                        {
-                            return PdfParser.ReadPdfFile(fileContent);
-                        }
+                        return PdfParser.ReadPdfFile(fileContent);
                     }
                 }
                 else if (extension == ".txt")
                 {
-                    if (File.Exists(file.PhysicalPath))
+                    var fileContent = FileManager.Instance.GetFileContent(file);
+                    if (fileContent != null)
                     {
-                        var fileContent = FileManager.Instance.GetFileContent(file);
-                        if (fileContent != null)
+                        using (var reader = new StreamReader(fileContent, Encoding.UTF8))
                         {
-                            using (var reader = new StreamReader(fileContent, Encoding.UTF8))
-                            {
-                                return reader.ReadToEnd();
-                            }
+                            return reader.ReadToEnd();
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
+                string filename = file == null ? "unknown filename. IFileInfo is null." : file.FileName;
                 Log.Logger.WarnFormat("Ignoring file [{0}]. Failed reading content. Error: {1}", filename, ex.Message);
             }
             return "";

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using DotNetNuke.Services.FileSystem;
 using Lucene.Net.Analysis;
@@ -18,7 +19,7 @@ using Satrabel.OpenFiles.Components.ExternalData;
 
 namespace Satrabel.OpenFiles.Components.Lucene.Mapping
 {
-    public static class DnnFilesMappingUtils
+    public static class LuceneMappingUtils
     {
         #region Consts
 
@@ -29,7 +30,8 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
         /// </summary>
         public static readonly string ItemTypeField = "$type";
         public static readonly string TenantField = "$tenant";
-        public static readonly string ItemIdField = "$id";
+
+
         /// <summary>
         /// The name of the field which holds the JSON-serialized source of the object.
         /// </summary>
@@ -39,12 +41,14 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
         /// The name of the field which holds the timestamp when the document was created.
         /// </summary>
         public static readonly string FieldTimestamp = "$timestamp";
-        #endregion
+        public static readonly string ItemIdField = "$id";
 
-        //internal static string[] GetSearchAllFieldList()
-        //{
-        //    return new[] { "PortalId", "FileId", "FileName", "Title", "Description", "PublicationDate", "FileContent", "Category" };
-        //}
+        public static readonly string PortalIdField = "portalid";
+        public static readonly string FileIdField = "fileid";
+        public static readonly string FileNameField = "filename";
+        public static readonly string FolderField = "folder";
+
+        #endregion
 
         public static Document CreateLuceneDocument(LuceneIndexItem data, bool storeSource = false)
         {
@@ -64,11 +68,11 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
             }
             luceneDoc.Add(new NumericField(FieldTimestamp, Field.Store.YES, true).SetLongValue(DateTime.UtcNow.Ticks));
 
-            luceneDoc.Add(new Field("PortalId", item.PortalId.ToString(), Field.Store.YES, Field.Index.ANALYZED));
-            luceneDoc.Add(new Field("FileId", item.FileId.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-            luceneDoc.Add(new Field("FileName", item.FileName, Field.Store.YES, Field.Index.ANALYZED));
-            luceneDoc.Add(new Field("Folder", item.Folder, Field.Store.YES, Field.Index.NOT_ANALYZED));
-            luceneDoc.Add(new Field("FileContent", string.IsNullOrEmpty(item.FileContent) ? "" : item.FileContent, Field.Store.YES, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field(PortalIdField, item.PortalId.ToString(), Field.Store.YES, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field("fileid", item.FileId.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
+            luceneDoc.Add(new Field("filename", item.FileName, Field.Store.YES, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field(FolderField, item.Folder, Field.Store.YES, Field.Index.NOT_ANALYZED));
+            luceneDoc.Add(new Field("filecontent", string.IsNullOrEmpty(item.FileContent) ? "" : item.FileContent, Field.Store.YES, Field.Index.ANALYZED));
             var objectMapper = new JsonObjectMapper();
             objectMapper.AddJsonToDocument(item.Meta, luceneDoc, config);
 
@@ -79,11 +83,12 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
         {
             return new LuceneIndexItem(ItemTypeValue, doc.Get(TenantField), doc.Get(ItemIdField))
             {
-                PortalId = Convert.ToInt32(doc.Get("PortalId")),
-                FileId = Convert.ToInt32(doc.Get("FileId")),
-                FileName = doc.Get("FileName"),
-                FileContent = doc.Get("FileContent"),
-                Meta = doc.Get("Meta"),
+                PortalId = Convert.ToInt32(doc.Get(PortalIdField)),
+                FileId = Convert.ToInt32(doc.Get("fileid")),
+                FileName = doc.Get("filename"),
+                Folder = doc.Get(FolderField),
+                FileContent = doc.Get("filecontent"),
+                Meta = doc.Get("meta"),
             };
         }
 
@@ -101,7 +106,7 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
                 FileId = file.FileId,
                 FileName = file.FileName,
                 Folder = file.Folder.TrimEnd('/'),
-                FileContent = DnnFilesRepository.GetFileContent(file.FileName, file)
+                FileContent = DnnFilesRepository.GetFileContent(file)
             };
 
             JObject custom = DnnFilesRepository.GetCustomFileDataAsJObject(file);
@@ -111,32 +116,7 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
             }
             return indexData;
         }
-
-
-        public static Analyzer GetAnalyser()
-        {
-            var analyser = new StandardAnalyzer(global::Lucene.Net.Util.Version.LUCENE_30);
-            return analyser;
-        }
-
-        public static Query GetDeleteQuery(LuceneIndexItem data)
-        {
-            var selection = new TermQuery(new Term(DnnFilesMappingUtils.GetIndexFieldName(), DnnFilesMappingUtils.GetIndexFieldValue(data)));
-            return new FilteredQuery(selection, DnnFilesMappingUtils.GetTypeTenantFilter(ItemTypeValue, data.PortalId.ToString()));
-        }
-
-        #region private methods
-
-        private static string GetIndexFieldName()
-        {
-            return "FileId";
-        }
-
-        private static string GetIndexFieldValue(LuceneIndexItem data)
-        {
-            return data.FileId.ToString();
-        }
-
+		
         private static Filter GetTypeTenantFilter(string type, string tenant)
         {
             var query = new BooleanQuery();
@@ -150,6 +130,31 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
             Filter filter = new QueryWrapperFilter(query);
             return filter;
         }
+
+        public static Analyzer GetAnalyser()
+        {
+            var analyser = new StandardAnalyzer(global::Lucene.Net.Util.Version.LUCENE_30);
+            return analyser;
+        }
+
+        public static Query GetDeleteQuery(LuceneIndexItem data)
+        {
+            var selection = new TermQuery(new Term(LuceneMappingUtils.GetIndexFieldName(), LuceneMappingUtils.GetIndexFieldValue(data)));
+            return new FilteredQuery(selection, LuceneMappingUtils.GetTypeTenantFilter(ItemTypeValue, data.PortalId.ToString()));
+        }
+
+        #region private methods
+
+        private static string GetIndexFieldName()
+        {
+            return FileIdField;
+        }
+
+        private static string GetIndexFieldValue(LuceneIndexItem data)
+        {
+            return data.FileId.ToString();
+        }
+
 
         #endregion
     }

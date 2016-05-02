@@ -16,10 +16,10 @@ namespace Satrabel.OpenFiles.Components.ExternalData
     {
         internal static FieldConfig GetIndexConfig()
         {
-            var file = new FileUri(Config.Instance.PortalFolder, "index.json");
+            var file = new FileUri(AppConfig.Instance.PortalFolder, "index.json");
             if (!file.FileExists)
             {
-                file = new FileUri(Config.Instance.SchemaFolder, "index.json");
+                file = new FileUri(AppConfig.Instance.SchemaFolder, "index.json");
             }
             if (file.FileExists)
             {

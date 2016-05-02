@@ -45,7 +45,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 JplistQueryBuilder.MergeJpListQuery(FilesRepository.GetIndexConfig(), queryBuilder.Select, req.StatusLst);
 
                 string curFolder = NormalizePath(req.folder);
-                foreach (var item in queryBuilder.Select.Query.FilterRules.Where(f => f.Field == "Folder"))
+                foreach (var item in queryBuilder.Select.Query.FilterRules.Where(f => f.Field == LuceneMappingUtils.FolderField))
                 {
                     curFolder = NormalizePath(item.Value.AsString);
                     item.Value = new StringRuleValue(NormalizePath(item.Value.AsString)); //any file of current folder
@@ -76,7 +76,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                     if (f == null)
                     {
                         //file seems to have been deleted
-                        LuceneController.Instance.Delete(DnnFilesMappingUtils.CreateLuceneItem(doc.PortalId, doc.FileId));
+                        LuceneController.Instance.Delete(LuceneMappingUtils.CreateLuceneItem(doc.PortalId, doc.FileId));
                         total -= 1;
                     }
                     else
@@ -117,39 +117,20 @@ namespace Satrabel.OpenFiles.Components.JPList
                     }
                 }
 
-                //Sort as requested
-                //data = SortAsRequested(data, jpListQuery);
-
-                //Page as requested
-                //if (jpListQuery.Pagination.number > 0)
-                //    data = data.Skip((jpListQuery.Pagination.currentPage) * jpListQuery.Pagination.number).Take(jpListQuery.Pagination.number).ToList();
-
-                if (req.withSubFolder)
-                {
-                    var res = new ResultExtDTO<FileDTO>()
-                    {
-                        data = new ResultDataDTO<FileDTO>()
-                        {
-                            items = data,
-                            breadcrumbs = breadcrumbs.Select(f => new ResultBreadcrumbDTO
-                            {
-                                name = f.FolderName,
-                                path = f.FolderPath.Trim('/')
-                            })
-                        },
-                        count = total
-                    };
-                    return Request.CreateResponse(HttpStatusCode.OK, res);
-                }
-                else
-                {
-                    var res = new ResultDTO<FileDTO>()
-                    {
-                        data = data,
-                        count = total
-                    };
-                    return Request.CreateResponse(HttpStatusCode.OK, res);
-                }
+                var res = new ResultExtDTO<FileDTO>()
+                     {
+                         data = new ResultDataDTO<FileDTO>()
+                         {
+                             items = data,
+                             breadcrumbs = breadcrumbs.Select(f => new ResultBreadcrumbDTO
+                             {
+                                 name = f.FolderName,
+                                 path = f.FolderPath.Trim('/')
+                             })
+                         },
+                         count = total
+                     };
+                return Request.CreateResponse(HttpStatusCode.OK, res);
 
             }
             catch (Exception exc)
@@ -184,7 +165,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 if (firstFile != null)
                 {
                     var custom = GetCustomFileDataAsDynamic(firstFile);
-                  
+
                     dto.FileName = firstFile.FileName;
                     dto.Url = fileManager.GetUrl(firstFile);
 

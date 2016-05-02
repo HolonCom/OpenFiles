@@ -1,9 +1,7 @@
 ﻿using Satrabel.OpenContent.Components.Datasource.search;
 using Satrabel.OpenContent.Components.JPList;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Satrabel.OpenFiles.Components.JPList
 {
@@ -17,23 +15,22 @@ namespace Satrabel.OpenFiles.Components.JPList
         }
         internal void BuildFilter(int portalId, string folder)
         {
-
-            var Filter = Select.Filter;
-            Filter.AddRule(new FilterRule()
+            var filter = Select.Filter;
+            filter.AddRule(new FilterRule()
             {
-                Field = "PortalId",
+                Field = Lucene.Mapping.LuceneMappingUtils.PortalIdField,
                 FieldType = FieldTypeEnum.INTEGER,
                 FieldOperator = OperatorEnum.EQUAL,
                 Value = new IntegerRuleValue(portalId)
             });
             if (!string.IsNullOrEmpty(folder))
             {
-                string WildCardSearchValue = NormalizePath(folder);
-                Filter.AddRule(new FilterRule()
+                string wildCardSearchValue = NormalizePath(folder);
+                filter.AddRule(new FilterRule()
                 {
-                    Field = "Folder",
+                    Field = Lucene.Mapping.LuceneMappingUtils.FolderField,
                     FieldOperator = OperatorEnum.START_WITH,
-                    Value = new StringRuleValue(WildCardSearchValue)
+                    Value = new StringRuleValue(wildCardSearchValue)
                 });
             }
             //Filter = Filter.FilterRules.Any() || Filter.FilterGroups.Any() > 0 ? q : null;
@@ -43,7 +40,6 @@ namespace Satrabel.OpenFiles.Components.JPList
         {
             filePath = filePath.Replace("\\", "/");
             filePath = filePath.Trim('~');
-            //filePath = filePath.TrimStart(NormalizedApplicationPath);
             filePath = filePath.Trim('/');
             return filePath;
         }
@@ -58,7 +54,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 {
                     case "paging":
                         {
-                            int number = 100000;
+                            int number;
                             //  string value (it could be number or "all")
                             int.TryParse(status.data.number, out number);
                             select.PageSize = number;
@@ -74,19 +70,19 @@ namespace Satrabel.OpenFiles.Components.JPList
                                 {
                                     query.AddRule(new FilterRule()
                                     {
-                                        Field = status.name,
+                                        Field = status.name.ToLowerInvariant(),
                                         FieldOperator = OperatorEnum.START_WITH,
                                         Value = new StringRuleValue(status.data.value),
                                     });
                                 }
                                 else
                                 {
-                                    var group = new FilterGroup() { Condition=ConditionEnum.OR};
+                                    var group = new FilterGroup() { Condition = ConditionEnum.OR };
                                     foreach (var n in names)
                                     {
                                         group.AddRule(new FilterRule()
                                         {
-                                            Field = n,
+                                            Field = n.ToLowerInvariant(),
                                             FieldOperator = OperatorEnum.START_WITH,
                                             Value = new StringRuleValue(status.data.value),
                                         });
@@ -101,7 +97,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                                 {
                                     query.AddRule(new FilterRule()
                                     {
-                                        Field = status.name,
+                                        Field = status.name.ToLowerInvariant(),
                                         FieldOperator = OperatorEnum.IN,
                                         MultiValue = status.data.pathGroup.Select(s => new StringRuleValue(s)),
                                     });
@@ -113,7 +109,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                                 {
                                     query.AddRule(new FilterRule()
                                     {
-                                        Field = status.name,
+                                        Field = status.name.ToLowerInvariant(),
                                         Value = new StringRuleValue(status.data.path),
                                     });
                                 }
@@ -126,7 +122,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                             select.Sort.Clear();
                             select.Sort.Add(new SortRule()
                             {
-                                Field = status.data.path,
+                                Field =  status.data.path.ToLowerInvariant(),
                                 Descending = status.data.order == "desc",
                                 //FieldType = FieldTypeEnum.
                             });

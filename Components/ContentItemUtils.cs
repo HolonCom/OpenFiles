@@ -39,7 +39,7 @@ namespace Satrabel.OpenFiles.Components
             Util.GetContentController().UpdateContentItem(item);
 
 
-            LuceneController.Instance.Update(DnnFilesMappingUtils.CreateLuceneItem(file));
+            LuceneController.Instance.Update(LuceneMappingUtils.CreateLuceneItem(file));
             LuceneController.Instance.Store.Commit();
 
             FileManager.Instance.UpdateFile(file);

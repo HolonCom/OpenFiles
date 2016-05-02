@@ -6,6 +6,7 @@ using DotNetNuke.Services.Localization;
 using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.Alpaca;
 using Satrabel.OpenFiles.Components;
+using AppConfig = Satrabel.OpenFiles.Components.AppConfig;
 
 namespace Satrabel.OpenFiles.DigitalAssets
 {
@@ -30,9 +31,9 @@ namespace Satrabel.OpenFiles.DigitalAssets
 
             //************************
 
-            var virtualFolderOfSchemaFiles = Config.Instance.SchemaFolder;
+            var virtualFolderOfSchemaFiles = AppConfig.Instance.SchemaFolder;
 
-            var portalFolder = Config.Instance.PortalFolder;
+            var portalFolder = AppConfig.Instance.PortalFolder;
             if (!portalFolder.FolderExists)
             {
                 Directory.CreateDirectory(portalFolder.PhysicalFullDirectory);
@@ -41,7 +42,7 @@ namespace Satrabel.OpenFiles.DigitalAssets
             var schemaFile = new FileUri(portalFolder, "schema.json");
             if (schemaFile.FileExists)
             {
-                virtualFolderOfSchemaFiles = Config.Instance.PortalFolder;
+                virtualFolderOfSchemaFiles = AppConfig.Instance.PortalFolder;
             }
 
             AlpacaEngine alpaca = new AlpacaEngine(Page, ModuleContext, virtualFolderOfSchemaFiles.FolderPath, "");
