@@ -44,7 +44,7 @@ namespace Satrabel.OpenFiles.Components
                     if (item != null && !string.IsNullOrEmpty(item.Content))
                     {
                         JObject dataJson = JObject.Parse(item.Content);
-                        json["data"] = dataJson["meta"];
+                        json["data"] = dataJson[Lucene.Mapping.LuceneMappingUtils.MetaField];
                     }
                 }
 

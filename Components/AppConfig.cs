@@ -13,15 +13,23 @@ namespace Satrabel.OpenFiles.Components
 
         private AppConfig()
         {
-            var ps = PortalSettings.Current;
-            PortalFolder = new PortalFolderUri(ps.PortalId, ps.HomeDirectory + "/OpenFiles/");
         }
 
         public FolderUri SchemaFolder
         {
             get { return new FolderUri("~/DesktopModules/OpenFiles/Templates/Schema/"); }
         }
-        public FolderUri PortalFolder { get; private set; }
+        public FolderUri PortalFolder
+        {
+            get
+            {
+                var ps = PortalSettings.Current;
+                if (ps != null)
+                    return new PortalFolderUri(ps.PortalId, ps.HomeDirectory + "/OpenFiles/");
+                Log.Logger.WarnFormat("Cannot determine PortalFolder as Portalsettings is NULL");
+                return null;
+            }
+        }
 
         public bool CaseSensitiveFieldNames { get { return false; } }
         public string LuceneIndexFolder { get { return @"App_Data\OpenFiles\LuceneIndex"; } }

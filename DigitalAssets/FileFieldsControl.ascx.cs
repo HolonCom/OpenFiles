@@ -63,7 +63,7 @@ namespace Satrabel.OpenFiles.DigitalAssets
         public override object SaveProperties()
         {
             var file = base.SaveProperties();
-            ContentItemUtils.Save(File, "meta", hfAlpacaData.Value);
+            ContentItemUtils.Save(File, Components.Lucene.Mapping.LuceneMappingUtils.MetaField, hfAlpacaData.Value);
             return file;
         }
         public int ContentItemId
