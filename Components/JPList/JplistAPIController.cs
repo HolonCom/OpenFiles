@@ -18,6 +18,7 @@ using System.Web.Http;
 using DotNetNuke.Common;
 using DotNetNuke.Entities.Portals;
 using DotNetNuke.Security.Permissions;
+using DotNetNuke.Services.Personalization;
 using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.TemplateHelpers;
 using Satrabel.OpenContent.Components.Datasource.search;
@@ -250,6 +251,18 @@ namespace Satrabel.OpenFiles.Components.JPList
                 //role lookup on every property access (instead caching the result)
                 if (!_isEditable.HasValue)
                 {
+                    //first check some weird Dnn issue
+                    if (HttpContext.Current != null && HttpContext.Current.Request.IsAuthenticated)
+                    {
+                        var personalization = (PersonalizationInfo)HttpContext.Current.Items["Personalization"];
+                        if (personalization != null && personalization.UserId == -1)
+                        {
+                            //this should never happen. 
+                            //Let us make sure that the wrong value is no longer cached 
+                            HttpContext.Current.Items.Remove("Personalization");
+                        }
+                    }
+
                     bool blnPreview = (PortalSettings.UserMode == PortalSettings.Mode.View);
                     if (Globals.IsHostTab(PortalSettings.ActiveTab.TabID))
                     {
