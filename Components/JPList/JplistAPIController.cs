@@ -194,59 +194,11 @@ namespace Satrabel.OpenFiles.Components.JPList
 
         #region Private Methods
 
-        private List<FileDTO> SortAsRequested(List<FileDTO> data, JpListQueryDTO jpListQuery)
-        {
-            //This implementation is not more than a hack for one project.
-            //todo add support for multiple sorting field
-            //todo add support for other sorting fields
-            //todo refactor to using Func<> to support more flexible approach
-
-            if (data.Count == 0) return data;
-
-            List<FileDTO> newdata = null;
-            foreach (var sort in jpListQuery.Sorts)
-            {
-                if (string.Equals(sort.path, "LastModifiedOnDate", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    if (string.Equals(sort.order, "desc", StringComparison.InvariantCultureIgnoreCase))
-                        newdata = data.OrderByDescending(i => i.LastModifiedOnDate).ToList();
-                    else
-                        newdata = data.OrderBy(i => i.LastModifiedOnDate).ToList();
-                }
-                else if (string.Equals(sort.path, "Name", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    if (string.Equals(sort.order, "desc", StringComparison.InvariantCultureIgnoreCase))
-                        newdata = data.OrderByDescending(i => i.Name).ToList();
-                    else
-                        newdata = data.OrderBy(i => i.Name).ToList();
-                }
-                else if (string.Equals(sort.path, "FileName", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    if (string.Equals(sort.order, "desc", StringComparison.InvariantCultureIgnoreCase))
-                        newdata = data.OrderByDescending(i => i.FileName).ToList();
-                    else
-                        newdata = data.OrderBy(i => i.FileName).ToList();
-                }
-                else if (string.Equals(sort.path, "Description", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    if (string.Equals(sort.order, "desc", StringComparison.InvariantCultureIgnoreCase))
-                        newdata = data.OrderByDescending(i => i.Custom.Description).ToList();
-                    else
-                        newdata = data.OrderBy(i => i.FileName).ToList();
-                }
-
-            }
-            return newdata ?? data;
-        }
-
         private bool? _isEditable;
         private bool IsEditable
         {
             get
             {
-
-
-
                 //Perform tri-state switch check to avoid having to perform a security
                 //role lookup on every property access (instead caching the result)
                 if (!_isEditable.HasValue)
