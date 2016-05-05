@@ -15,25 +15,10 @@ namespace Satrabel.OpenFiles.DigitalAssets
         protected override void OnInit(EventArgs e)
         {
             base.OnInit(e);
-            //string virtualFolderOfSchemaFiles = Config.Instance.SchemaFolder.FolderPath;
-
-            //string portalFolder =  HostingEnvironment.MapPath(PortalSettings.HomeDirectory + "/OpenFiles/");
-            //if (!Directory.Exists(portalFolder))
-            //{
-            //    Directory.CreateDirectory(portalFolder);
-            //}
-
-            //string schemaFilename = portalFolder + "schema.json";
-            //if (System.IO.File.Exists(schemaFilename))
-            //{
-            //    virtualFolderOfSchemaFiles = Config.Instance.PortalFolder.FolderPath;
-            //}
-
-            //************************
 
             var virtualFolderOfSchemaFiles = AppConfig.Instance.SchemaFolder;
 
-            var portalFolder = AppConfig.Instance.PortalFolder;
+            var portalFolder = AppConfig.Instance.PortalFolder(PortalSettings);
             if (!portalFolder.FolderExists)
             {
                 Directory.CreateDirectory(portalFolder.PhysicalFullDirectory);
@@ -42,7 +27,7 @@ namespace Satrabel.OpenFiles.DigitalAssets
             var schemaFile = new FileUri(portalFolder, "schema.json");
             if (schemaFile.FileExists)
             {
-                virtualFolderOfSchemaFiles = AppConfig.Instance.PortalFolder;
+                virtualFolderOfSchemaFiles = AppConfig.Instance.PortalFolder(PortalSettings);
             }
 
             AlpacaEngine alpaca = new AlpacaEngine(Page, ModuleContext, virtualFolderOfSchemaFiles.FolderPath, "");

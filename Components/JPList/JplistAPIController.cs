@@ -42,7 +42,7 @@ namespace Satrabel.OpenFiles.Components.JPList
 
                 QueryBuilder queryBuilder = new QueryBuilder();
                 queryBuilder.BuildFilter(PortalSettings.PortalId, req.folder);
-                JplistQueryBuilder.MergeJpListQuery(FilesRepository.GetIndexConfig(), queryBuilder.Select, req.StatusLst);
+                JplistQueryBuilder.MergeJpListQuery(FilesRepository.GetIndexConfig(PortalSettings), queryBuilder.Select, req.StatusLst);
 
                 string curFolder = NormalizePath(req.folder);
                 foreach (var item in queryBuilder.Select.Query.FilterRules.Where(f => f.Field == LuceneMappingUtils.FolderField))

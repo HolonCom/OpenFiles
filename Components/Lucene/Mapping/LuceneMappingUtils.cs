@@ -52,13 +52,7 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
 
         #endregion
 
-        public static Document CreateLuceneDocument(LuceneIndexItem data, bool storeSource = false)
-        {
-            FieldConfig indexJson = FilesRepository.GetIndexConfig();
-            return CreateLuceneDocument(data, indexJson, storeSource);
-        }
-
-        private static Document CreateLuceneDocument(LuceneIndexItem item, FieldConfig config, bool storeSource = false)
+        internal static Document CreateLuceneDocument(LuceneIndexItem item, FieldConfig config, bool storeSource = false)
         {
             Document luceneDoc = new Document();
             luceneDoc.Add(new Field(ItemTypeField, item.Type, Field.Store.YES, Field.Index.NOT_ANALYZED));

@@ -19,16 +19,21 @@ namespace Satrabel.OpenFiles.Components
         {
             get { return new FolderUri("~/DesktopModules/OpenFiles/Templates/Schema/"); }
         }
-        public FolderUri PortalFolder
+        public FolderUri PortalFolder(PortalSettings ps)
         {
-            get
-            {
-                var ps = PortalSettings.Current;
-                if (ps != null)
-                    return new PortalFolderUri(ps.PortalId, ps.HomeDirectory + "/OpenFiles/");
-                Log.Logger.WarnFormat("Cannot determine PortalFolder as Portalsettings is NULL");
-                return null;
-            }
+            //var ps = PortalSettings.Current;
+            if (ps != null)
+                return new PortalFolderUri(ps.PortalId, ps.HomeDirectory + "/OpenFiles/");
+            Log.Logger.WarnFormat("Cannot determine PortalFolder as Portalsettings is NULL");
+            return null;
+        }
+
+        public FolderUri PortalFolder(PortalInfo ps)
+        {
+            if (ps != null)
+                return new PortalFolderUri(ps.PortalID, ps.HomeDirectory + "/OpenFiles/");
+            Log.Logger.WarnFormat("Cannot determine PortalFolder as PortalInfo is NULL");
+            return null;
         }
 
         public bool CaseSensitiveFieldNames { get { return false; } }

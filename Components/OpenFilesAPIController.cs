@@ -37,7 +37,7 @@ namespace Satrabel.OpenFiles.Components
         {
             try
             {
-                JObject json = FilesRepository.GetSchemaAndOptionsJson(AppConfig.Instance.SchemaFolder, AppConfig.Instance.PortalFolder, "");
+                JObject json = FilesRepository.GetSchemaAndOptionsJson(AppConfig.Instance.SchemaFolder, AppConfig.Instance.PortalFolder(PortalSettings), "");
                 if (id > 0)
                 {
                     var item = Util.GetContentController().GetContentItem(id);
@@ -70,7 +70,7 @@ namespace Satrabel.OpenFiles.Components
                 string templateFilename = HostingEnvironment.MapPath("~/" + Template);
                 string prefix = Path.GetFileNameWithoutExtension(templateFilename) + "-";
 
-                JObject json = FilesRepository.GetSchemaAndOptionsJson(AppConfig.Instance.SchemaFolder, AppConfig.Instance.PortalFolder, prefix);
+                JObject json = FilesRepository.GetSchemaAndOptionsJson(AppConfig.Instance.SchemaFolder, AppConfig.Instance.PortalFolder(PortalSettings), prefix);
 
                 if (!string.IsNullOrEmpty(data))
                 {
@@ -118,7 +118,7 @@ namespace Satrabel.OpenFiles.Components
             //string Template = "DesktopModules/OpenFiles/";
             try
             {
-                JObject json = FilesRepository.GetSchemaAndOptionsJson(AppConfig.Instance.SchemaFolder, AppConfig.Instance.PortalFolder, "images");
+                JObject json = FilesRepository.GetSchemaAndOptionsJson(AppConfig.Instance.SchemaFolder, AppConfig.Instance.PortalFolder(PortalSettings), "images");
 
                 //int moduleId = ActiveModule.ModuleID;
                 if (id > 0)

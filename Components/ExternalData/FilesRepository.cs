@@ -14,9 +14,31 @@ namespace Satrabel.OpenFiles.Components.ExternalData
 {
     public static class FilesRepository
     {
-        internal static FieldConfig GetIndexConfig()
+        internal static FieldConfig GetIndexConfig(int portalId)
         {
-            var file = new FileUri(AppConfig.Instance.PortalFolder, "index.json");
+            var portal = PortalController.Instance.GetPortal(portalId);
+            return GetIndexConfig(portal);
+        }
+
+        internal static FieldConfig GetIndexConfig(PortalInfo ps)
+        {
+            var file = new FileUri(AppConfig.Instance.PortalFolder(ps), "index.json");
+            if (!file.FileExists)
+            {
+                file = new FileUri(AppConfig.Instance.SchemaFolder, "index.json");
+            }
+            if (file.FileExists)
+            {
+                string content = File.ReadAllText(file.PhysicalFilePath);
+                var indexConfig = JsonConvert.DeserializeObject<FieldConfig>(content);
+                return indexConfig;
+            }
+            throw new Exception("Can not find index.json");
+        }
+
+        internal static FieldConfig GetIndexConfig(PortalSettings ps)
+        {
+            var file = new FileUri(AppConfig.Instance.PortalFolder(ps), "index.json");
             if (!file.FileExists)
             {
                 file = new FileUri(AppConfig.Instance.SchemaFolder, "index.json");
@@ -82,6 +104,5 @@ namespace Satrabel.OpenFiles.Components.ExternalData
             }
             return json;
         }
-
     }
 }

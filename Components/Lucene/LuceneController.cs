@@ -126,7 +126,8 @@ namespace Satrabel.OpenFiles.Components.Lucene
                         foreach (LuceneIndexItem indexItem in searchDocs)
                         {
                             Delete(indexItem, lc);
-                            lc.Store.Add(LuceneMappingUtils.CreateLuceneDocument(indexItem));
+                            FieldConfig indexJson = FilesRepository.GetIndexConfig(portal);
+                            lc.Store.Add(LuceneMappingUtils.CreateLuceneDocument(indexItem,indexJson));
                         }
                         Log.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
                     }
@@ -175,7 +176,8 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 throw new ArgumentNullException("data");
             }
 
-            Store.Add(LuceneMappingUtils.CreateLuceneDocument(data));
+            FieldConfig indexJson = FilesRepository.GetIndexConfig(data.PortalId);
+            Store.Add(LuceneMappingUtils.CreateLuceneDocument(data, indexJson));
         }
 
         private void Update(LuceneIndexItem data, LuceneController storeInstance)
