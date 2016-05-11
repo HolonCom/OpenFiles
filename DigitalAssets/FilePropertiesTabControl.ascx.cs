@@ -50,7 +50,6 @@ namespace Satrabel.OpenFiles.DigitalAssets
             get
             {
                 return File.ContentItemID;
-
             }
         }
 
