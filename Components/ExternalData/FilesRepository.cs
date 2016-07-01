@@ -47,6 +47,14 @@ namespace Satrabel.OpenFiles.Components.ExternalData
             {
                 string content = File.ReadAllText(file.PhysicalFilePath);
                 var indexConfig = JsonConvert.DeserializeObject<FieldConfig>(content);
+
+                //add system field "Folder"
+                indexConfig.Fields.Add("Folder", new FieldConfig()
+                {
+                    Index = true,
+                    IndexType = "key",
+                    Sort = true
+                });
                 return indexConfig;
             }
             throw new Exception("Can not find index.json");

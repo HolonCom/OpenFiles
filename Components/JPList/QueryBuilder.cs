@@ -29,11 +29,11 @@ namespace Satrabel.OpenFiles.Components.JPList
                 filter.AddRule(new FilterRule()
                 {
                     Field = Lucene.Mapping.LuceneMappingUtils.FolderField,
+                    FieldType = FieldTypeEnum.KEY,
                     FieldOperator = OperatorEnum.START_WITH,
                     Value = new StringRuleValue(wildCardSearchValue)
                 });
             }
-            //Filter = Filter.FilterRules.Any() || Filter.FilterGroups.Any() > 0 ? q : null;
         }
 
         private string NormalizePath(string filePath)
