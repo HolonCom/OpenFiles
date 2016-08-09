@@ -24,6 +24,7 @@ using Satrabel.OpenContent.Components.TemplateHelpers;
 using Satrabel.OpenContent.Components.Datasource.search;
 using Satrabel.OpenContent.Components.Lucene.Config;
 using Satrabel.OpenContent.Components.JPList;
+using Satrabel.OpenContent.Components.Logging;
 using Satrabel.OpenFiles.Components.ExternalData;
 using Satrabel.OpenFiles.Components.Lucene.Mapping;
 
@@ -61,6 +62,15 @@ namespace Satrabel.OpenFiles.Components.JPList
                 var ratio = string.IsNullOrEmpty(req.imageRatio) ? new Ratio(100, 100) : new Ratio(req.imageRatio);
 
                 Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", def.Filter.ToJson() + " / " + def.Query.ToJson(), total);
+
+                //if (LogContext.IsLogActive)
+                //{
+                //    var logKey = "Query";
+                //    LogContext.Log(ActiveModule.ModuleID, logKey, "select", queryBuilder.Select);
+                //    LogContext.Log(ActiveModule.ModuleID, logKey, "result", dsItems);
+                //    LogContext.Log(ActiveModule.ModuleID, logKey, "model", model);
+                //    model["Logs"] = JToken.FromObject(LogContext.Current.ModuleLogs(ActiveModule.ModuleID));
+                //}
 
                 var fileManager = FileManager.Instance;
                 var data = new List<FileDTO>();
