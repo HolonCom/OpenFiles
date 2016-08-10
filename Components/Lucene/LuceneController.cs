@@ -43,7 +43,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
         #region constructor
         private LuceneController()
         {
-            _serviceInstance = new LuceneService(AppConfig.Instance.LuceneIndexFolder , LuceneMappingUtils.GetAnalyser());
+            _serviceInstance = new LuceneService(AppConfig.Instance.LuceneIndexFolder, LuceneMappingUtils.GetAnalyser());
         }
 
         public static void ClearInstance()
@@ -76,11 +76,20 @@ namespace Satrabel.OpenFiles.Components.Lucene
         #region Index
 
         /// <summary>
+        /// Reindex files of a Folder.
+        /// </summary>
+        public void ReIndexFolderFiles(string folder)
+        {
+
+        }
+
+        /// <summary>
         /// Reindex all portal files.
         /// </summary>
         internal void IndexAll()
         {
             Log.Logger.DebugFormat("Lucene index directory [{0}] being initialized.", "OpenFiles");
+            IndexClear();
             IndexFiles(null);
             Log.Logger.DebugFormat("Exiting ReIndexContent");
         }
@@ -108,9 +117,6 @@ namespace Satrabel.OpenFiles.Components.Lucene
             {
                 using (var lc = LuceneController.Instance)
                 {
-                    if (!startDate.HasValue)
-                        lc.Store.DeleteAll();
-
                     var fileIndexer = new DnnFilesRepository();
                     var portals = PortalController.Instance.GetPortals();
                     foreach (var portal in portals.Cast<PortalInfo>())
@@ -127,7 +133,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                         {
                             Delete(indexItem, lc);
                             FieldConfig indexJson = FilesRepository.GetIndexConfig(portal);
-                            lc.Store.Add(LuceneMappingUtils.CreateLuceneDocument(indexItem,indexJson));
+                            lc.Store.Add(LuceneMappingUtils.CreateLuceneDocument(indexItem, indexJson));
                         }
                         Log.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
                     }
@@ -164,7 +170,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
         {
             Delete(data, null);
         }
-       
+
         #endregion
 
         #region Private
@@ -192,7 +198,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         private void Delete(LuceneIndexItem data, LuceneController storeInstance)
         {
-            if (null == data)
+            if (data == null)
             {
                 throw new ArgumentNullException("data");
             }
@@ -202,6 +208,22 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 Store.Delete(deleteQuery);
             else
                 storeInstance.Store.Delete(deleteQuery);
+        }
+
+        private void IndexClear()
+        {
+            LuceneController.ClearInstance();
+            try
+            {
+                using (var lc = LuceneController.Instance)
+                {
+                    lc.Store.DeleteAll();
+                }
+            }
+            finally
+            {
+                LuceneController.ClearInstance();
+            }
         }
 
         /// -----------------------------------------------------------------------------
