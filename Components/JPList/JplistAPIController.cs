@@ -60,7 +60,7 @@ namespace Satrabel.OpenFiles.Components.JPList
 
                 var ratio = string.IsNullOrEmpty(req.imageRatio) ? new Ratio(100, 100) : new Ratio(req.imageRatio);
 
-                Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", def.Filter.ToJson() + " / " + def.Query.ToJson(), total);
+                Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", def.Filter.ToString() + " / " + def.Query.ToString(), total);
 
                 var fileManager = FileManager.Instance;
                 var data = new List<FileDTO>();
