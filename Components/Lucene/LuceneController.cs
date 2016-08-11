@@ -88,10 +88,21 @@ namespace Satrabel.OpenFiles.Components.Lucene
         /// </summary>
         internal void IndexAll()
         {
-            Log.Logger.DebugFormat("Lucene index directory [{0}] being initialized.", "OpenFiles");
+            Log.Logger.DebugFormat("Lucene index all [{0}] being initialized.", "OpenFiles");
             IndexClear();
             IndexFiles(null);
-            Log.Logger.DebugFormat("Exiting ReIndexContent");
+            Log.Logger.DebugFormat("Exiting ReIndex All");
+        }
+
+        /// <summary>
+        /// Reindex all files of folder.
+        /// </summary>
+        internal void IndexFolder(int portalId, string folderPath)
+        {
+            Log.Logger.DebugFormat("Lucene index folder [{0}] being initialized.", "OpenFiles");
+            DeleteFolder(portalId, folderPath, null);
+            IndexFolder(null, portalId, folderPath);
+            Log.Logger.DebugFormat("Exiting ReIndex Folder");
         }
 
         /// -----------------------------------------------------------------------------
@@ -110,7 +121,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 IndexFiles(startDate);
         }
 
-        private void IndexFiles(DateTime? startDate)
+        private void IndexFiles(DateTime? startDate, string folderPath = "")
         {
             LuceneController.ClearInstance();
             try
@@ -126,7 +137,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                             Log.Logger.InfoFormat("Reindexing all documents from Portal {0}", portal.PortalID);
                         }
                         var indexSince = FixedIndexingStartDate(portal.PortalID, startDate ?? DateTime.MinValue);
-                        List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portal.PortalID, indexSince).ToList();
+                        List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portal.PortalID, "", true, indexSince).ToList();
                         Log.Logger.DebugFormat("Found {1} documents from Portal {0} to index", portal.PortalID, searchDocs.Count());
 
                         foreach (LuceneIndexItem indexItem in searchDocs)
@@ -137,6 +148,39 @@ namespace Satrabel.OpenFiles.Components.Lucene
                         }
                         Log.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
                     }
+                    lc.Store.Commit();
+                    lc.Store.OptimizeSearchIndex(true);
+                }
+            }
+            finally
+            {
+                LuceneController.ClearInstance();
+            }
+        }
+
+        private void IndexFolder(DateTime? startDate, int portalId, string folderPath)
+        {
+            LuceneController.ClearInstance();
+            try
+            {
+                using (var lc = LuceneController.Instance)
+                {
+                    var fileIndexer = new DnnFilesRepository();
+                    if (!startDate.HasValue)
+                    {
+                        Log.Logger.InfoFormat("Reindexing documents from Portal {0} folder {1}", portalId, folderPath);
+                    }
+                    var indexSince = FixedIndexingStartDate(portalId, startDate ?? DateTime.MinValue);
+                    List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portalId, folderPath, false, indexSince).ToList();
+                    Log.Logger.DebugFormat("Found {2} documents from Portal {0} folder {1} to index", portalId, folderPath, searchDocs.Count());
+
+                    foreach (LuceneIndexItem indexItem in searchDocs)
+                    {
+                        Delete(indexItem, lc);
+                        FieldConfig indexJson = FilesRepository.GetIndexConfig(portalId);
+                        lc.Store.Add(LuceneMappingUtils.CreateLuceneDocument(indexItem, indexJson));
+                    }
+                    Log.Logger.DebugFormat("Indexed {2} documents from Portal {0} folder {1}", portalId, folderPath, searchDocs.Count());
                     lc.Store.Commit();
                     lc.Store.OptimizeSearchIndex(true);
                 }
@@ -204,6 +248,15 @@ namespace Satrabel.OpenFiles.Components.Lucene
             }
 
             Query deleteQuery = LuceneMappingUtils.GetDeleteQuery(data);
+            if (storeInstance == null)
+                Store.Delete(deleteQuery);
+            else
+                storeInstance.Store.Delete(deleteQuery);
+        }
+
+        private void DeleteFolder(int portalId, string folderPath, LuceneController storeInstance)
+        {
+            Query deleteQuery = LuceneMappingUtils.GetDeleteFolderQuery(portalId, folderPath);
             if (storeInstance == null)
                 Store.Delete(deleteQuery);
             else

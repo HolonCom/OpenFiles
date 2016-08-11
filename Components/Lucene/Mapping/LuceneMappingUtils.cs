@@ -135,6 +135,12 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
             return new FilteredQuery(selection, LuceneMappingUtils.GetTypeTenantFilter(ItemTypeValue, data.PortalId.ToString()));
         }
 
+        public static Query GetDeleteFolderQuery(int portalId, string folderPath )
+        {
+            var selection = new TermQuery(new Term(LuceneMappingUtils.FolderField, folderPath.TrimEnd('/')));
+            return new FilteredQuery(selection, LuceneMappingUtils.GetTypeTenantFilter(ItemTypeValue, portalId.ToString()));
+        }
+
         #region private methods
 
         private static string GetIndexFieldName()
@@ -146,7 +152,6 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
         {
             return data.FileId.ToString();
         }
-
 
         #endregion
     }

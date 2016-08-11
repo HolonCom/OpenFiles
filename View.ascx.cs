@@ -14,6 +14,9 @@ using DotNetNuke.Entities.Modules;
 using DotNetNuke.Common.Utilities;
 using Satrabel.OpenFiles.Components.Lucene;
 using DotNetNuke.Services.Scheduling;
+using DotNetNuke.Services.FileSystem;
+using System.Web.UI.WebControls;
+using System.Collections.Generic;
 
 #endregion
 
@@ -31,8 +34,16 @@ namespace Satrabel.OpenFiles
             if (!Page.IsPostBack)
             {
                 bIndex.Visible = ModuleContext.PortalSettings.UserInfo.IsSuperUser;
+
+                var fm = FolderManager.Instance;
+                var folders = fm.GetFolders(PortalId);
+                foreach (var folder in folders)
+                {
+                    ddlFolders.Items.Add(new ListItem(folder.FolderPath.Trim('/'), folder.FolderPath));
+                }
             }
         }
+
         protected void bIndex_Click(object sender, EventArgs e)
         {
             var searchEngine = LuceneController.Instance;
@@ -67,6 +78,12 @@ namespace Satrabel.OpenFiles
             scheduleItem.ScheduleStartDate = Null.NullDate;
             scheduleItem.Servers = "";
             return scheduleItem;
+        }
+
+        protected void bIndexFolder_Click(object sender, EventArgs e)
+        {
+            var searchEngine = LuceneController.Instance;
+            searchEngine.IndexFolder(PortalId, ddlFolders.SelectedValue);
         }
     }
 }

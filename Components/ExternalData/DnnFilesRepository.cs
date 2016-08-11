@@ -29,12 +29,12 @@ namespace Satrabel.OpenFiles.Components.ExternalData
         ///     [vnguyen]   04/16/2013  created
         /// </history>
         /// -----------------------------------------------------------------------------
-        public IEnumerable<LuceneIndexItem> GetPortalSearchDocuments(int portalId, DateTime? startDateLocal)
+        public IEnumerable<LuceneIndexItem> GetPortalSearchDocuments(int portalId, string folderPath, bool recursive,  DateTime? startDateLocal)
         {
             var searchDocuments = new List<LuceneIndexItem>();
             var folderManager = FolderManager.Instance;
-            var folder = folderManager.GetFolder(portalId, "");
-            var files = folderManager.GetFiles(folder, true);
+            var folder = folderManager.GetFolder(portalId, folderPath);
+            var files = folderManager.GetFiles(folder, recursive);
             if (startDateLocal.HasValue)
             {
                 files = files.Where(f => f.LastModifiedOnDate > startDateLocal.Value);
