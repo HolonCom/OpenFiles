@@ -22,13 +22,13 @@ namespace Satrabel.OpenFiles {
         protected global::System.Web.UI.WebControls.Button bIndex;
         
         /// <summary>
-        /// bScheduleTask control.
+        /// bUpdateIndex control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button bScheduleTask;
+        protected global::System.Web.UI.WebControls.Button bUpdateIndex;
         
         /// <summary>
         /// ddlFolders control.
@@ -47,5 +47,14 @@ namespace Satrabel.OpenFiles {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button bIndexFolder;
+        
+        /// <summary>
+        /// bScheduleTask control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button bScheduleTask;
     }
 }

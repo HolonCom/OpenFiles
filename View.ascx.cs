@@ -17,6 +17,8 @@ using DotNetNuke.Services.Scheduling;
 using DotNetNuke.Services.FileSystem;
 using System.Web.UI.WebControls;
 using System.Collections.Generic;
+using DotNetNuke.Services.Search.Internals;
+using Satrabel.OpenFiles.Components;
 
 #endregion
 
@@ -84,6 +86,37 @@ namespace Satrabel.OpenFiles
         {
             var searchEngine = LuceneController.Instance;
             searchEngine.IndexFolder(PortalId, ddlFolders.SelectedValue);
+        }
+
+        protected void bUpdateIndex_Click(object sender, EventArgs e)
+        {
+            var sc = SchedulingProvider.Instance();
+            var schedule = sc.GetSchedule("Satrabel.OpenFiles.Components.Lucene.SearchEngineScheduler, OpenFiles", "");
+
+            if (schedule != null)
+            {
+                var startDate = DateTime.Now;
+                var lastSuccessFulDateTime = SearchHelper.Instance.GetLastSuccessfulIndexingDateTime(schedule.ScheduleID);
+                Log.Logger.Trace("Search: File Crawler - Starting. Content change start time " + lastSuccessFulDateTime.ToString("g"));
+
+                var searchEngine = LuceneController.Instance;
+                try
+                {
+                    searchEngine.IndexContent(lastSuccessFulDateTime);
+                }
+                catch (Exception ex)
+                {
+                    Log.Logger.ErrorFormat("Failed executing Scheduled Reindexing. Error: {0}", ex.Message);
+                }
+                finally
+                {
+                    //searchEngine.Commit();
+                }
+
+                SearchHelper.Instance.SetLastSuccessfulIndexingDateTime(schedule.ScheduleID, startDate);
+
+                Log.Logger.Trace("Search: File Crawler - Indexing Successful");
+            }
         }
     }
 }
