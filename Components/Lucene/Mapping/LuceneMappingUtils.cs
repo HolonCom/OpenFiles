@@ -79,8 +79,6 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
         {
             return new LuceneIndexItem(ItemTypeValue, doc.Get(TenantField), doc.Get(ItemIdField))
             {
-                PortalId = Convert.ToInt32(doc.Get(PortalIdField)),
-                FileId = Convert.ToInt32(doc.Get(FileIdField)),
                 FileName = doc.Get(FileNameField),
                 Folder = doc.Get(FolderField),
                 FileContent = doc.Get(FileContentField),
@@ -98,8 +96,6 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
         {
             var indexData = new LuceneIndexItem(ItemTypeValue, file.PortalId.ToString(), file.FileId.ToString())
             {
-                PortalId = file.PortalId,
-                FileId = file.FileId,
                 FileName = file.FileName,
                 Folder = file.Folder.TrimEnd('/'),
                 FileContent = DnnFilesRepository.GetFileContent(file)

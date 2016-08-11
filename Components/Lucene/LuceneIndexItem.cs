@@ -17,8 +17,20 @@ namespace Satrabel.OpenFiles.Components.Lucene
         public string Tenant { get; set; }
 
 
-        public int PortalId { get; set; }
-        public int FileId { get; set; }
+        public int PortalId
+        {
+            get
+            {
+                return int.Parse(Tenant);
+            }
+        }
+        public int FileId
+        {
+            get
+            {
+                return int.Parse(Id);
+            }
+        }
         public string FileName { get; set; }
         public string Folder { get; set; }
         //public string Title { get; set; }
