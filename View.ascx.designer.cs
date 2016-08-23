@@ -13,13 +13,13 @@ namespace Satrabel.OpenFiles {
     public partial class View {
         
         /// <summary>
-        /// bIndex control.
+        /// bReindexAll control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button bIndex;
+        protected global::System.Web.UI.WebControls.Button bReindexAll;
         
         /// <summary>
         /// bUpdateIndex control.

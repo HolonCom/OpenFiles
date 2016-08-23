@@ -2,7 +2,7 @@
 
 <div class="form">
     <div class="form-group">
-        <asp:Button ID="bIndex" runat="server" Text="Reindex all" OnClick="bIndex_Click" CssClass="btn btn-default" />
+        <asp:Button ID="bReindexAll" runat="server" Text="Reindex all" OnClick="bReindexAll_Click" CssClass="btn btn-default" />
     </div>
     <div class="form-group">
         <asp:Button ID="bUpdateIndex" runat="server" Text="Update Index" OnClick="bUpdateIndex_Click" CssClass="btn btn-default" />
@@ -10,7 +10,7 @@
     <div class="form-group">
         <label for="ddlFolders">Folder</label>
         <asp:DropDownList ID="ddlFolders" runat="server" CssClass="form-control"></asp:DropDownList>
-        
+
     </div>
     <div class="form-group">
         <asp:Button ID="bIndexFolder" runat="server" Text="Reindex folder" OnClick="bIndexFolder_Click" CssClass="btn btn-default" />

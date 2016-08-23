@@ -35,7 +35,8 @@ namespace Satrabel.OpenFiles
             base.OnLoad(e);
             if (!Page.IsPostBack)
             {
-                bIndex.Visible = ModuleContext.PortalSettings.UserInfo.IsSuperUser;
+                //bReindexAll.Visible = ModuleContext.PortalSettings.UserInfo.IsSuperUser;
+                bScheduleTask.Visible = ModuleContext.PortalSettings.UserInfo.IsSuperUser;
 
                 var fm = FolderManager.Instance;
                 var folders = fm.GetFolders(PortalId);
@@ -46,7 +47,7 @@ namespace Satrabel.OpenFiles
             }
         }
 
-        protected void bIndex_Click(object sender, EventArgs e)
+        protected void bReindexAll_Click(object sender, EventArgs e)
         {
             var searchEngine = LuceneController.Instance;
             searchEngine.IndexAll();

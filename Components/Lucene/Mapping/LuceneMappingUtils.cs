@@ -104,11 +104,11 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
             JObject custom = DnnFilesRepository.GetCustomFileDataAsJObject(file);
             if (custom[MetaField] != null && custom[MetaField].HasValues)
             {
-                indexData.Meta = custom[MetaField].ToString();
+                indexData.Meta = custom[MetaField];
             }
             return indexData;
         }
-		
+
         private static Filter GetTypeTenantFilter(string type, string tenant)
         {
             var query = new BooleanQuery();
@@ -135,7 +135,7 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
             return new FilteredQuery(selection, LuceneMappingUtils.GetTypeTenantFilter(ItemTypeValue, data.PortalId.ToString()));
         }
 
-        public static Query GetDeleteFolderQuery(int portalId, string folderPath )
+        public static Query GetDeleteFolderQuery(int portalId, string folderPath)
         {
             var selection = new TermQuery(new Term(LuceneMappingUtils.FolderField, folderPath.TrimEnd('/')));
             return new FilteredQuery(selection, LuceneMappingUtils.GetTypeTenantFilter(ItemTypeValue, portalId.ToString()));

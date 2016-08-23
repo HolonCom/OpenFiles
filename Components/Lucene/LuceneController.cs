@@ -88,10 +88,10 @@ namespace Satrabel.OpenFiles.Components.Lucene
         /// </summary>
         internal void IndexAll()
         {
-            Log.Logger.DebugFormat("Lucene index all [{0}] being initialized.", "OpenFiles");
+            Log.Logger.InfoFormat("Lucene index all [{0}] being initialized.", "OpenFiles");
             IndexClear();
             IndexFiles(null);
-            Log.Logger.DebugFormat("Exiting ReIndex All");
+            Log.Logger.InfoFormat("Exiting ReIndex All");
         }
 
         /// <summary>
@@ -99,10 +99,10 @@ namespace Satrabel.OpenFiles.Components.Lucene
         /// </summary>
         internal void IndexFolder(int portalId, string folderPath)
         {
-            Log.Logger.DebugFormat("Lucene index folder [{0}] being initialized.", "OpenFiles");
+            Log.Logger.InfoFormat("Lucene index folder [{0}] being initialized.", "OpenFiles");
             DeleteFolder(portalId, folderPath, null);
             IndexFolder(null, portalId, folderPath);
-            Log.Logger.DebugFormat("Exiting ReIndex Folder");
+            Log.Logger.InfoFormat("Exiting ReIndex Folder");
         }
 
         /// -----------------------------------------------------------------------------
@@ -171,7 +171,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                         Log.Logger.InfoFormat("Reindexing documents from Portal {0} folder {1}", portalId, folderPath);
                     }
                     var indexSince = FixedIndexingStartDate(portalId, startDate ?? DateTime.MinValue);
-                    List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portalId, folderPath, false, indexSince).ToList();
+                    List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portalId, folderPath, true, indexSince).ToList();
                     Log.Logger.DebugFormat("Found {2} documents from Portal {0} folder {1} to index", portalId, folderPath, searchDocs.Count());
 
                     foreach (LuceneIndexItem indexItem in searchDocs)

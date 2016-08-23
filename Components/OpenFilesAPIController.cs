@@ -18,9 +18,7 @@ using Newtonsoft.Json.Linq;
 using System.Web.Hosting;
 using System.IO;
 using DotNetNuke.Security;
-using Satrabel.OpenContent.Components.Json;
 using DotNetNuke.Entities.Content.Common;
-using Satrabel.OpenContent.Components;
 using Satrabel.OpenFiles.Components.ExternalData;
 
 #endregion

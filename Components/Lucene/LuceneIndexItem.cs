@@ -37,6 +37,6 @@ namespace Satrabel.OpenFiles.Components.Lucene
         //public string Description { get; set; }
         //public List<string> Categories { get; private set; }
         public string FileContent { get; set; }
-        public string Meta { get; set; }
+        public JToken Meta { get; set; }
     }
 }
