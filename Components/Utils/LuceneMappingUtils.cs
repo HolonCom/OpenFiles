@@ -11,8 +11,9 @@ using Satrabel.OpenContent.Components.Json;
 using Satrabel.OpenContent.Components.Lucene.Config;
 using Satrabel.OpenContent.Components.Lucene.Mapping;
 using Satrabel.OpenFiles.Components.ExternalData;
+using Satrabel.OpenFiles.Components.Lucene;
 
-namespace Satrabel.OpenFiles.Components.Lucene.Mapping
+namespace Satrabel.OpenFiles.Components.Utils
 {
     public static class LuceneMappingUtils
     {
@@ -37,6 +38,7 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
         /// </summary>
         public static readonly string FieldTimestamp = "$timestamp";
         public static readonly string ItemIdField = "$id";
+        public static readonly string FieldCreatedOnDate = "$createdondate";
 
         public static readonly string PortalIdField = "PortalId";
         public static readonly string FileIdField = "FileId";
@@ -58,6 +60,7 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
                 luceneDoc.Add(new Field(FieldSource, item.ToJson(), Field.Store.YES, Field.Index.NO));
             }
             luceneDoc.Add(new NumericField(FieldTimestamp, Field.Store.YES, true).SetLongValue(DateTime.UtcNow.Ticks));
+            luceneDoc.Add(new NumericField(FieldCreatedOnDate, Field.Store.NO, true).SetLongValue(item.CreatedOnDate.Ticks));
 
             luceneDoc.Add(new Field(PortalIdField, item.PortalId.ToString(), Field.Store.YES, Field.Index.ANALYZED));
             luceneDoc.Add(new Field(FileIdField, item.FileId.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
@@ -72,7 +75,7 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
 
         internal static LuceneIndexItem CreateLuceneItem(Document doc)
         {
-            return new LuceneIndexItem(ItemTypeValue, doc.Get(TenantField), doc.Get(ItemIdField))
+            return new LuceneIndexItem(ItemTypeValue, doc.Get(TenantField), doc.Get(FieldCreatedOnDate).TicksToDateTime(), doc.Get(ItemIdField))
             {
                 FileName = doc.Get(FileNameField),
                 Folder = doc.Get(FolderField),
@@ -83,25 +86,35 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
 
         internal static LuceneIndexItem CreateLuceneItem(int portalid, int fileid)
         {
-            var indexData = new LuceneIndexItem(ItemTypeValue, portalid.ToString(), fileid.ToString());
+            var indexData = new LuceneIndexItem(ItemTypeValue, portalid.ToString(), DateTime.Now, fileid.ToString());
             return indexData;
         }
-
-        internal static LuceneIndexItem CreateLuceneItem(IFileInfo file)
+        public static LuceneIndexItem CreateLuceneItem(IFileInfo file, FieldConfig indexConfig)
         {
-            var indexData = new LuceneIndexItem(ItemTypeValue, file.PortalId.ToString(), file.FileId.ToString())
+            var filesInfo = new OpenFilesInfo(file);
+            return CreateLuceneItem(filesInfo, indexConfig);
+        }
+
+        internal static LuceneIndexItem CreateLuceneItem(OpenFilesInfo fileInfo, FieldConfig indexConfig)
+        {
+            fileInfo.HydrateDefaultFields(indexConfig);
+
+            var luceneItem = new LuceneIndexItem(ItemTypeValue, fileInfo.File.PortalId.ToString(), fileInfo.File.CreatedOnDate, fileInfo.File.FileId.ToString())
             {
-                FileName = file.FileName,
-                Folder = file.Folder.TrimEnd('/'),
-                FileContent = DnnFilesRepository.GetFileContent(file)
+                FileName = fileInfo.File.FileName,
+                Folder = fileInfo.File.Folder.TrimEnd('/'),
+                FileContent = DnnFilesRepository.GetFileContent(fileInfo.File)
             };
 
-            JObject custom = DnnFilesRepository.GetCustomFileDataAsJObject(file);
+            JObject custom = fileInfo.JsonAsJToken;
             if (custom[MetaField] != null && custom[MetaField].HasValues)
             {
-                indexData.Meta = custom[MetaField];
+                luceneItem.Meta = custom[MetaField];
             }
-            return indexData;
+
+
+
+            return luceneItem;
         }
 
         private static Filter GetTypeTenantFilter(string type, string tenant)
@@ -149,5 +162,7 @@ namespace Satrabel.OpenFiles.Components.Lucene.Mapping
         }
 
         #endregion
+
+
     }
 }

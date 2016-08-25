@@ -5,15 +5,17 @@ namespace Satrabel.OpenFiles.Components.Lucene
 {
     public class LuceneIndexItem
     {
-        public LuceneIndexItem(string itemType, string tenant, string itemId)
+        public LuceneIndexItem(string itemType, string tenant, DateTime createdOnDate, string itemId)
         {
             Type = itemType; ;
             Tenant = tenant;
             Id = itemId;
+            CreatedOnDate = createdOnDate;
         }
         public string Id { get; set; }
         public string Type { get; private set; }
         public string Tenant { get; set; }
+        public DateTime CreatedOnDate { get; set; }
 
 
         public int PortalId

@@ -25,7 +25,7 @@ using Satrabel.OpenContent.Components.Datasource.search;
 using Satrabel.OpenContent.Components.Lucene.Config;
 using Satrabel.OpenContent.Components.JPList;
 using Satrabel.OpenFiles.Components.ExternalData;
-using Satrabel.OpenFiles.Components.Lucene.Mapping;
+using Satrabel.OpenFiles.Components.Utils;
 
 namespace Satrabel.OpenFiles.Components.JPList
 {
@@ -41,8 +41,10 @@ namespace Satrabel.OpenFiles.Components.JPList
             {
                 Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() called with request [{0}].", req.ToJson());
 
-                QueryBuilder queryBuilder = new QueryBuilder();
-                queryBuilder.BuildFilter(PortalSettings.PortalId, req.folder);
+                FieldConfig indexConfig = FilesRepository.GetIndexConfig(PortalSettings.PortalId);
+                bool addWorkFlow = PortalSettings.UserMode != PortalSettings.Mode.Edit;
+                QueryBuilder queryBuilder = new QueryBuilder(indexConfig);
+                queryBuilder.BuildFilter(PortalSettings.PortalId, req.folder, addWorkFlow, PortalSettings.UserInfo.Social.Roles);
                 JplistQueryBuilder.MergeJpListQuery(FilesRepository.GetIndexConfig(PortalSettings), queryBuilder.Select, req.StatusLst, DnnUtils.GetCurrentCultureCode());
 
                 string curFolder = NormalizePath(req.folder);

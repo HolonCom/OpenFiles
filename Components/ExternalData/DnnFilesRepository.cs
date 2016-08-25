@@ -9,8 +9,9 @@ using DotNetNuke.Entities.Content.Common;
 using DotNetNuke.Services.Exceptions;
 using DotNetNuke.Services.FileSystem;
 using Newtonsoft.Json.Linq;
+using Satrabel.OpenContent.Components.Lucene.Config;
 using Satrabel.OpenFiles.Components.Lucene;
-using Satrabel.OpenFiles.Components.Lucene.Mapping;
+using Satrabel.OpenFiles.Components.Utils;
 
 #endregion
 
@@ -29,7 +30,7 @@ namespace Satrabel.OpenFiles.Components.ExternalData
         ///     [vnguyen]   04/16/2013  created
         /// </history>
         /// -----------------------------------------------------------------------------
-        public IEnumerable<LuceneIndexItem> GetPortalSearchDocuments(int portalId, string folderPath, bool recursive,  DateTime? startDateLocal)
+        public IEnumerable<LuceneIndexItem> GetPortalSearchDocuments(int portalId, string folderPath, bool recursive, DateTime? startDateLocal)
         {
             var searchDocuments = new List<LuceneIndexItem>();
             var folderManager = FolderManager.Instance;
@@ -41,9 +42,10 @@ namespace Satrabel.OpenFiles.Components.ExternalData
             }
             try
             {
+                FieldConfig indexConfig = FilesRepository.GetIndexConfig(portalId);
                 foreach (var file in files)
                 {
-                    var indexData = LuceneMappingUtils.CreateLuceneItem(file);
+                    var indexData = LuceneMappingUtils.CreateLuceneItem(file, indexConfig);
                     searchDocuments.Add(indexData);
                 }
             }

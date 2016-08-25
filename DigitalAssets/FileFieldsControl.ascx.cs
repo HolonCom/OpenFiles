@@ -5,6 +5,8 @@ using DotNetNuke.Services.Localization;
 using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.Alpaca;
 using Satrabel.OpenFiles.Components;
+using Satrabel.OpenFiles.Components.Lucene;
+using Satrabel.OpenFiles.Components.Utils;
 using AppConfig = Satrabel.OpenFiles.Components.AppConfig;
 
 namespace Satrabel.OpenFiles.DigitalAssets
@@ -47,7 +49,7 @@ namespace Satrabel.OpenFiles.DigitalAssets
         public override object SaveProperties()
         {
             var file = base.SaveProperties();
-            ContentItemUtils.Save(File, Components.Lucene.Mapping.LuceneMappingUtils.MetaField, hfAlpacaData.Value);
+            OpenFilesUtils.Save(File, LuceneMappingUtils.MetaField, hfAlpacaData.Value);
             return file;
         }
         public int ContentItemId

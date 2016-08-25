@@ -134,6 +134,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         private DateTime _lastReadTimeUtc;
         private DateTime _lastDirModifyTimeUtc;
+
         private bool MustRereadIndex
         {
             get

@@ -38,5 +38,37 @@ namespace Satrabel.OpenFiles.Components
 
         public bool CaseSensitiveFieldNames { get { return false; } }
         public string LuceneIndexFolder { get { return @"App_Data\OpenFiles\LuceneIndex"; } }
+
+
+        #region Constants
+
+        internal static string FieldNamePublishStartDate
+        {
+            get
+            {
+                const string CONSTANT = "publishstartdate";
+                return CONSTANT;
+            }
+        }
+
+        internal static string FieldNamePublishEndDate
+        {
+            get
+            {
+                const string CONSTANT = "publishenddate";
+                return CONSTANT;
+            }
+        }
+
+        internal static string FieldNamePublishStatus
+        {
+            get
+            {
+                const string CONSTANT = "publishstatus";
+                return CONSTANT;
+            }
+        }
+
+        #endregion
     }
 }

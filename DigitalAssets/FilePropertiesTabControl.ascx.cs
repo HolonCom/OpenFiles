@@ -6,6 +6,7 @@ using DotNetNuke.Services.FileSystem;
 using DotNetNuke.Services.Localization;
 using Satrabel.OpenContent.Components.Alpaca;
 using Satrabel.OpenFiles.Components;
+using Satrabel.OpenFiles.Components.Utils;
 
 namespace Satrabel.OpenFiles.DigitalAssets
 {
@@ -78,7 +79,7 @@ namespace Satrabel.OpenFiles.DigitalAssets
 
         protected void validation_ServerValidate(object source, ServerValidateEventArgs args)
         {
-            ContentItemUtils.Save(File, "crop", hfAlpacaImagesData.Value);
+            OpenFilesUtils.Save(File, "crop", hfAlpacaImagesData.Value);
         }
     }
 }

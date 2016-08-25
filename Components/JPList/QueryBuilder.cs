@@ -1,22 +1,43 @@
+﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
+using DotNetNuke.Entities.Users;
+using Newtonsoft.Json.Linq;
+using Satrabel.OpenContent.Components.Datasource.search;
+using Satrabel.OpenContent.Components.Json;
+using Satrabel.OpenContent.Components.Lucene.Config;
+using Satrabel.OpenFiles.Components.Lucene;
+using Satrabel.OpenFiles.Components.Utils;
 
 namespace Satrabel.OpenFiles.Components.JPList
 {
     class QueryBuilder
     {
+        private readonly FieldConfig IndexConfig;
         public Select Select { get; private set; }
-        public QueryBuilder()
+        public QueryBuilder(FieldConfig config)
         {
+            this.IndexConfig = config;
             Select = new Select();
             //Select.PageSize = 100;
         }
-        internal void BuildFilter(int portalId, string folder)
+        //public QueryBuilder Build(bool addWorkflowFilter, string cultureCode, IList<UserRoleInfo> roles, NameValueCollection queryString = null)
+        //{
+
+        //    BuildFilter(addWorkflowFilter, cultureCode, roles, queryString);
+
+        //    return this;
+        //}
+
+
+        internal void BuildFilter(int portalId, string folder, bool addWorkflowFilter, IList<UserRoleInfo> roles)
         {
+
             var filter = Select.Filter;
             filter.AddRule(new FilterRule()
             {
-                Field = Lucene.Mapping.LuceneMappingUtils.PortalIdField,
+                Field = LuceneMappingUtils.PortalIdField,
                 FieldType = FieldTypeEnum.INTEGER,
                 FieldOperator = OperatorEnum.EQUAL,
                 Value = new IntegerRuleValue(portalId)
@@ -26,13 +47,91 @@ namespace Satrabel.OpenFiles.Components.JPList
                 string wildCardSearchValue = NormalizePath(folder);
                 filter.AddRule(new FilterRule()
                 {
-                    Field = Lucene.Mapping.LuceneMappingUtils.FolderField,
+                    Field = LuceneMappingUtils.FolderField,
                     FieldType = FieldTypeEnum.KEY,
                     FieldOperator = OperatorEnum.START_WITH,
                     Value = new StringRuleValue(wildCardSearchValue)
                 });
             }
+            if (addWorkflowFilter)
+            {
+                AddWorkflowFilter(filter);
+                AddRolesFilter(filter, roles);
+            }
         }
+
+        private void AddWorkflowFilter(FilterGroup filter)
+        {
+
+            if (IndexConfig != null && IndexConfig.Fields != null && IndexConfig.Fields.ContainsKey(AppConfig.FieldNamePublishStatus))
+            {
+                filter.AddRule(new FilterRule()
+                {
+                    Field = AppConfig.FieldNamePublishStatus,
+                    Value = new StringRuleValue("published"),
+                    FieldType = FieldTypeEnum.KEY
+                });
+            }
+            if (IndexConfig != null && IndexConfig.Fields != null && IndexConfig.Fields.ContainsKey(AppConfig.FieldNamePublishStartDate))
+            {
+                //DateTime startDate = DateTime.MinValue;
+                //DateTime endDate = DateTime.Today;
+                filter.AddRule(new FilterRule()
+                {
+                    Field = AppConfig.FieldNamePublishStartDate,
+                    Value = new DateTimeRuleValue(DateTime.Today),
+                    FieldOperator = OperatorEnum.LESS_THEN_OR_EQUALS,
+                    FieldType = FieldTypeEnum.DATETIME
+                });
+            }
+            if (IndexConfig != null && IndexConfig.Fields != null && IndexConfig.Fields.ContainsKey(AppConfig.FieldNamePublishEndDate))
+            {
+                //DateTime startDate = DateTime.Today;
+                //DateTime endDate = DateTime.MaxValue;
+                filter.AddRule(new FilterRule()
+                {
+                    Field = AppConfig.FieldNamePublishEndDate,
+                    Value = new DateTimeRuleValue(DateTime.Today),
+                    FieldOperator = OperatorEnum.GREATER_THEN_OR_EQUALS,
+                    FieldType = FieldTypeEnum.DATETIME
+                });
+            }
+        }
+
+        private void AddRolesFilter(FilterGroup filter, IList<UserRoleInfo> roles)
+        {
+            string fieldName = "";
+            if (IndexConfig != null && IndexConfig.Fields != null && IndexConfig.Fields.ContainsKey("userrole"))
+            {
+                fieldName = "userrole";
+            }
+            else if (IndexConfig != null && IndexConfig.Fields != null && IndexConfig.Fields.ContainsKey("userroles"))
+            {
+                fieldName = "userroles";
+            }
+            if (!string.IsNullOrEmpty(fieldName))
+            {
+                List<string> roleLst;
+                if (roles.Any())
+                {
+                    roleLst = roles.Select(r => r.RoleID.ToString()).ToList();
+                }
+                else
+                {
+                    roleLst = new List<string>();
+                    roleLst.Add("Unauthenticated");
+                }
+                roleLst.Add("AllUsers");
+                filter.AddRule(new FilterRule()
+                {
+                    Field = fieldName,
+                    FieldOperator = OperatorEnum.IN,
+                    MultiValue = roleLst.OrderBy(r => r).Select(r => new StringRuleValue(r)),
+                    FieldType = FieldTypeEnum.KEY
+                });
+            }
+        }
+
 
         private string NormalizePath(string filePath)
         {

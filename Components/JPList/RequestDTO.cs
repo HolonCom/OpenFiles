@@ -21,7 +21,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 var lst = new List<StatusDTO>();
                 if (!String.IsNullOrEmpty(statuses))
                 {
-                    lst  = JsonConvert.DeserializeObject<List<StatusDTO>>(HttpUtility.UrlDecode(statuses));
+                    lst = JsonConvert.DeserializeObject<List<StatusDTO>>(HttpUtility.UrlDecode(statuses));
                     if (lst != null)
                     {
 

@@ -20,6 +20,8 @@ using System.IO;
 using DotNetNuke.Security;
 using DotNetNuke.Entities.Content.Common;
 using Satrabel.OpenFiles.Components.ExternalData;
+using Satrabel.OpenFiles.Components.Lucene;
+using Satrabel.OpenFiles.Components.Utils;
 
 #endregion
 
@@ -42,7 +44,7 @@ namespace Satrabel.OpenFiles.Components
                     if (item != null && !string.IsNullOrEmpty(item.Content))
                     {
                         JObject dataJson = JObject.Parse(item.Content);
-                        json["data"] = dataJson[Lucene.Mapping.LuceneMappingUtils.MetaField];
+                        json["data"] = dataJson[LuceneMappingUtils.MetaField];
                     }
                 }
 

@@ -145,7 +145,8 @@
     <Compile Include="Components\DigitalAssets\PreviewInfoPanelExtensionPoint.cs" />
     <Compile Include="Components\ExternalData\FilesRepository.cs" />
     <Compile Include="Components\FeatureController.cs" />
-    <Compile Include="Components\ContentItemUtils.cs" />
+    <Compile Include="Components\OpenFilesInfo.cs" />
+    <Compile Include="Components\Utils\OpenFilesUtils.cs" />
     <Compile Include="Components\DigitalAssets\FolderFieldsControlExtensionPoint.cs" />
     <Compile Include="Components\DigitalAssets\FileFieldsControlExtensionPoint.cs" />
     <Compile Include="Components\DigitalAssets\FilePropertiesTab.cs" />
@@ -162,7 +163,7 @@
     <Compile Include="Components\ExternalData\DnnFilesRepository.cs" />
     <Compile Include="Components\Lucene\LuceneIndexItem.cs" />
     <Compile Include="Components\Lucene\LuceneService.cs" />
-    <Compile Include="Components\Lucene\Mapping\LuceneMappingUtils.cs" />
+    <Compile Include="Components\Utils\LuceneMappingUtils.cs" />
     <Compile Include="Components\Lucene\PdfParser.cs" />
     <Compile Include="Components\Lucene\LuceneController.cs" />
     <Compile Include="Components\Lucene\SearchEngineScheduler.cs" />

@@ -9,8 +9,8 @@ using DotNetNuke.Entities.Portals;
 using DotNetNuke.Services.Search.Internals;
 using Lucene.Net.Documents;
 using Satrabel.OpenContent.Components.Lucene.Config;
-using Satrabel.OpenFiles.Components.Lucene.Mapping;
 using Satrabel.OpenFiles.Components.ExternalData;
+using Satrabel.OpenFiles.Components.Utils;
 
 #endregion
 
