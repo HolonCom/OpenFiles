@@ -16,7 +16,6 @@ using Satrabel.OpenFiles.Components.Lucene;
 using DotNetNuke.Services.Scheduling;
 using DotNetNuke.Services.FileSystem;
 using System.Web.UI.WebControls;
-using System.Collections.Generic;
 using DotNetNuke.Services.Search.Internals;
 using Satrabel.OpenFiles.Components;
 

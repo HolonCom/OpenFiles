@@ -1,6 +1,4 @@
-﻿using DotNetNuke.Services.Exceptions;
-
-namespace Satrabel.OpenFiles.Components.JPList
+﻿namespace Satrabel.OpenFiles.Components.JPList
 {
     class ResultExtDTO<TResultDTO>
     {

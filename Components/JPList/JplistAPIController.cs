@@ -24,7 +24,6 @@ using Satrabel.OpenContent.Components.TemplateHelpers;
 using Satrabel.OpenContent.Components.Datasource.search;
 using Satrabel.OpenContent.Components.Lucene.Config;
 using Satrabel.OpenContent.Components.JPList;
-using Satrabel.OpenContent.Components.Logging;
 using Satrabel.OpenFiles.Components.ExternalData;
 using Satrabel.OpenFiles.Components.Lucene.Mapping;
 

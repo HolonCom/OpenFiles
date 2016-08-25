@@ -1,5 +1,3 @@
-﻿using Satrabel.OpenContent.Components.Datasource.search;
-using Satrabel.OpenContent.Components.JPList;
 using System.Collections.Generic;
 using System.Linq;
 

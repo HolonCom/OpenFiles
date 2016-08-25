@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Web.Hosting;
 using DotNetNuke.Modules.DigitalAssets.Components.ExtensionPoint;
 using DotNetNuke.Services.Localization;
 using Satrabel.OpenContent.Components;
