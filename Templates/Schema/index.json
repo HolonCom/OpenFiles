@@ -33,7 +33,7 @@
             "sort": true
         },
         "publishstatus": {
-            "indexType": "text",
+            "indexType": "key",
             "index": true,
             "sort": true
         }

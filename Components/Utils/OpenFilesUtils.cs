@@ -61,6 +61,9 @@ namespace Satrabel.OpenFiles.Components.Utils
             {
                 content[AppConfig.FieldNamePublishEndDate] = DateTime.MaxValue;
             }
+            if (indexConfig.HasField(AppConfig.FieldNamePublishStatus) && !content.HasField(AppConfig.FieldNamePublishStatus))
+            {
+                content[AppConfig.FieldNamePublishStatus] = "published";
             }
         }
 
