@@ -100,19 +100,17 @@ namespace Satrabel.OpenFiles.Components.Utils
             fileInfo.HydrateDefaultFields(indexConfig);
 
             var luceneItem = new LuceneIndexItem(ItemTypeValue, fileInfo.File.PortalId.ToString(), fileInfo.File.CreatedOnDate, fileInfo.File.FileId.ToString())
-            {
-                FileName = fileInfo.File.FileName,
-                Folder = fileInfo.File.Folder.TrimEnd('/'),
-                FileContent = DnnFilesRepository.GetFileContent(fileInfo.File)
-            };
+                {
+                    FileName = fileInfo.File.FileName,
+                    Folder = fileInfo.File.Folder.TrimEnd('/'),
+                    FileContent = DnnFilesRepository.GetFileContent(fileInfo.File)
+                };
 
             JObject custom = fileInfo.JsonAsJToken;
             if (custom[MetaField] != null && custom[MetaField].HasValues)
             {
                 luceneItem.Meta = custom[MetaField];
             }
-
-
 
             return luceneItem;
         }

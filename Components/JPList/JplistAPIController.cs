@@ -279,6 +279,11 @@ namespace Satrabel.OpenFiles.Components.JPList
             if (f.ContentItemID > 0)
             {
                 var item = Util.GetContentController().GetContentItem(f.ContentItemID);
+                if (item == null)
+                {
+                    Log.Logger.ErrorFormat("Could not find contentitem for {0},{1},{2},{3},", f.FileId, f.Folder, f.FileName, f.ContentItemID);
+                    return new JObject();
+                }
                 return JsonUtils.JsonToDynamic(item.Content);
             }
             else
@@ -286,8 +291,6 @@ namespace Satrabel.OpenFiles.Components.JPList
                 return new JObject();
             }
         }
-
-
 
         #endregion
     }

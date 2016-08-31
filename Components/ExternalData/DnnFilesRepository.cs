@@ -24,6 +24,8 @@ namespace Satrabel.OpenFiles.Components.ExternalData
         /// Returns the collection of SearchDocuments populated with Tab MetaData for the given portal.
         /// </summary>
         /// <param name="portalId"></param>
+        /// <param name="folderPath"></param>
+        /// <param name="recursive"></param>
         /// <param name="startDateLocal"></param>
         /// <returns></returns>
         /// <history>

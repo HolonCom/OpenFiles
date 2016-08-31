@@ -6,7 +6,9 @@ using DotNetNuke.Entities.Content.Common;
 using DotNetNuke.Entities.Portals;
 using DotNetNuke.Services.FileSystem;
 using Newtonsoft.Json.Linq;
+using Satrabel.OpenContent.Components.Json;
 using Satrabel.OpenContent.Components.Lucene.Config;
+using Satrabel.OpenContent.Components.Lucene.Index;
 using Satrabel.OpenFiles.Components.ExternalData;
 using Satrabel.OpenFiles.Components.Lucene;
 
@@ -49,20 +51,18 @@ namespace Satrabel.OpenFiles.Components.Utils
             FileManager.Instance.UpdateFile(file);
         }
 
-        internal static void HydrateDefaultFields(this OpenFilesInfo content, FieldConfig indexConfig)
+        internal static void HydrateDefaultFields(this JToken content, FieldConfig indexConfig)
         {
-            if (indexConfig != null && indexConfig.Fields != null && indexConfig.Fields.ContainsKey(AppConfig.FieldNamePublishStartDate)
-                && content.JsonAsJToken != null && content.JsonAsJToken[AppConfig.FieldNamePublishStartDate] == null)
+            if (indexConfig.HasField(AppConfig.FieldNamePublishStartDate) && !content.HasField(AppConfig.FieldNamePublishStartDate))
             {
-                content.JsonAsJToken[AppConfig.FieldNamePublishStartDate] = DateTime.MinValue;
+                content[AppConfig.FieldNamePublishStartDate] = DateTime.MinValue;
             }
-            if (indexConfig != null && indexConfig.Fields != null && indexConfig.Fields.ContainsKey(AppConfig.FieldNamePublishEndDate)
-                && content.JsonAsJToken != null && content.JsonAsJToken[AppConfig.FieldNamePublishEndDate] == null)
+            if (indexConfig.HasField(AppConfig.FieldNamePublishEndDate) && !content.HasField(AppConfig.FieldNamePublishEndDate))
             {
-                content.JsonAsJToken[AppConfig.FieldNamePublishEndDate] = DateTime.MaxValue;
+                content[AppConfig.FieldNamePublishEndDate] = DateTime.MaxValue;
+            }
             }
         }
-
 
         private static ContentItem CreateDnnContentItem(int contentItemId)
         {

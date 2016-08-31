@@ -172,10 +172,10 @@ namespace Satrabel.OpenFiles.Components.Lucene
                     List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portalId, folderPath, true, indexSince).ToList();
                     Log.Logger.DebugFormat("Found {2} documents from Portal {0} folder {1} to index", portalId, folderPath, searchDocs.Count());
 
+                    FieldConfig indexJson = FilesRepository.GetIndexConfig(portalId);
                     foreach (LuceneIndexItem indexItem in searchDocs)
                     {
                         Delete(indexItem, lc);
-                        FieldConfig indexJson = FilesRepository.GetIndexConfig(portalId);
                         lc.Store.Add(LuceneMappingUtils.CreateLuceneDocument(indexItem, indexJson));
                     }
                     Log.Logger.DebugFormat("Indexed {2} documents from Portal {0} folder {1}", portalId, folderPath, searchDocs.Count());
