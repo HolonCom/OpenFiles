@@ -24,5 +24,6 @@ namespace Satrabel.OpenFiles.Components.Template
         public string FolderPath { get; set; }
 
         public bool IsFolder { get; set; }
+        public int Id { get; set; }
     }
 }

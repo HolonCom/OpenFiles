@@ -97,8 +97,6 @@ namespace Satrabel.OpenFiles.Components.Utils
 
         internal static LuceneIndexItem CreateLuceneItem(OpenFilesInfo fileInfo, FieldConfig indexConfig)
         {
-            fileInfo.HydrateDefaultFields(indexConfig);
-
             var luceneItem = new LuceneIndexItem(ItemTypeValue, fileInfo.File.PortalId.ToString(), fileInfo.File.CreatedOnDate, fileInfo.File.FileId.ToString())
                 {
                     FileName = fileInfo.File.FileName,
@@ -107,7 +105,10 @@ namespace Satrabel.OpenFiles.Components.Utils
                 };
 
             JObject custom = fileInfo.JsonAsJToken;
-            if (custom[MetaField] != null && custom[MetaField].HasValues)
+            custom.MakeSureFieldExists(MetaField, JTokenType.Object);
+            custom[MetaField].HydrateDefaultFields(indexConfig);
+
+            if (custom[MetaField].HasValues)
             {
                 luceneItem.Meta = custom[MetaField];
             }

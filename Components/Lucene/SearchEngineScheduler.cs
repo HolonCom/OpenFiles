@@ -40,11 +40,6 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 try
                 {
                     searchEngine.IndexContent(lastSuccessFulDateTime);
-                    //foreach (var result in searchEngine.Results)
-                    //{
-                    //    ScheduleHistoryItem.AddLogNote(string.Format("<br/>&nbsp;&nbsp;{0} Indexed: {1}", result.Key, result.Value));
-                    //}
-
                 }
                 catch (Exception ex)
                 {

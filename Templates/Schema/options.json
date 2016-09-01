@@ -34,7 +34,7 @@
         },
         "publishenddate": {
             "type": "date",
-            "label": "Niet langer tonen op website vanaf datum",
+            "label": "Toon op website tot en met datum",
             "hidden": false,
             "picker": {
                 "format": "DD/MM/YYYY",

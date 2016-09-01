@@ -113,6 +113,7 @@ namespace Satrabel.OpenFiles.Components.JPList
 
                         data.Add(new FileDTO()
                         {
+                            Id = f.FileId,
                             Name = Normalize.DynamicValue(title, f.FileName),
                             FileName = f.FileName,
                             CreatedOnDate = f.CreatedOnDate,
