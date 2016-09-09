@@ -93,10 +93,10 @@ namespace Satrabel.OpenFiles.Components.ExternalData
                 }
             }
             // language options
-            optionsFilename = portalFolder.PhysicalFullDirectory + "\\" + prefix + "options." + DnnUtils.GetCurrentCultureCode() + ".json";
+            optionsFilename = portalFolder.PhysicalFullDirectory + "\\" + prefix + "options." + DnnLanguageUtils.GetCurrentCultureCode() + ".json";
             if (!File.Exists(optionsFilename))
             {
-                optionsFilename = desktopFolder.PhysicalFullDirectory + "\\" + prefix + "options." + DnnUtils.GetCurrentCultureCode() + ".json";
+                optionsFilename = desktopFolder.PhysicalFullDirectory + "\\" + prefix + "options." + DnnLanguageUtils.GetCurrentCultureCode() + ".json";
             }
             if (File.Exists(optionsFilename))
             {

@@ -45,7 +45,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 bool addWorkFlow = PortalSettings.UserMode != PortalSettings.Mode.Edit;
                 QueryBuilder queryBuilder = new QueryBuilder(indexConfig);
                 queryBuilder.BuildFilter(PortalSettings.PortalId, req.folder, addWorkFlow, PortalSettings.UserInfo.Social.Roles);
-                JplistQueryBuilder.MergeJpListQuery(FilesRepository.GetIndexConfig(PortalSettings), queryBuilder.Select, req.StatusLst, DnnUtils.GetCurrentCultureCode());
+                JplistQueryBuilder.MergeJpListQuery(FilesRepository.GetIndexConfig(PortalSettings), queryBuilder.Select, req.StatusLst, DnnLanguageUtils.GetCurrentCultureCode());
 
                 string curFolder = NormalizePath(req.folder);
                 foreach (var item in queryBuilder.Select.Query.FilterRules.Where(f => f.Field == LuceneMappingUtils.FolderField))
@@ -215,36 +215,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 //role lookup on every property access (instead caching the result)
                 if (!_isEditable.HasValue)
                 {
-                    //first check some weird Dnn issue
-                    if (HttpContext.Current != null && HttpContext.Current.Request.IsAuthenticated)
-                    {
-                        var personalization = (PersonalizationInfo)HttpContext.Current.Items["Personalization"];
-                        if (personalization != null && personalization.UserId == -1)
-                        {
-                            //this should never happen. 
-                            //Let us make sure that the wrong value is no longer cached 
-                            HttpContext.Current.Items.Remove("Personalization");
-                        }
-                    }
-
-                    bool blnPreview = (PortalSettings.UserMode == PortalSettings.Mode.View);
-                    if (Globals.IsHostTab(PortalSettings.ActiveTab.TabID))
-                    {
-                        blnPreview = false;
-                    }
-                    bool blnHasModuleEditPermissions = false;
-                    if (ActiveModule != null)
-                    {
-                        blnHasModuleEditPermissions = ModulePermissionController.HasModuleAccess(SecurityAccessLevel.Edit, "CONTENT", ActiveModule);
-                    }
-                    if (blnPreview == false && blnHasModuleEditPermissions)
-                    {
-                        _isEditable = true;
-                    }
-                    else
-                    {
-                        _isEditable = false;
-                    }
+                    _isEditable = ActiveModule.CheckIfEditable(PortalSettings.Current);
                 }
                 return _isEditable.Value;
             }
