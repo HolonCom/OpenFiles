@@ -21,7 +21,7 @@ using DotNetNuke.Security.Permissions;
 using DotNetNuke.Services.Personalization;
 using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.TemplateHelpers;
-using Satrabel.OpenContent.Components.Datasource.search;
+using Satrabel.OpenContent.Components.Datasource.Search;
 using Satrabel.OpenContent.Components.Lucene.Config;
 using Satrabel.OpenContent.Components.JPList;
 using Satrabel.OpenFiles.Components.ExternalData;
