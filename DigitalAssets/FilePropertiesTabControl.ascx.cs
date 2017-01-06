@@ -17,7 +17,7 @@ namespace Satrabel.OpenFiles.DigitalAssets
         protected void Page_Load(object sender, EventArgs e)
         {
             AlpacaEngine alpaca = new AlpacaEngine(Page, ModuleContext, AppConfig.Instance.SchemaFolder.FolderPath, "images");
-            alpaca.RegisterAll();
+            alpaca.RegisterAll(false, false);
 
             int fileid = int.Parse(Page.Request.QueryString["fileId"]);
             var fm = DotNetNuke.Services.FileSystem.FileManager.Instance;

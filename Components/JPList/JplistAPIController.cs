@@ -68,7 +68,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 //{
                 //    var logKey = "Query";
                 //    LogContext.Log(ActiveModule.ModuleID, logKey, "select", queryBuilder.Select);
-                //    LogContext.Log(ActiveModule.ModuleID, logKey, "result", dsItems);
+                //    LogContext.Log(ActiveModule.ModuleID, logKey, "debuginfo", dsItems.DebugInfo);
                 //    LogContext.Log(ActiveModule.ModuleID, logKey, "model", model);
                 //    model["Logs"] = JToken.FromObject(LogContext.Current.ModuleLogs(ActiveModule.ModuleID));
                 //}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using DotNetNuke.Modules.DigitalAssets.Components.ExtensionPoint;
 using DotNetNuke.Services.Localization;
 using Satrabel.OpenContent.Components;
@@ -32,7 +33,7 @@ namespace Satrabel.OpenFiles.DigitalAssets
             }
 
             AlpacaEngine alpaca = new AlpacaEngine(Page, ModuleContext, virtualFolderOfSchemaFiles.FolderPath, "");
-            alpaca.RegisterAll();
+            alpaca.RegisterAll(false, false);
         }
         protected override void OnLoad(EventArgs e)
         {
