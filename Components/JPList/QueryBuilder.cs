@@ -14,26 +14,16 @@ namespace Satrabel.OpenFiles.Components.JPList
 {
     class QueryBuilder
     {
-        private readonly FieldConfig IndexConfig;
+        private readonly FieldConfig _indexConfig;
         public Select Select { get; private set; }
         public QueryBuilder(FieldConfig config)
         {
-            this.IndexConfig = config;
+            this._indexConfig = config;
             Select = new Select();
-            //Select.PageSize = 100;
         }
-        //public QueryBuilder Build(bool addWorkflowFilter, string cultureCode, IList<UserRoleInfo> roles, NameValueCollection queryString = null)
-        //{
-
-        //    BuildFilter(addWorkflowFilter, cultureCode, roles, queryString);
-
-        //    return this;
-        //}
-
 
         internal void BuildFilter(int portalId, string folder, bool addWorkflowFilter, IList<UserRoleInfo> roles)
         {
-
             var filter = Select.Filter;
             filter.AddRule(new FilterRule()
             {
@@ -63,7 +53,7 @@ namespace Satrabel.OpenFiles.Components.JPList
         private void AddWorkflowFilter(FilterGroup filter)
         {
 
-            if (IndexConfig != null && IndexConfig.Fields != null && IndexConfig.Fields.ContainsKey(AppConfig.FieldNamePublishStatus))
+            if (_indexConfig?.Fields != null && _indexConfig.Fields.ContainsKey(AppConfig.FieldNamePublishStatus))
             {
                 filter.AddRule(new FilterRule()
                 {
@@ -72,10 +62,8 @@ namespace Satrabel.OpenFiles.Components.JPList
                     FieldType = FieldTypeEnum.KEY
                 });
             }
-            if (IndexConfig != null && IndexConfig.Fields != null && IndexConfig.Fields.ContainsKey(AppConfig.FieldNamePublishStartDate))
+            if (_indexConfig?.Fields != null && _indexConfig.Fields.ContainsKey(AppConfig.FieldNamePublishStartDate))
             {
-                //DateTime startDate = DateTime.MinValue;
-                //DateTime endDate = DateTime.Today;
                 filter.AddRule(new FilterRule()
                 {
                     Field = AppConfig.FieldNamePublishStartDate,
@@ -84,10 +72,8 @@ namespace Satrabel.OpenFiles.Components.JPList
                     FieldType = FieldTypeEnum.DATETIME
                 });
             }
-            if (IndexConfig != null && IndexConfig.Fields != null && IndexConfig.Fields.ContainsKey(AppConfig.FieldNamePublishEndDate))
+            if (_indexConfig?.Fields != null && _indexConfig.Fields.ContainsKey(AppConfig.FieldNamePublishEndDate))
             {
-                //DateTime startDate = DateTime.Today;
-                //DateTime endDate = DateTime.MaxValue;
                 filter.AddRule(new FilterRule()
                 {
                     Field = AppConfig.FieldNamePublishEndDate,
@@ -101,11 +87,11 @@ namespace Satrabel.OpenFiles.Components.JPList
         private void AddRolesFilter(FilterGroup filter, IList<UserRoleInfo> roles)
         {
             string fieldName = "";
-            if (IndexConfig != null && IndexConfig.Fields != null && IndexConfig.Fields.ContainsKey("userrole"))
+            if (_indexConfig?.Fields != null && _indexConfig.Fields.ContainsKey("userrole"))
             {
                 fieldName = "userrole";
             }
-            else if (IndexConfig != null && IndexConfig.Fields != null && IndexConfig.Fields.ContainsKey("userroles"))
+            else if (_indexConfig?.Fields != null && _indexConfig.Fields.ContainsKey("userroles"))
             {
                 fieldName = "userroles";
             }
@@ -132,7 +118,6 @@ namespace Satrabel.OpenFiles.Components.JPList
             }
         }
 
-
         private string NormalizePath(string filePath)
         {
             filePath = filePath.Replace("\\", "/");
@@ -140,94 +125,5 @@ namespace Satrabel.OpenFiles.Components.JPList
             filePath = filePath.Trim('/');
             return filePath;
         }
-
-        //internal Select MergeJpListQuery(List<StatusDTO> statuses)
-        //{
-        //    var select = Select;
-        //    var query = select.Query;
-        //    foreach (StatusDTO status in statuses)
-        //    {
-        //        switch (status.action)
-        //        {
-        //            case "paging":
-        //                {
-        //                    int number;
-        //                    //  string value (it could be number or "all")
-        //                    int.TryParse(status.data.number, out number);
-        //                    select.PageSize = number;
-        //                    select.PageIndex = status.data.currentPage;
-        //                    break;
-        //                }
-        //            case "filter":
-        //                {
-        //                    if (status.type == "textbox" && status.data != null && !string.IsNullOrEmpty(status.name) && !string.IsNullOrEmpty(status.data.value))
-        //                    {
-        //                        var names = status.name.Split(',');
-        //                        if (names.Length == 1)
-        //                        {
-        //                            query.AddRule(new FilterRule()
-        //                            {
-        //                                Field = status.name,
-        //                                FieldOperator = OperatorEnum.START_WITH,
-        //                                Value = new StringRuleValue(status.data.value),
-        //                            });
-        //                        }
-        //                        else
-        //                        {
-        //                            var group = new FilterGroup() { Condition = ConditionEnum.OR };
-        //                            foreach (var n in names)
-        //                            {
-        //                                group.AddRule(new FilterRule()
-        //                                {
-        //                                    Field = n,
-        //                                    FieldOperator = OperatorEnum.START_WITH,
-        //                                    Value = new StringRuleValue(status.data.value),
-        //                                });
-        //                            }
-        //                            query.FilterGroups.Add(group);
-        //                        }
-        //                    }
-        //                    else if ((status.type == "checkbox-group-filter" || status.type == "button-filter-group")
-        //                                && status.data != null && !string.IsNullOrEmpty(status.name))
-        //                    {
-        //                        if (status.data.filterType == "pathGroup" && status.data.pathGroup != null && status.data.pathGroup.Count > 0)
-        //                        {
-        //                            query.AddRule(new FilterRule()
-        //                            {
-        //                                Field = status.name,
-        //                                FieldOperator = OperatorEnum.IN,
-        //                                MultiValue = status.data.pathGroup.Select(s => new StringRuleValue(s)),
-        //                            });
-        //                        }
-        //                    }
-        //                    else if (status.type == "filter-select" && status.data != null && !string.IsNullOrEmpty(status.name))
-        //                    {
-        //                        if (status.data.filterType == "path" && !string.IsNullOrEmpty(status.data.path))
-        //                        {
-        //                            query.AddRule(new FilterRule()
-        //                            {
-        //                                Field = status.name,
-        //                                Value = new StringRuleValue(status.data.path),
-        //                            });
-        //                        }
-        //                    }
-        //                    break;
-        //                }
-
-        //            case "sort":
-        //                {
-        //                    select.Sort.Clear();
-        //                    select.Sort.Add(new SortRule()
-        //                    {
-        //                        Field =  status.data.path,
-        //                        Descending = status.data.order == "desc",
-        //                        //FieldType = FieldTypeEnum.
-        //                    });
-        //                    break;
-        //                }
-        //        }
-        //    }
-        //    return select;
-        //}
     }
 }

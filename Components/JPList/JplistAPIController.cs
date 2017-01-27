@@ -15,10 +15,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web;
 using System.Web.Http;
-using DotNetNuke.Common;
 using DotNetNuke.Entities.Portals;
-using DotNetNuke.Security.Permissions;
-using DotNetNuke.Services.Personalization;
 using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.TemplateHelpers;
 using Satrabel.OpenContent.Components.Datasource.Search;
@@ -60,6 +57,8 @@ namespace Satrabel.OpenFiles.Components.JPList
                 var docs = LuceneController.Instance.Search(def);
                 int total = docs.TotalResults;
 
+
+
                 var ratio = string.IsNullOrEmpty(req.imageRatio) ? new Ratio(100, 100) : new Ratio(req.imageRatio);
 
                 Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", def.Filter.ToString() + " / " + def.Query.ToString(), total);
@@ -97,8 +96,8 @@ namespace Satrabel.OpenFiles.Components.JPList
                         {
                             continue; // skip
                         }
-                        var custom = GetCustomFileDataAsDynamic(f);
                         dynamic title = null;
+                        var custom = GetCustomFileDataAsDynamic(f);
                         if (custom != null && custom.meta != null)
                         {
                             try
@@ -169,25 +168,32 @@ namespace Satrabel.OpenFiles.Components.JPList
                     IsFolder = true
                 };
                 data.Add(dto);
-                var files = folderManager.GetFiles(f, false);
+                var files = folderManager.GetFiles(f, false).ToList();
                 var firstFile = files.FirstOrDefault(fi => fi.FileName == "_folder.jpg");
                 if (firstFile == null)
                 {
                     firstFile = files.OrderBy(fi => fi.FileName).FirstOrDefault();
                 }
-                if (firstFile != null)
+                if (firstFile != null && fileManager.IsImageFile(firstFile))
                 {
                     var custom = GetCustomFileDataAsDynamic(firstFile);
 
                     dto.FileName = firstFile.FileName;
                     dto.Url = fileManager.GetUrl(firstFile);
-
                     dto.IsImage = fileManager.IsImageFile(firstFile);
-                    dto.ImageUrl = ImageHelper.GetImageUrl(firstFile, ratio);
+                    dto.ImageUrl = dto.IsImage ? ImageHelper.GetImageUrl(firstFile, ratio) : "";
                     dto.Custom = custom;
                     dto.IconUrl = GetFileIconUrl(firstFile.Extension);
                     dto.IsEditable = IsEditable;
                     dto.EditUrl = IsEditable ? GetFileEditUrl(firstFile) : "";
+                }
+                else
+                {
+                    dto.FileName = f.FolderName;
+                    dto.IsImage = false;
+                    dto.IconUrl = GetFolderIconUrl();
+                    dto.IsEditable = false;
+                    dto.EditUrl = "";
                 }
             }
             var path = new List<IFolderInfo>();
@@ -245,7 +251,10 @@ namespace Satrabel.OpenFiles.Components.JPList
 
             return IconController.IconURL("ExtFile", "32x32", "Standard");
         }
-
+        private static string GetFolderIconUrl()
+        {
+            return IconController.IconURL("FolderStandard", "32x32", "Standard");
+        }
         private dynamic GetCustomFileDataAsDynamic(IFileInfo f)
         {
             if (f.ContentItemID > 0)

@@ -41,7 +41,7 @@ namespace Satrabel.OpenFiles.Components
                 if (id > 0)
                 {
                     var item = Util.GetContentController().GetContentItem(id);
-                    if (item != null && !string.IsNullOrEmpty(item.Content))
+                    if (!string.IsNullOrEmpty(item?.Content))
                     {
                         JObject dataJson = JObject.Parse(item.Content);
                         json["data"] = dataJson[LuceneMappingUtils.MetaField];
