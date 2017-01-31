@@ -4,6 +4,7 @@ using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
+using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Newtonsoft.Json.Linq;
 using Satrabel.OpenContent.Components;
@@ -65,7 +66,7 @@ namespace Satrabel.OpenFiles.Components.Utils
             luceneDoc.Add(new Field(PortalIdField, item.PortalId.ToString(), Field.Store.YES, Field.Index.ANALYZED));
             luceneDoc.Add(new Field(FileIdField, item.FileId.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
             luceneDoc.Add(new Field(FileNameField, item.FileName, Field.Store.YES, Field.Index.ANALYZED));
-            luceneDoc.Add(new Field(FolderField, item.Folder, Field.Store.YES, Field.Index.NOT_ANALYZED));
+            luceneDoc.Add(new Field(FolderField, QueryParser.Escape(item.Folder) , Field.Store.YES, Field.Index.NOT_ANALYZED));
             luceneDoc.Add(new Field(FileContentField, string.IsNullOrEmpty(item.FileContent) ? "" : item.FileContent, Field.Store.YES, Field.Index.ANALYZED));
             var objectMapper = new JsonObjectMapper();
             objectMapper.AddJsonToDocument(item.Meta, luceneDoc, config);
