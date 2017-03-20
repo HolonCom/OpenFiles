@@ -235,10 +235,10 @@ namespace Satrabel.OpenFiles.Components.JPList
             return filePath;
         }
 
-        private string GetFileEditUrl(IFileInfo f)
+        private string GetFileEditUrl(IFileInfo fileInfo)
         {
-            if (f == null) return "";
-            var portalFileUri = new PortalFileUri(f);
+            if (fileInfo == null) return "";
+            var portalFileUri = new PortalFileUri(fileInfo);
             return portalFileUri.EditUrl();
         }
 
