@@ -10,9 +10,11 @@
 ' 
 */
 
+using DotNetNuke.Entities.Modules;
+
 namespace Satrabel.OpenFiles.Components
 {
-    public class FeatureController //: ModuleSearchBase //,IPortable //, IUpgradeable
+    public class FeatureController : IUpgradeable //: ModuleSearchBase //,IPortable 
     {
         #region Optional Interfaces
 
@@ -84,5 +86,15 @@ namespace Satrabel.OpenFiles.Components
         //	throw new System.NotImplementedException("The method or operation is not implemented.");
         //}
         #endregion
+
+        public string UpgradeModule(string version)
+        {
+            string res = "";
+            if (version == "03.02.00")
+            {
+                Lucene.LuceneController.Instance.IndexAll();
+            }
+            return version + res;
+        }
     }
 }
