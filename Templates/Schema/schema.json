@@ -19,20 +19,6 @@
             "type": "array",
             "enum": [ "Featured" ]
         },
-        "publishstartdate": {
-            "title": "Publication Startdate",
-            "type": "string",
-            "required": true,
-            "readonly": false,
-            "default": "today"
-        },
-        "publishenddate": {
-            "title": "Publication Enddate",
-            "type": "string",
-            "required": true,
-            "readonly": false,
-            "default": "2099/12/31"
-        },
         "publishstatus": {
             "title": "Publication Status",
             "type": "string",
