@@ -1,12 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using DotNetNuke.Modules.DigitalAssets.Components.ExtensionPoint;
 using DotNetNuke.Services.Localization;
 using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.Alpaca;
-using Satrabel.OpenFiles.Components;
-using Satrabel.OpenFiles.Components.Lucene;
 using Satrabel.OpenFiles.Components.Utils;
 using AppConfig = Satrabel.OpenFiles.Components.AppConfig;
 

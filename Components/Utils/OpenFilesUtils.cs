@@ -3,7 +3,6 @@ using System.Linq;
 using DotNetNuke.Common.Utilities;
 using DotNetNuke.Entities.Content;
 using DotNetNuke.Entities.Content.Common;
-using DotNetNuke.Entities.Portals;
 using DotNetNuke.Services.FileSystem;
 using Newtonsoft.Json.Linq;
 using Satrabel.OpenContent.Components.Json;

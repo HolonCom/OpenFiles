@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 using DotNetNuke.Entities.Users;
-using Newtonsoft.Json.Linq;
 using Satrabel.OpenContent.Components.Datasource.Search;
-using Satrabel.OpenContent.Components.Json;
 using Satrabel.OpenContent.Components.Lucene.Config;
-using Satrabel.OpenFiles.Components.Lucene;
 using Satrabel.OpenFiles.Components.Utils;
 
 namespace Satrabel.OpenFiles.Components.JPList

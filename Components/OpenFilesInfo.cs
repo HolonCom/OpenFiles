@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Web;
-using DotNetNuke.ComponentModel.DataAnnotations;
 using DotNetNuke.Entities.Content;
 using DotNetNuke.Entities.Content.Common;
 using DotNetNuke.Services.Exceptions;
 using DotNetNuke.Services.FileSystem;
 using Newtonsoft.Json.Linq;
-using Satrabel.OpenFiles.Components.ExternalData;
 
 namespace Satrabel.OpenFiles.Components
 {

@@ -20,7 +20,6 @@ using System.IO;
 using DotNetNuke.Security;
 using DotNetNuke.Entities.Content.Common;
 using Satrabel.OpenFiles.Components.ExternalData;
-using Satrabel.OpenFiles.Components.Lucene;
 using Satrabel.OpenFiles.Components.Utils;
 
 #endregion
