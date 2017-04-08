@@ -16,6 +16,7 @@
       <dependencies>
         <dependency type="CoreVersion">07.02.00</dependency>
         <dependency type="package">OpenContent</dependency>
+        <dependency type="package">OpenImageProcessor</dependency>
         <dependency type="type">Satrabel.OpenContent.Components.TemplateHelpers.ImageHelper</dependency>
       </dependencies>
       <components>
@@ -64,7 +65,6 @@
                     <helpUrl />
                     <viewOrder>0</viewOrder>
                   </moduleControl>
-
                 </moduleControls>
               </moduleDefinition>
             </moduleDefinitions>
@@ -84,75 +84,8 @@
               <name>itextsharp.pdfa.dll</name>
               <path>bin</path>
             </assembly>
-            <assembly>
-              <name>ImageProcessor.dll</name>
-              <path>bin</path>
-            </assembly>
-            <assembly>
-              <name>ImageProcessor.Web.dll</name>
-              <path>bin</path>
-            </assembly>
-
           </assemblies>
         </component>
-
-        <component type="Config">
-          <config>
-            <configFile>web.config</configFile>
-            <install>
-              <configuration>
-                <nodes>
-
-                  <node path="/configuration/configSections" action="update" key="name" collision="overwrite">
-                    <sectionGroup name="imageProcessor">
-                      <section name="security" requirePermission="false" type="ImageProcessor.Web.Configuration.ImageSecuritySection, ImageProcessor.Web" />
-                      <section name="processing" requirePermission="false" type="ImageProcessor.Web.Configuration.ImageProcessingSection, ImageProcessor.Web" />
-                      <section name="caching" requirePermission="false" type="ImageProcessor.Web.Configuration.ImageCacheSection, ImageProcessor.Web" />
-                    </sectionGroup>
-                  </node>
-
-                  <node path="/configuration/system.webServer/modules" action="update" key="name" collision="overwrite">
-                    <add name="ImageProcessorModule" type="ImageProcessor.Web.HttpModules.ImageProcessingModule, ImageProcessor.Web" />
-                  </node>
-
-                  <node path="/configuration" action="update" targetpath="/configuration/imageProcessor" collision="ignore">
-                    <imageProcessor>
-                      <security configSource="config\imageprocessor\security.config" />
-                      <caching configSource="config\imageprocessor\cache.config" />
-                      <processing configSource="config\imageprocessor\processing.config" />
-                    </imageProcessor>
-                  </node>
-
-                </nodes>
-              </configuration>
-            </install>
-            <uninstall>
-              <configuration>
-                <nodes>
-                  <node path="/configuration/configSections/sectionGroup[@name='imageProcessor']" action="remove"  />
-                  <node path="/configuration/system.webServer/modules/add[@name='ImageProcessorModule']" action="remove"  />
-                  <node path="/configuration/imageProcessor" action="remove"  />
-                </nodes>
-              </configuration>
-            </uninstall>
-          </config>
-        </component>
-
-        <component type="File">
-          <files>
-            <basePath>Config\imageprocessor</basePath>
-            <file>
-              <name>security.config</name>
-            </file>
-            <file>
-              <name>cache.config</name>
-            </file>
-            <file>
-              <name>processing.config</name>
-            </file>
-          </files>
-        </component>
-
       </components>
     </package>
   </packages>

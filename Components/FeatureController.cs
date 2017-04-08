@@ -10,7 +10,11 @@
 ' 
 */
 
+using DotNetNuke.Common;
+using DotNetNuke.Common.Utilities;
 using DotNetNuke.Entities.Modules;
+using DotNetNuke.Entities.Modules.Definitions;
+using DotNetNuke.Entities.Tabs;
 
 namespace Satrabel.OpenFiles.Components
 {
@@ -75,18 +79,15 @@ namespace Satrabel.OpenFiles.Components
         }
          */
         #endregion
+
+        #endregion
+
         /// -----------------------------------------------------------------------------
         /// <summary>
         /// UpgradeModule implements the IUpgradeable Interface
         /// </summary>
-        /// <param name="Version">The current version of the module</param>
+        /// <param name="version">The current version of the module</param>
         /// -----------------------------------------------------------------------------
-        //public string UpgradeModule(string Version)
-        //{
-        //	throw new System.NotImplementedException("The method or operation is not implemented.");
-        //}
-        #endregion
-
         public string UpgradeModule(string version)
         {
             string res = "";
@@ -96,5 +97,74 @@ namespace Satrabel.OpenFiles.Components
             }
             return version + res;
         }
+
+        internal static void GenerateAdminTab(int portalId)
+        {
+            GenerateAdminTab("OpenFiles", portalId);
+        }
+
+        internal static bool AdminTabExists( int portalId)
+        {
+            return AdminTabExists("OpenFiles", portalId);
+        }
+
+        private static bool AdminTabExists(string friendlyModuleName, int portalId)
+        {
+            var tabId = TabController.GetTabByTabPath(portalId, $"//Admin//{friendlyModuleName}", Null.NullString);
+            return (tabId != Null.NullInteger);
+        }
+
+        private static void GenerateAdminTab(string friendlyModuleName, int portalId)
+        {
+            var tabId = TabController.GetTabByTabPath(portalId, $"//Admin//{friendlyModuleName}", Null.NullString);
+            if (tabId == Null.NullInteger)
+            {
+                var adminTabId = TabController.GetTabByTabPath(portalId, @"//Admin", Null.NullString);
+
+                // create new page 
+                int parentTabId = adminTabId;
+                var tabName = friendlyModuleName;
+                var tabPath = Globals.GenerateTabPath(parentTabId, tabName);
+                tabId = TabController.GetTabByTabPath(portalId, tabPath, Null.NullString);
+                if (tabId == Null.NullInteger)
+                {
+                    //Create a new page
+                    var newTab = new TabInfo
+                    {
+                        TabName = tabName,
+                        ParentId = parentTabId,
+                        PortalID = portalId,
+                        IsVisible = true,
+                        IconFile = "~/Images/icon_search_16px.gif",
+                        IconFileLarge = "~/Images/icon_search_32px.gif"
+                    };
+                    newTab.TabID = new TabController().AddTab(newTab, false);
+                    tabId = newTab.TabID;
+                }
+            }
+
+            // create new module
+            var moduleCtl = new ModuleController();
+            if (moduleCtl.GetTabModules(tabId).Count == 0)
+            {
+                var dm = DesktopModuleController.GetDesktopModuleByModuleName(friendlyModuleName, portalId);
+                var md = ModuleDefinitionController.GetModuleDefinitionByFriendlyName(friendlyModuleName, dm.DesktopModuleID);
+
+                var objModule = new ModuleInfo
+                {
+                    PortalID = portalId,
+                    TabID = tabId,
+                    ModuleOrder = Null.NullInteger,
+                    ModuleTitle = friendlyModuleName,
+                    PaneName = Globals.glbDefaultPane,
+                    ModuleDefID = md.ModuleDefID,
+                    InheritViewPermissions = true,
+                    AllTabs = false,
+                    IconFile = "~/Images/icon_search_32px.gif"
+                };
+                moduleCtl.AddModule(objModule);
+            }
+        }
+
     }
 }
