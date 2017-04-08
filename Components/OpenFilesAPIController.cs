@@ -17,11 +17,10 @@ using DotNetNuke.Web.Api;
 using Newtonsoft.Json.Linq;
 using System.Web.Hosting;
 using System.IO;
-using DotNetNuke.Instrumentation;
 using DotNetNuke.Security;
-using Satrabel.OpenContent.Components.Json;
 using DotNetNuke.Entities.Content.Common;
-using Satrabel.OpenContent.Components;
+using Satrabel.OpenFiles.Components.ExternalData;
+using Satrabel.OpenFiles.Components.Utils;
 
 #endregion
 
@@ -30,34 +29,21 @@ namespace Satrabel.OpenFiles.Components
     // [SupportedModules("OpenFiles")]
     public class OpenFilesAPIController : DnnApiController
     {
-        public string BaseDir
-        {
-            get
-            {
-                return PortalSettings.HomeDirectory + "/OpenFiles/Templates/";
-            }
-        }
-
         [ValidateAntiForgeryToken]
         [DnnModuleAuthorize(AccessLevel = SecurityAccessLevel.Edit)]
         [HttpGet]
         public HttpResponseMessage Edit(int id)
         {
-            //string Template = "DesktopModules/OpenFiles/";
-            JObject json = new JObject();
             try
             {
-                string desktopFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenFiles/");
-                string portalFolder = HostingEnvironment.MapPath(PortalSettings.HomeDirectory + "/OpenFiles/");
-                GetJson(json, desktopFolder, portalFolder, "");
-                int moduleId = ActiveModule.ModuleID;
+                JObject json = FilesRepository.GetSchemaAndOptionsJson(AppConfig.Instance.SchemaFolder, AppConfig.Instance.PortalFolder(PortalSettings), "");
                 if (id > 0)
                 {
                     var item = Util.GetContentController().GetContentItem(id);
-                    if (item != null && !string.IsNullOrEmpty(item.Content))
+                    if (!string.IsNullOrEmpty(item?.Content))
                     {
                         JObject dataJson = JObject.Parse(item.Content);
-                        json["data"] = dataJson["meta"];
+                        json["data"] = dataJson[LuceneMappingUtils.MetaField];
                     }
                 }
 
@@ -65,73 +51,11 @@ namespace Satrabel.OpenFiles.Components
             }
             catch (Exception exc)
             {
-                Utils.Logger.Error(exc);
+                Log.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
 
-        private void GetJson(JObject json, string desktopFolder, string portalFolder, string prefix)
-        {
-            if (!Directory.Exists(portalFolder))
-            {
-                Directory.CreateDirectory(portalFolder);
-            }
-            if (!string.IsNullOrEmpty(prefix))
-            {
-                prefix = prefix + "-";
-            }
-            // schema
-            string schemaFilename = portalFolder + "\\" + prefix + "schema.json";
-            if (!File.Exists(schemaFilename))
-            {
-                schemaFilename = desktopFolder + "\\" + prefix + "schema.json";
-            }
-            JObject schemaJson = JObject.Parse(File.ReadAllText(schemaFilename));
-            json["schema"] = schemaJson;
-            // default options
-            string optionsFilename = portalFolder + "\\" + prefix + "options.json";
-            if (!File.Exists(optionsFilename))
-            {
-                optionsFilename = desktopFolder + "\\" + prefix + "options.json";
-            }
-            if (File.Exists(optionsFilename))
-            {
-                string fileContent = File.ReadAllText(optionsFilename);
-                if (!string.IsNullOrWhiteSpace(fileContent))
-                {
-                    JObject optionsJson = JObject.Parse(fileContent);
-                    json["options"] = optionsJson;
-                }
-            }
-            // language options
-            optionsFilename = portalFolder + "\\" + prefix + "options." + DnnUtils.GetCurrentCultureCode() + ".json";
-            if (!File.Exists(optionsFilename))
-            {
-                optionsFilename = desktopFolder + "\\" + prefix + "options." + DnnUtils.GetCurrentCultureCode() + ".json";
-            }
-            if (File.Exists(optionsFilename))
-            {
-                string fileContent = File.ReadAllText(optionsFilename);
-                if (!string.IsNullOrWhiteSpace(fileContent))
-                {
-                    JObject optionsJson = JObject.Parse(fileContent);
-                    json["options"] = json["options"].JsonMerge(optionsJson);
-                }
-            }
-            // view
-            /*
-            string viewFilename = TemplateFolder + "\\" + Prefix +"view.json";
-            if (File.Exists(optionsFilename))
-            {
-                string fileContent = File.ReadAllText(viewFilename);
-                if (!string.IsNullOrWhiteSpace(fileContent))
-                {
-                    JObject optionsJson = JObject.Parse(fileContent);
-                    json["view"] = optionsJson;
-                }
-            }
-            */
-        }
 
 
         [ValidateAntiForgeryToken]
@@ -139,33 +63,30 @@ namespace Satrabel.OpenFiles.Components
         [HttpGet]
         public HttpResponseMessage Settings(string Template)
         {
-            string Data = (string)ActiveModule.ModuleSettings["data"];
-            JObject json = new JObject();
+            string data = (string)ActiveModule.ModuleSettings["data"];
             try
             {
-                string TemplateFilename = HostingEnvironment.MapPath("~/" + Template);
-                string prefix = Path.GetFileNameWithoutExtension(TemplateFilename) + "-";
+                string templateFilename = HostingEnvironment.MapPath("~/" + Template);
+                string prefix = Path.GetFileNameWithoutExtension(templateFilename) + "-";
 
-                string DesktopFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenFiles/");
-                string PortalFolder = HostingEnvironment.MapPath(PortalSettings.HomeDirectory + "/OpenFiles/");
-                GetJson(json, DesktopFolder, PortalFolder, prefix);
+                JObject json = FilesRepository.GetSchemaAndOptionsJson(AppConfig.Instance.SchemaFolder, AppConfig.Instance.PortalFolder(PortalSettings), prefix);
 
-                if (!string.IsNullOrEmpty(Data))
+                if (!string.IsNullOrEmpty(data))
                 {
                     try
                     {
-                        json["data"] = JObject.Parse(Data);
+                        json["data"] = JObject.Parse(data);
                     }
                     catch (Exception ex)
                     {
-                        Utils.Logger.Error("Settings Json Data : " + Data, ex);
+                        Log.Logger.Error("Settings Json Data : " + data, ex);
                     }
                 }
                 return Request.CreateResponse(HttpStatusCode.OK, json);
             }
             catch (Exception exc)
             {
-                Utils.Logger.Error(exc);
+                Log.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
@@ -183,7 +104,7 @@ namespace Satrabel.OpenFiles.Components
             }
             catch (Exception exc)
             {
-                Utils.Logger.Error(exc);
+                Log.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
@@ -194,14 +115,11 @@ namespace Satrabel.OpenFiles.Components
         public HttpResponseMessage EditImages(int id)
         {
             //string Template = "DesktopModules/OpenFiles/";
-            JObject json = new JObject();
             try
             {
-                string desktopFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenFiles/");
-                string portalFolder = HostingEnvironment.MapPath(PortalSettings.HomeDirectory + "/OpenFiles/");
-                GetJson(json, desktopFolder, portalFolder, "images");
+                JObject json = FilesRepository.GetSchemaAndOptionsJson(AppConfig.Instance.SchemaFolder, AppConfig.Instance.PortalFolder(PortalSettings), "images");
 
-                int moduleId = ActiveModule.ModuleID;
+                //int moduleId = ActiveModule.ModuleID;
                 if (id > 0)
                 {
                     var item = Util.GetContentController().GetContentItem(id);
@@ -216,12 +134,10 @@ namespace Satrabel.OpenFiles.Components
             }
             catch (Exception exc)
             {
-                Utils.Logger.Error(exc);
+                Log.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
-
     }
-
 }
 

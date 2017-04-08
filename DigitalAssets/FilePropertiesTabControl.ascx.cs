@@ -1,13 +1,14 @@
-﻿using DotNetNuke.ExtensionPoints;
+﻿using System;
+using System.Web.UI.WebControls;
+using DotNetNuke.ExtensionPoints;
 using DotNetNuke.Modules.DigitalAssets.Components.ExtensionPoint;
 using DotNetNuke.Services.FileSystem;
 using DotNetNuke.Services.Localization;
 using Satrabel.OpenContent.Components.Alpaca;
-using Satrabel.OpenFiles.Components.DigitalAssets;
-using System;
-using System.Web.UI.WebControls;
+using Satrabel.OpenFiles.Components;
+using Satrabel.OpenFiles.Components.Utils;
 
-namespace Satrabel.Modules.DigitalAssets
+namespace Satrabel.OpenFiles.DigitalAssets
 {
     public partial class FilePropertiesTabControl : PropertiesTabContentControl, IEditPageTabControlActions
     {
@@ -15,8 +16,8 @@ namespace Satrabel.Modules.DigitalAssets
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            AlpacaEngine alpaca = new AlpacaEngine(Page, ModuleContext,"DesktopModules/OpenFiles/","images");
-            alpaca.RegisterAll();
+            AlpacaEngine alpaca = new AlpacaEngine(Page, ModuleContext.PortalId, AppConfig.Instance.SchemaFolder.FolderPath, "images");
+            alpaca.RegisterAll(false, false);
 
             int fileid = int.Parse(Page.Request.QueryString["fileId"]);
             var fm = DotNetNuke.Services.FileSystem.FileManager.Instance;
@@ -50,7 +51,6 @@ namespace Satrabel.Modules.DigitalAssets
             get
             {
                 return File.ContentItemID;
-
             }
         }
 
@@ -79,7 +79,7 @@ namespace Satrabel.Modules.DigitalAssets
 
         protected void validation_ServerValidate(object source, ServerValidateEventArgs args)
         {
-            ContentItemUtils.Save(File, "crop", hfAlpacaImagesData.Value);
+            OpenFilesUtils.Save(File, "crop", hfAlpacaImagesData.Value);
         }
     }
 }

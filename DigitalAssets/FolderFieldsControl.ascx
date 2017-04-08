@@ -1,4 +1,4 @@
-﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="FolderFieldsControl.ascx.cs" Inherits="Satrabel.Modules.DigitalAssets.FolderFieldsControl" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="FolderFieldsControl.ascx.cs" Inherits="Satrabel.OpenFiles.DigitalAssets.FolderFieldsControl" %>
 <%@ Register TagPrefix="dnn" TagName="Label" Src="~/controls/LabelControl.ascx" %>
 
 <%@ Register TagPrefix="dnncl" Namespace="DotNetNuke.Web.Client.ClientResourceManagement" Assembly="DotNetNuke.Web.Client" %>

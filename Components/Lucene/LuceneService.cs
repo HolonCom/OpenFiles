@@ -1,342 +1,396 @@
-﻿using System;
+﻿#region Usings
+
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web;
-using DotNetNuke.Instrumentation;
-using Lucene.Net.Analysis.Standard;
+using System.Threading;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
-using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
-using Version = Lucene.Net.Util.Version;
 using DotNetNuke.Common;
 using Lucene.Net.Analysis;
-using Directory = Lucene.Net.Store.Directory;
+
+#endregion
 
 namespace Satrabel.OpenFiles.Components.Lucene
 {
-    public static class LuceneService
+    public class LuceneService : IDisposable
     {
-        // properties
-        private static readonly string LuceneOutputPath = Path.Combine(Globals.ApplicationMapPath, "App_Data\\OpenFiles\\LuceneIndex");
-        private static FSDirectory _directoryTemp;
 
-        private static FSDirectory LuceneOutputFolder
+        #region Constants
+        private const string WriteLockFile = "write.lock";
+        private const int DefaultRereadTimeSpan = 10; // in seconds (initialy 30sec)
+        private const int DISPOSED = 1;
+        private const int UNDISPOSED = 0;
+        #endregion
+
+        #region Private Properties
+
+        private readonly string _searchFolder;
+        private readonly Analyzer _analyser;
+
+        private string IndexFolder { get; set; }
+
+        private IndexWriter _writer;
+        private IndexReader _idxReader;
+        private CachedReader _reader;
+        private readonly object _writerLock = new object();
+        private readonly double _readerTimeSpan; // in seconds
+        private readonly List<CachedReader> _oldReaders = new List<CachedReader>();
+        private int _isDisposed = UNDISPOSED;
+
+        #region constructor
+        internal LuceneService(string searchFolder, Analyzer analyser)
+        {
+            _searchFolder = searchFolder;
+            _analyser = analyser;
+            if (string.IsNullOrEmpty(_searchFolder))
+                throw new ArgumentNullException("searchFolder");
+            IndexFolder = Path.Combine(Globals.ApplicationMapPath, _searchFolder);
+            _readerTimeSpan = DefaultRereadTimeSpan;
+        }
+
+        private void CheckDisposed()
+        {
+            if (Thread.VolatileRead(ref _isDisposed) == DISPOSED)
+                throw new ObjectDisposedException(string.Format("LuceneController [{0}] is disposed and cannot be used anymore", _searchFolder));
+        }
+        #endregion
+
+        private IndexWriter Writer
         {
             get
             {
-                if (_directoryTemp == null)
-                    _directoryTemp = FSDirectory.Open(new DirectoryInfo(LuceneOutputPath));
-                if (IndexWriter.IsLocked(_directoryTemp))
-                    IndexWriter.Unlock(_directoryTemp);
-                var lockFilePath = Path.Combine(LuceneOutputPath, "write.lock");
-                if (File.Exists(lockFilePath))
-                    File.Delete(lockFilePath);
-                return _directoryTemp;
-            }
-        }
-
-        // search methods
-        internal static List<LuceneIndexItem> GetAllIndexedRecords()
-        {
-            // validate search index
-            if (!System.IO.Directory.EnumerateFiles(LuceneOutputPath).Any()) return new List<LuceneIndexItem>();
-
-            // set up lucene searcher
-            var searcher = new IndexSearcher(LuceneOutputFolder, false);
-            var reader = IndexReader.Open(LuceneOutputFolder, false);
-            var docs = new List<Document>();
-            var term = reader.TermDocs();
-            // v 2.9.4: use 'term.Doc()'
-            // v 3.0.3: use 'term.Doc'
-            while (term.Next()) docs.Add(searcher.Doc(term.Doc));
-            reader.Dispose();
-            searcher.Dispose();
-            return MapLuceneToDataList(docs);
-        }
-
-        #region Write
-
-        internal static void IndexItem(LuceneIndexItem item)
-        {
-            IndexItem(new List<LuceneIndexItem> { item });
-        }
-
-        internal static void IndexItem(List<LuceneIndexItem> itemlist)
-        {
-            // init lucene
-            //var analyzer = new StandardAnalyzer(Version.LUCENE_30);
-
-            if (itemlist.Count() == 0) return;
-
-            var analyzer = GetCustomAnalyzer();
-            
-            using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, !IndexExists()))
-            {
-                // add data to lucene search index (replaces older entries if any)
-                foreach (var sampleData in itemlist)
-                    AddToLuceneIndex(sampleData, writer);
-
-                // close handles
-                analyzer.Close();
-                writer.Dispose();
-            }
-        }
-
-        public static void RemoveLuceneIndexRecord(int indexId)
-        {
-            // init lucene
-            var analyzer = GetCustomAnalyzer();
-            using (var writer = new IndexWriter(LuceneOutputFolder, analyzer, IndexWriter.MaxFieldLength.UNLIMITED))
-            {
-                // remove older index entry
-                var searchQuery = new TermQuery(new Term(GetIndexField(), indexId.ToString()));
-                writer.DeleteDocuments(searchQuery);
-
-                // close handles
-                analyzer.Close();
-                writer.Dispose();
-            }
-        }
-
-        public static bool ClearLuceneIndex()
-        {
-            var retval = true;
-            Utils.Logger.DebugFormat("Executing ==> public static bool ClearLuceneIndex()");
-            try
-            {
-                if (LuceneOutputFolder.Directory.Exists)
+                if (_writer == null)
                 {
-
-                    var analyzer = GetCustomAnalyzer();
-                    using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, false))
+                    lock (_writerLock)
                     {
-                        Utils.Logger.DebugFormat("          ==> Deleting all documents from index");
-                        // remove older index entries
-                        writer.DeleteAll();
+                        if (_writer == null)
+                        {
+                            var lockFile = Path.Combine(IndexFolder, WriteLockFile);
+                            if (File.Exists(lockFile))
+                            {
+                                try
+                                {
+                                    // if we successd in deleting the file, move on and create a new writer; otherwise,
+                                    // the writer is locked by another instance (e.g., another server in a webfarm).
+                                    File.Delete(lockFile);
+                                }
+                                catch (IOException e)
+                                {
+#pragma warning disable 0618
+                                    throw new Exception("Unable to create Lucene writer (lock file is in use). Please recycle AppPool in IIS to release lock.", e);
+#pragma warning restore 0618
+                                }
+                            }
 
-                        // close handles
-                        analyzer.Close();
-                        writer.Dispose();
+                            CheckDisposed();
+                            var writer = new IndexWriter(FSDirectory.Open(IndexFolder), _analyser, IndexWriter.MaxFieldLength.UNLIMITED);
+                            _idxReader = writer.GetReader();
+                            Thread.MemoryBarrier();
+                            _writer = writer;
+                        }
+                    }
+                }
+                return _writer;
+            }
+        }
+
+        private void InstantiateReader()
+        {
+            IndexSearcher searcher;
+            if (_idxReader != null)
+            {
+                //use the Reopen() method for better near-realtime when the _writer ins't null
+                var newReader = _idxReader.Reopen();
+                if (_idxReader != newReader)
+                {
+                    //_idxReader.Dispose(); -- will get disposed upon disposing the searcher
+                    Interlocked.Exchange(ref _idxReader, newReader);
+                }
+
+                searcher = new IndexSearcher(_idxReader);
+            }
+            else
+            {
+                // Note: disposing the IndexSearcher instance obtained from the next
+                // statement will not close the underlying reader on dispose.
+                searcher = new IndexSearcher(FSDirectory.Open(IndexFolder));
+            }
+
+            var reader = new CachedReader(searcher);
+            var cutoffTime = DateTime.Now - TimeSpan.FromSeconds(_readerTimeSpan * 10);
+            lock (((ICollection)_oldReaders).SyncRoot)
+            {
+                CheckDisposed();
+                _oldReaders.RemoveAll(r => r.LastUsed <= cutoffTime);
+                _oldReaders.Add(reader);
+                Interlocked.Exchange(ref _reader, reader);
+            }
+        }
+
+        private DateTime _lastReadTimeUtc;
+        private DateTime _lastDirModifyTimeUtc;
+
+        private bool MustRereadIndex
+        {
+            get
+            {
+                return (DateTime.UtcNow - _lastReadTimeUtc).TotalSeconds >= _readerTimeSpan &&
+                    System.IO.Directory.Exists(IndexFolder) &&
+                    System.IO.Directory.GetLastWriteTimeUtc(IndexFolder) != _lastDirModifyTimeUtc;
+            }
+        }
+
+        private void UpdateLastAccessTimes()
+        {
+            _lastReadTimeUtc = DateTime.UtcNow;
+            if (System.IO.Directory.Exists(IndexFolder))
+            {
+                _lastDirModifyTimeUtc = System.IO.Directory.GetLastWriteTimeUtc(IndexFolder);
+            }
+        }
+
+        private void RescheduleAccessTimes()
+        {
+            // forces re-opening the reader within 30 seconds from now (used mainly by commit)
+            var now = DateTime.UtcNow;
+            if (_readerTimeSpan > DefaultRereadTimeSpan && (now - _lastReadTimeUtc).TotalSeconds > DefaultRereadTimeSpan)
+            {
+                _lastReadTimeUtc = now - TimeSpan.FromSeconds(_readerTimeSpan - DefaultRereadTimeSpan);
+            }
+        }
+
+        private void CheckValidIndexFolder()
+        {
+            if (!ValidateIndexFolder())
+                throw new Exception(string.Format("Lucene Search indexing directory [{0}] is either empty or does not exist", _searchFolder));
+        }
+
+        internal bool ValidateIndexFolder()
+        {
+            return System.IO.Directory.Exists(IndexFolder) &&
+                   System.IO.Directory.GetFiles(IndexFolder, "*.*").Length > 0;
+        }
+
+        #endregion
+
+        #region Search
+
+        internal SearchResults Search(Query filter, Query query, Sort sort, int pageSize, int pageIndex, Func<Document, LuceneIndexItem> mapper)
+        {
+            if (pageSize == 0) throw new Exception("Invalid Pagesize. Pagesize is zero.");
+            var searcher = GetSearcher();
+            TopDocs topDocs;
+            if (filter == null)
+                topDocs = searcher.Search(query, null, (pageIndex + 1) * pageSize, sort);
+            else
+                topDocs = searcher.Search(query, new QueryWrapperFilter(filter), (pageIndex + 1) * pageSize, sort);
+
+            var results = new List<LuceneIndexItem>();
+            if (topDocs.ScoreDocs.Length != 0)
+                results = MapLuceneToDataList(topDocs.ScoreDocs.Skip(pageIndex * pageSize), searcher, mapper);
+
+            var luceneResults = new SearchResults(results, topDocs.TotalHits);
+            return luceneResults;
+        }
+
+        private static List<LuceneIndexItem> MapLuceneToDataList(IEnumerable<ScoreDoc> hits, IndexSearcher searcher, Func<Document, LuceneIndexItem> mapper)
+        {
+            return hits.Select(hit => mapper(searcher.Doc(hit.Doc))).ToList();
+        }
+
+        internal IndexSearcher GetSearcher()
+        {
+            // made internal to be used in unit tests only; otherwise could be made private
+            if (_reader == null || MustRereadIndex)
+            {
+                CheckValidIndexFolder();
+                UpdateLastAccessTimes();
+                InstantiateReader();
+            }
+
+            return _reader.GetSearcher();
+        }
+
+        #endregion
+
+        #region Operations
+
+        public void Add(Document doc)
+        {
+            Requires.NotNull("searchDocument", doc);
+            if (doc.GetFields().Count > 0)
+            {
+                try
+                {
+                    Writer.AddDocument(doc);
+                }
+                catch (OutOfMemoryException)
+                {
+                    lock (_writerLock)
+                    {
+                        // as suggested by Lucene's doc
+                        DisposeWriter();
+                        Writer.AddDocument(doc);
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                Utils.Logger.DebugFormat("          ==> Deleting documents failed with {0}", ex.Message);
-                retval = false;
-            }
-            Utils.Logger.DebugFormat("     Exit ==> public static bool ClearLuceneIndex() with {0}", retval);
-            return retval;
         }
 
-        public static void Optimize()
+        public void Delete(Query query)
         {
-            var analyzer = GetCustomAnalyzer();
-            using (var writer = GetIndexWriter(LuceneOutputFolder, analyzer, false))
+            Requires.NotNull("luceneQuery", query);
+            Writer.DeleteDocuments(query);
+        }
+
+        public void Commit()
+        {
+            if (_writer != null)
             {
-                analyzer.Close();
-                writer.Optimize();
-                writer.Dispose();
+                lock (_writerLock)
+                {
+                    if (_writer != null)
+                    {
+                        CheckDisposed();
+                        _writer.Commit();
+                        RescheduleAccessTimes();
+                    }
+                }
+            }
+        }
+
+        public void DeleteAll()
+        {
+            if (ValidateIndexFolder())
+                Writer.DeleteAll();
+        }
+
+        public bool OptimizeSearchIndex(bool doWait)
+        {
+            var writer = _writer;
+            if (writer != null && writer.HasDeletions())
+            {
+                if (doWait)
+                {
+                    Log.Logger.Debug("Compacting Search Index - started");
+                }
+
+                CheckDisposed();
+                //optimize down to "> 1 segments" for better performance than down to 1
+                _writer.Optimize(4, doWait);
+
+                if (doWait)
+                {
+                    Commit();
+                    Log.Logger.Debug("Compacting Search Index - finished");
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool HasDeletions()
+        {
+            CheckDisposed();
+            var searcher = GetSearcher();
+            return searcher.IndexReader.HasDeletions;
+        }
+
+        public int MaxDocsCount()
+        {
+            CheckDisposed();
+            var searcher = GetSearcher();
+            return searcher.IndexReader.MaxDoc;
+        }
+
+        public int SearchbleDocsCount()
+        {
+            CheckDisposed();
+            var searcher = GetSearcher();
+            return searcher.IndexReader.NumDocs();
+        }
+
+        #endregion
+
+        #region Dispose
+
+        public void Dispose()
+        {
+            var status = Interlocked.CompareExchange(ref _isDisposed, DISPOSED, UNDISPOSED);
+            if (status == UNDISPOSED)
+            {
+                DisposeWriter();
+                DisposeReaders();
+            }
+        }
+
+        private void DisposeWriter()
+        {
+            if (_writer != null)
+            {
+                lock (_writerLock)
+                {
+                    if (_writer != null)
+                    {
+                        _idxReader.Dispose();
+                        _idxReader = null;
+
+                        _writer.Commit();
+                        _writer.Dispose();
+                        _writer = null;
+                    }
+                }
+            }
+        }
+
+        private void DisposeReaders()
+        {
+            lock (((ICollection)_oldReaders).SyncRoot)
+            {
+                foreach (var rdr in _oldReaders)
+                {
+                    rdr.Dispose();
+                }
+                _oldReaders.Clear();
+                _reader = null;
             }
         }
 
         #endregion
 
-        #region Private Methods
-
-        internal static List<LuceneIndexItem> DoSearch(string searchQuery, string searchField = "")
+        class CachedReader : IDisposable
         {
-            // main search method
+            public DateTime LastUsed { get; private set; }
+            private readonly IndexSearcher _searcher;
 
-            // validation
-            if (string.IsNullOrEmpty(searchQuery.Replace("*", "").Replace("?", ""))) return new List<LuceneIndexItem>();
-
-            // set up lucene searcher
-            using (var searcher = new IndexSearcher(LuceneOutputFolder, true))
+            public CachedReader(IndexSearcher searcher)
             {
-                ScoreDoc[] hits;
-                const int hitsLimit = 1000;
-                var analyzer = GetCustomAnalyzer();
+                _searcher = searcher;
+                UpdateLastUsed();
+            }
 
-                // search by single field
-                if (!string.IsNullOrEmpty(searchField))
-                {
-                    var parser = new QueryParser(Version.LUCENE_30, searchField, analyzer);
-                    var query = ParseQuery(searchQuery, parser);
-                    hits = searcher.Search(query, hitsLimit).ScoreDocs;
-                }
-                // search by multiple fields (ordered by RELEVANCE)
-                else
-                {
-                    var parser = new MultiFieldQueryParser(Version.LUCENE_30, GetSearchAllFieldList(), analyzer);
-                    var query = ParseQuery(searchQuery, parser);
-                    hits = searcher.Search(query, null, hitsLimit, Sort.INDEXORDER).ScoreDocs;
-                }
-                var results = MapLuceneToDataList(hits, searcher);
-                analyzer.Close();
-                searcher.Dispose();
-                return results;
+            public IndexSearcher GetSearcher()
+            {
+                UpdateLastUsed();
+                return _searcher;
+            }
+
+            private void UpdateLastUsed()
+            {
+                LastUsed = DateTime.Now;
+            }
+
+            public void Dispose()
+            {
+                _searcher.Dispose();
+                _searcher.IndexReader.Dispose();
             }
         }
-
-        private static Query ParseQuery(string searchQuery, QueryParser parser)
-        {
-            Query query;
-            try
-            {
-                query = parser.Parse(searchQuery.Trim());
-            }
-            catch (ParseException)
-            {
-                query = parser.Parse(QueryParser.Escape(searchQuery.Trim()));
-            }
-            return query;
-        }
-
-        private static List<LuceneIndexItem> MapLuceneToDataList(IEnumerable<Document> hits)
-        {
-            // map Lucene search index to data
-            return hits.Select(MapLuceneDocumentToData).ToList();
-        }
-
-        private static List<LuceneIndexItem> MapLuceneToDataList(IEnumerable<ScoreDoc> hits, IndexSearcher searcher)
-        {
-            // v 2.9.4: use 'hit.doc'
-            // v 3.0.3: use 'hit.Doc'
-            return hits.Select(hit => MapLuceneDocumentToData(searcher.Doc(hit.Doc))).ToList();
-        }
-
-        private static string GetIndexField()
-        {
-            return "FileId";
-        }
-        private static string GetIndexFieldValue(LuceneIndexItem item)
-        {
-            return item.FileId.ToString();
-        }
-
-        private static string[] GetSearchAllFieldList()
-        {
-            return new[] { "PortalId", "FileId", "FileName", "Title", "Description", "FileContent", "Category" };
-        }
-
-        private static LuceneIndexItem MapLuceneDocumentToData(Document doc)
-        {
-            return new LuceneIndexItem
-            {
-                PortalId = Convert.ToInt32(doc.Get("PortalId")),
-                FileId = Convert.ToInt32(doc.Get("FileId")),
-                Title = doc.Get("Title"),
-                FileName = doc.Get("FileName"),
-                Description = doc.Get("Description"),
-                FileContent = doc.Get("FileContent")
-            };
-        }
-
-        private static PerFieldAnalyzerWrapper GetCustomAnalyzer()
-        {
-            var analyzerList = new List<KeyValuePair<string, Analyzer>>
-            {
-                new KeyValuePair<string, Analyzer>("PortalId", new KeywordAnalyzer()),
-                new KeyValuePair<string, Analyzer>("FileId", new KeywordAnalyzer()),
-                new KeyValuePair<string, Analyzer>("Title", new SimpleAnalyzer()),
-                new KeyValuePair<string, Analyzer>("FileName", new SimpleAnalyzer()),
-                new KeyValuePair<string, Analyzer>("Description", new StandardAnalyzer(Version.LUCENE_30)),
-                new KeyValuePair<string, Analyzer>("FileContent", new StandardAnalyzer(Version.LUCENE_30)),
-                new KeyValuePair<string, Analyzer>("Folder", new LowercaseKeywordAnalyzer()),
-                new KeyValuePair<string, Analyzer>("Category", new KeywordAnalyzer())
-            };
-            return new PerFieldAnalyzerWrapper(new KeywordAnalyzer(), analyzerList);
-        }
-
-        private class LowercaseKeywordAnalyzer : Analyzer
-        {
-
-            public override TokenStream TokenStream(string fieldName, System.IO.TextReader reader)
-            {
-                TokenStream tokenStream = new KeywordTokenizer(reader);
-                tokenStream = new LowerCaseFilter(tokenStream);
-                return tokenStream;
-            }
-        }
-
-        private static void AddToLuceneIndex(LuceneIndexItem item, IndexWriter writer)
-        {
-            // remove older index entry
-            var searchQuery = new TermQuery(new Term(GetIndexField(), GetIndexFieldValue(item)));
-            writer.DeleteDocuments(searchQuery);
-
-            // add new index entry
-            var luceneDoc = new Document();
-
-            // add lucene fields mapped to db fields
-            luceneDoc.Add(new Field("PortalId", item.PortalId.ToString(), Field.Store.NO, Field.Index.ANALYZED));
-            luceneDoc.Add(new Field("FileId", item.FileId.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-            luceneDoc.Add(new Field("FileName", item.FileName, Field.Store.NO, Field.Index.ANALYZED));
-            luceneDoc.Add(new Field("Folder", item.Folder, Field.Store.NO, Field.Index.ANALYZED));
-            if (!string.IsNullOrEmpty(item.Title))
-                luceneDoc.Add(new Field("Title", item.Title, Field.Store.NO, Field.Index.ANALYZED));
-            if (!string.IsNullOrEmpty(item.Description))
-                luceneDoc.Add(new Field("Description", item.Description, Field.Store.NO, Field.Index.ANALYZED));
-            if (!string.IsNullOrEmpty(item.FileContent))
-                luceneDoc.Add(new Field("FileContent", item.FileContent, Field.Store.NO, Field.Index.ANALYZED));
-
-            if (item.Categories != null)
-            {
-                foreach (var cat in item.Categories)
-                {
-                    luceneDoc.Add(new Field("Category", cat, Field.Store.NO, Field.Index.ANALYZED));
-                }
-            }
-            // add entry to index
-            try
-            {
-                writer.AddDocument(luceneDoc);
-            }
-            catch (Exception ex)
-            {
-                Utils.Logger.Error(string.Format("Failed to index File [{0}:{1}]", item.FileId, item.Title), ex);
-            }
-        }
-
-        private static IndexWriter GetIndexWriter(Directory outputFolder, Analyzer analyzer, bool allowCreate)
-        {
-            return new IndexWriter(outputFolder, analyzer, allowCreate, IndexWriter.MaxFieldLength.UNLIMITED);
-        }
-
-        private static class LockKeys
-        {
-            public static string IndexWriterLockKey(string file)
-            {
-                return String.Format("IndexWriter_{0}", file);
-            }
-        }
-
-        #endregion
-
-        internal static bool IndexExists()
-        {
-            return LuceneOutputFolder.Directory.Exists;
-        }
-
-    }
-
-    public class LuceneIndexItem
-    {
-        public LuceneIndexItem()
-        {
-            Categories = new List<string>();
-        }
-        public int PortalId { get; set; }
-        public int FileId { get; set; }
-        public string FileName { get; set; }
-        public string Folder { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public string FileContent { get; set; }
-        public List<string> Categories { get; private set; }
     }
 }

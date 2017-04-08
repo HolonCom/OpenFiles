@@ -13,22 +13,40 @@ namespace Satrabel.OpenFiles {
     public partial class View {
         
         /// <summary>
-        /// DnnJsInclude1 control.
+        /// bReindexAll control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::DotNetNuke.Web.Client.ClientResourceManagement.DnnJsInclude DnnJsInclude1;
+        protected global::System.Web.UI.WebControls.Button bReindexAll;
         
         /// <summary>
-        /// bIndex control.
+        /// bUpdateIndex control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button bIndex;
+        protected global::System.Web.UI.WebControls.Button bUpdateIndex;
+        
+        /// <summary>
+        /// ddlFolders control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlFolders;
+        
+        /// <summary>
+        /// bIndexFolder control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button bIndexFolder;
         
         /// <summary>
         /// bScheduleTask control.

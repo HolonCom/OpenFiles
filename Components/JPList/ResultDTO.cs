@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Satrabel.OpenFiles.Components.JPList
 {
@@ -10,5 +7,8 @@ namespace Satrabel.OpenFiles.Components.JPList
         public IEnumerable<TResultDTO> data { get; set; }
 
         public int count { get; set; }
+
+        public string query  { get; set; }
+        
     }
 }

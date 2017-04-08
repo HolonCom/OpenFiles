@@ -7,10 +7,19 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Satrabel.Modules.DigitalAssets {
+namespace Satrabel.OpenFiles.DigitalAssets {
     
     
     public partial class FilePropertiesTabControl {
+        
+        /// <summary>
+        /// DnnCssInclude2 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::DotNetNuke.Web.Client.ClientResourceManagement.DnnCssInclude DnnCssInclude2;
         
         /// <summary>
         /// lblNoImage control.

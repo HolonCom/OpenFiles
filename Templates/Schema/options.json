@@ -1,0 +1,51 @@
+﻿{
+    "fields": {
+
+        "description": {
+            "type": "textarea",
+            "label": "Description"
+        },
+        "publicationdate": {
+            "type": "date",
+            "label": "Publication Date",
+            "helper": "Date on which the document was published",
+            "hidden": false,
+            "picker": {
+                "format": "DD/MM/YYYY",
+                "minDate": "2000-01-01",
+                "maxDate": "2099-12-31",
+                "locale": "nl"
+            }
+        },
+        "category": {
+            "type": "select2",
+            "optionLabels": [ "Category 1", "Category 2", "Category 3" ]
+        },
+        "publishstartdate": {
+            "type": "date",
+            "label": "Toon op website vanaf datum",
+            "hidden": false,
+            "picker": {
+                "format": "DD/MM/YYYY",
+                "minDate": "2000-01-01",
+                "maxDate": "2099-12-31",
+                "locale": "nl"
+            }
+        },
+        "publishenddate": {
+            "type": "date",
+            "label": "Toon op website tot en met datum",
+            "hidden": false,
+            "picker": {
+                "format": "DD/MM/YYYY",
+                "minDate": "2000-01-01",
+                "maxDate": "2099-12-31",
+                "locale": "nl"
+            }
+        },
+        "publishstatus": {
+            "type": "radio",
+            "label": "Publicatie status"
+        }
+    }
+}

@@ -17,10 +17,10 @@ namespace Satrabel.OpenFiles.Components.Template
         public static dynamic GetDocumentModel(string folder)
         {
             PortalSettings ps = PortalSettings.Current;
-            string PhysicalTemplateFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenFiles/");
+            string physicalTemplateFolder = HostingEnvironment.MapPath("~/DesktopModules/OpenFiles/");
             dynamic model = new ExpandoObject();
             // schema
-            string schemaFilename = PhysicalTemplateFolder + "\\" + "schema.json";
+            string schemaFilename = physicalTemplateFolder + "schema.json";
             try
             {
                 dynamic schema = JsonUtils.JsonToDynamic(File.ReadAllText(schemaFilename));
@@ -33,7 +33,7 @@ namespace Satrabel.OpenFiles.Components.Template
             // options
             JToken optionsJson = null;
             // default options
-            string optionsFilename = PhysicalTemplateFolder + "\\" + "options.json";
+            string optionsFilename = physicalTemplateFolder + "options.json";
             if (File.Exists(optionsFilename))
             {
                 string fileContent = File.ReadAllText(optionsFilename);
@@ -43,7 +43,7 @@ namespace Satrabel.OpenFiles.Components.Template
                 }
             }
             // language options
-            optionsFilename = PhysicalTemplateFolder + "\\" + "options." + PortalSettings.Current.CultureCode + ".json";
+            optionsFilename = physicalTemplateFolder + "options." + PortalSettings.Current.CultureCode + ".json";
             if (File.Exists(optionsFilename))
             {
                 string fileContent = File.ReadAllText(optionsFilename);
@@ -64,19 +64,25 @@ namespace Satrabel.OpenFiles.Components.Template
             {
                 string homedir = HostingEnvironment.MapPath(ps.HomeDirectory);
                 string basedir = HostingEnvironment.MapPath(ps.HomeDirectory + folder);
-                var dirs = Directory.GetDirectories(basedir, "*", SearchOption.AllDirectories);
-
-
-                model.Folders = dirs.Select(d => new FolderInfo()
+                if (Directory.Exists(basedir))
                 {
-                    value = d.Substring(homedir.Length).Replace("\\", "/"),
-                    text = d.Substring(basedir.Length + 1).Replace("\\", "/")
-                }).ToList();
+                    var dirs = Directory.GetDirectories(basedir, "*", SearchOption.AllDirectories);
+
+                    model.Folders = dirs.Select(d => new FolderInfo()
+                    {
+                        value = d.Substring(homedir.Length).Replace("\\", "/"),
+                        text = d.Substring(basedir.Length + 1).Replace("\\", "/")
+                    }).ToList();
+                }
+                else
+                {
+                    throw new Exception(string.Format("Folder {0} does not exist", folder));
+                }
             }
             return model;
         }
 
-        private static int GetFileIdFromUrl(string url)
+        public static int GetFileIdFromLinkClickUrl(string url)
         {
             int returnValue = -1;
             //add http

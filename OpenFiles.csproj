@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -13,13 +13,14 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Satrabel.OpenFiles</RootNamespace>
     <AssemblyName>OpenFiles</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <TargetFrameworkProfile />
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,58 +45,74 @@
     <Reference Include="ClientDependency.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\bin\ClientDependency.Core.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="DotNetNuke">
       <HintPath>..\..\..\bin\DotNetNuke.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="DotNetNuke.Instrumentation">
       <HintPath>..\..\..\bin\DotNetNuke.Instrumentation.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="DotNetNuke.Modules.DigitalAssets, Version=7.4.1.280, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\DotNetNuke.Modules.DigitalAssets.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="DotNetNuke.Web">
       <HintPath>..\..\..\bin\DotNetNuke.Web.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="DotNetNuke.Web.Client, Version=7.3.2.109, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\bin\DotNetNuke.Web.Client.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="DotNetNuke.Web.Razor">
       <HintPath>..\..\..\bin\DotNetNuke.Web.Razor.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="DotNetNuke.WebUtility, Version=4.2.1.783, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\bin\DotNetNuke.WebUtility.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Handlebars, Version=1.0.5607.41709, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Handlebars.Net\source\Handlebars\bin\Debug\Handlebars.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="ImageProcessor, Version=2.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ImageProcessor.2.3.0.0\lib\net40\ImageProcessor.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="ImageProcessor, Version=2.4.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ref\ImageProcessor.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="ImageProcessor.Web">
-      <HintPath>..\packages\ImageProcessor.Web.4.4.0.0\lib\net45\ImageProcessor.Web.dll</HintPath>
+    <Reference Include="ImageProcessor.Web, Version=4.6.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ref\ImageProcessor.Web.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="itextsharp, Version=5.5.6.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\itextsharp.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Lucene.Net, Version=3.0.3.0, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\Lucene.Net.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\bin\Newtonsoft.Json.dll</HintPath>
+      <HintPath>ref\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="SharpZipLib, Version=0.81.0.1407, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\SharpZipLib.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -105,25 +122,30 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\bin\System.Net.Http.dll</HintPath>
+      <HintPath>..\..\bin\System.Net.Http.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\bin\System.Net.Http.Formatting.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\System.Web.Helpers.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Web.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\bin\System.Web.Http.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\bin\System.Web.WebPages.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
@@ -135,33 +157,42 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\AppConfig.cs" />
     <Compile Include="Components\DigitalAssets\DigitalAssetsScriptItemExtensionPoint.cs" />
     <Compile Include="Components\DigitalAssets\PreviewInfoPanelExtensionPoint.cs" />
+    <Compile Include="Components\ExternalData\FilesRepository.cs" />
     <Compile Include="Components\FeatureController.cs" />
-    <Compile Include="Components\DigitalAssets\ContentItemUtils.cs" />
+    <Compile Include="Components\OpenFilesInfo.cs" />
+    <Compile Include="Components\Utils\OpenFilesUtils.cs" />
     <Compile Include="Components\DigitalAssets\FolderFieldsControlExtensionPoint.cs" />
     <Compile Include="Components\DigitalAssets\FileFieldsControlExtensionPoint.cs" />
     <Compile Include="Components\DigitalAssets\FilePropertiesTab.cs" />
     <Compile Include="Components\JPList\FilterDTO.cs" />
     <Compile Include="Components\JPList\JplistAPIController.cs" />
+    <Compile Include="Components\JPList\QueryBuilder.cs" />
+    <Compile Include="Components\JPList\ResultExtDTO.cs" />
+    <Compile Include="Components\JPList\ResultDataDTO.cs" />
     <Compile Include="Components\JPList\ResultDTO.cs" />
     <Compile Include="Components\JPList\SortDTO.cs" />
     <Compile Include="Components\JPList\StatusDataDTO.cs" />
-    <Compile Include="Components\Lucene\FileIndexer.cs" />
+    <Compile Include="Components\JPList\ResultBreadcrumbDTO.cs" />
+    <Compile Include="Components\Log.cs" />
+    <Compile Include="Components\ExternalData\DnnFilesRepository.cs" />
+    <Compile Include="Components\Lucene\LuceneIndexItem.cs" />
     <Compile Include="Components\Lucene\LuceneService.cs" />
+    <Compile Include="Components\Utils\LuceneMappingUtils.cs" />
     <Compile Include="Components\Lucene\PdfParser.cs" />
-    <Compile Include="Components\Lucene\SearchEngine.cs" />
+    <Compile Include="Components\Lucene\LuceneController.cs" />
     <Compile Include="Components\Lucene\SearchEngineScheduler.cs" />
+    <Compile Include="Components\Lucene\SearchResults.cs" />
     <Compile Include="Components\OpenFilesAPIController.cs" />
     <Compile Include="Components\OpenFilesRouteMapper.cs" />
     <Compile Include="Components\JPList\PaginationDTO.cs" />
     <Compile Include="Components\JPList\JpListQueryDTO.cs" />
     <Compile Include="Components\JPList\RequestDTO.cs" />
-    <Compile Include="Components\JPList\StatusDTO.cs" />
     <Compile Include="Components\Template\DataDTO.cs" />
     <Compile Include="Components\Template\FileDTO.cs" />
     <Compile Include="Components\Template\TemplateHelper.cs" />
-    <Compile Include="Components\Utils.cs" />
     <Compile Include="DigitalAssets\FolderFieldsControl.ascx.cs">
       <DependentUpon>FolderFieldsControl.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -245,15 +276,13 @@
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="schema.json" />
-    <Content Include="options.json" />
-    <Content Include="Providers\DataProviders\SqlDataProvider\00.00.01.SqlDataProvider" />
+    <Content Include="Templates\Schema\schema.json" />
+    <Content Include="Templates\Schema\options.json" />
     <Content Include="Providers\DataProviders\SqlDataProvider\Uninstall.SqlDataProvider" />
-    <Content Include="images-schema.json" />
-    <Content Include="images-options.json" />
-    <Content Include="Config\cache.config" />
-    <Content Include="Config\processing.config" />
-    <Content Include="Config\security.config" />
+    <Content Include="Templates\Schema\images-schema.json" />
+    <Content Include="Templates\Schema\images-options.json" />
+    <Content Include="Providers\DataProviders\SqlDataProvider\02.00.00.SqlDataProvider" />
+    <Content Include="Templates\Schema\index.json" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
@@ -270,11 +299,11 @@
   <ItemGroup>
     <Content Include="DigitalAssets\App_LocalResources\FilePropertiesTabControl.ascx.resx" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="..\OpenContent\OpenContent.csproj">
+    <ProjectReference Include="..\..\..\..\Modules\OpenContent\OpenContent\OpenContent.csproj">
       <Project>{7d61a32c-0f21-453f-a981-bd8e5a3a5304}</Project>
       <Name>OpenContent</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

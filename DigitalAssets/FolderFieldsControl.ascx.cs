@@ -1,26 +1,18 @@
 ﻿using System;
-using System.Linq;
-using System.IO;
-using System.Text.RegularExpressions;
-
+using System.Web.Hosting;
 using DotNetNuke.Entities.Modules;
 using DotNetNuke.Framework;
-using DotNetNuke.Framework.JavaScriptLibraries;
 using DotNetNuke.Modules.DigitalAssets.Components.Controllers;
 using DotNetNuke.Modules.DigitalAssets.Components.Controllers.Models;
 using DotNetNuke.Modules.DigitalAssets.Components.ExtensionPoint;
 using DotNetNuke.Services.FileSystem;
-using DotNetNuke.Entities.Content;
-using DotNetNuke.Entities.Content.Common;
-using DotNetNuke.Common.Utilities;
 using DotNetNuke.Services.Localization;
-using DotNetNuke.Web.Client.ClientResourceManagement;
 using DotNetNuke.Web.Client;
-using System.Web.Hosting;
+using DotNetNuke.Web.Client.ClientResourceManagement;
 
-namespace Satrabel.Modules.DigitalAssets
+namespace Satrabel.OpenFiles.DigitalAssets
 {
-    public partial class FolderFieldsControl : PortalModuleBase /*DotNetNuke.Modules.DigitalAssets.FileFieldsControl*/ , IFieldsControl
+    public partial class FolderFieldsControl : PortalModuleBase, IFieldsControl
     {
         protected IFolderInfo Folder { get; private set; }
 
@@ -52,61 +44,40 @@ namespace Satrabel.Modules.DigitalAssets
 
         public void PrepareProperties()
         {
-            //base.PrepareProperties();
-            //TitleInput.Text = File.Title;
+
         }
         public object SaveProperties()
         {
-            //var file = base.SaveProperties();
-            //File.Title = TitleInput.Text;
-            //ContentItem item;
-            //if (File.ContentItemID == Null.NullInteger)
-            //{
-            //    item = CreateFileContentItem();
-            //    File.ContentItemID = item.ContentItemId;
-            //}
-            //else
-            //{
-            //    item = Util.GetContentController().GetContentItem(File.ContentItemID);
-            //}
-            //item.Content = hfAlpacaData.Value;
-            //Util.GetContentController().UpdateContentItem(item);
-
-
-            //FileManager.Instance.UpdateFile(File);
-
-            //IFolderInfo Folder = FolderManager.Instance.GetFolder(_Item.ItemID);
             return Folder;
         }
 
-        private ContentItem CreateFileContentItem()
-        {
-            var typeController = new ContentTypeController();
-            var contentTypeFile = (from t in typeController.GetContentTypes() where t.ContentType == "File" select t).SingleOrDefault();
+        //private ContentItem CreateFileContentItem()
+        //{
+        //    var typeController = new ContentTypeController();
+        //    var contentTypeFile = (from t in typeController.GetContentTypes() where t.ContentType == "File" select t).SingleOrDefault();
 
-            if (contentTypeFile == null)
-            {
-                contentTypeFile = new ContentType { ContentType = "File" };
-                contentTypeFile.ContentTypeId = typeController.AddContentType(contentTypeFile);
-            }
+        //    if (contentTypeFile == null)
+        //    {
+        //        contentTypeFile = new ContentType { ContentType = "File" };
+        //        contentTypeFile.ContentTypeId = typeController.AddContentType(contentTypeFile);
+        //    }
 
-            var objContent = new ContentItem
-            {
-                ContentTypeId = contentTypeFile.ContentTypeId,
-                Indexed = false,
-            };
+        //    var objContent = new ContentItem
+        //    {
+        //        ContentTypeId = contentTypeFile.ContentTypeId,
+        //        Indexed = false,
+        //    };
 
-            objContent.ContentItemId = Util.GetContentController().AddContentItem(objContent);
+        //    objContent.ContentItemId = Util.GetContentController().AddContentItem(objContent);
 
-            return objContent;
-        }
+        //    return objContent;
+        //}
 
         public int ContentItemId
         {
             get
             {
-                return -1;//File.ContentItemID;
-
+                return -1; //File.ContentItemID;
             }
         }
 
@@ -129,7 +100,8 @@ namespace Satrabel.Modules.DigitalAssets
 
         public IDigitalAssetsController Controller
         {
-            get {
+            get
+            {
                 return _Controller;
             }
         }
@@ -137,7 +109,8 @@ namespace Satrabel.Modules.DigitalAssets
         ItemViewModel _Item;
         public ItemViewModel Item
         {
-            get {
+            get
+            {
                 return _Item;
             }
         }

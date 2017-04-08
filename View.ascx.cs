@@ -14,6 +14,10 @@ using DotNetNuke.Entities.Modules;
 using DotNetNuke.Common.Utilities;
 using Satrabel.OpenFiles.Components.Lucene;
 using DotNetNuke.Services.Scheduling;
+using DotNetNuke.Services.FileSystem;
+using System.Web.UI.WebControls;
+using DotNetNuke.Services.Search.Internals;
+using Satrabel.OpenFiles.Components;
 
 #endregion
 
@@ -21,8 +25,6 @@ namespace Satrabel.OpenFiles
 {
     public partial class View : PortalModuleBase
     {
-        private int ItemId = Null.NullInteger;
-
         protected override void OnInit(EventArgs e)
         {
             base.OnInit(e);
@@ -32,13 +34,22 @@ namespace Satrabel.OpenFiles
             base.OnLoad(e);
             if (!Page.IsPostBack)
             {
-                bIndex.Visible = ModuleContext.PortalSettings.UserInfo.IsSuperUser;
+                //bReindexAll.Visible = ModuleContext.PortalSettings.UserInfo.IsSuperUser;
+                bScheduleTask.Visible = ModuleContext.PortalSettings.UserInfo.IsSuperUser;
+
+                var fm = FolderManager.Instance;
+                var folders = fm.GetFolders(PortalId);
+                foreach (var folder in folders)
+                {
+                    ddlFolders.Items.Add(new ListItem(folder.FolderPath.Trim('/'), folder.FolderPath));
+                }
             }
         }
-        protected void bIndex_Click(object sender, EventArgs e)
+
+        protected void bReindexAll_Click(object sender, EventArgs e)
         {
-            var searchEngine = new SearchEngine();
-            searchEngine.ReIndexContent();
+            var searchEngine = LuceneController.Instance;
+            searchEngine.IndexAll();
         }
         protected void bScheduleTask_Click(object sender, EventArgs e)
         {
@@ -69,6 +80,43 @@ namespace Satrabel.OpenFiles
             scheduleItem.ScheduleStartDate = Null.NullDate;
             scheduleItem.Servers = "";
             return scheduleItem;
+        }
+
+        protected void bIndexFolder_Click(object sender, EventArgs e)
+        {
+            var searchEngine = LuceneController.Instance;
+            searchEngine.IndexFolder(PortalId, ddlFolders.SelectedValue);
+        }
+
+        protected void bUpdateIndex_Click(object sender, EventArgs e)
+        {
+            var sc = SchedulingProvider.Instance();
+            var schedule = sc.GetSchedule("Satrabel.OpenFiles.Components.Lucene.SearchEngineScheduler, OpenFiles", "");
+
+            if (schedule != null)
+            {
+                var startDate = DateTime.Now;
+                var lastSuccessFulDateTime = SearchHelper.Instance.GetLastSuccessfulIndexingDateTime(schedule.ScheduleID);
+                Log.Logger.Trace("Search: File Crawler - Starting. Content change start time " + lastSuccessFulDateTime.ToString("g"));
+
+                var searchEngine = LuceneController.Instance;
+                try
+                {
+                    searchEngine.IndexContent(lastSuccessFulDateTime);
+                }
+                catch (Exception ex)
+                {
+                    Log.Logger.ErrorFormat("Failed executing Scheduled Reindexing. Error: {0}", ex.Message);
+                }
+                finally
+                {
+                    //searchEngine.Commit();
+                }
+
+                SearchHelper.Instance.SetLastSuccessfulIndexingDateTime(schedule.ScheduleID, startDate);
+
+                Log.Logger.Trace("Search: File Crawler - Indexing Successful");
+            }
         }
     }
 }

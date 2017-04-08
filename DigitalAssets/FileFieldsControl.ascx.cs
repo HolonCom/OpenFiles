@@ -1,33 +1,36 @@
 ﻿using System;
-using System.Linq;
 using System.IO;
-using System.Text.RegularExpressions;
-using DotNetNuke.Entities.Modules;
-using DotNetNuke.Framework;
-using DotNetNuke.Framework.JavaScriptLibraries;
-using DotNetNuke.Modules.DigitalAssets.Components.Controllers;
-using DotNetNuke.Modules.DigitalAssets.Components.Controllers.Models;
 using DotNetNuke.Modules.DigitalAssets.Components.ExtensionPoint;
-using DotNetNuke.Services.FileSystem;
-using DotNetNuke.Entities.Content;
-using DotNetNuke.Entities.Content.Common;
-using DotNetNuke.Common.Utilities;
 using DotNetNuke.Services.Localization;
-using DotNetNuke.Web.Client.ClientResourceManagement;
-using DotNetNuke.Web.Client;
-using System.Web.Hosting;
+using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.Alpaca;
-using Satrabel.OpenFiles.Components.DigitalAssets;
+using Satrabel.OpenFiles.Components.Utils;
+using AppConfig = Satrabel.OpenFiles.Components.AppConfig;
 
-namespace Satrabel.Modules.DigitalAssets
+namespace Satrabel.OpenFiles.DigitalAssets
 {
     public partial class FileFieldsControl : DotNetNuke.Modules.DigitalAssets.FileFieldsControl, IFieldsControl
     {
         protected override void OnInit(EventArgs e)
         {
             base.OnInit(e);
-            AlpacaEngine alpaca = new AlpacaEngine(Page, ModuleContext, "DesktopModules/OpenFiles/", "");
-            alpaca.RegisterAll();
+
+            var virtualFolderOfSchemaFiles = AppConfig.Instance.SchemaFolder;
+
+            var portalFolder = AppConfig.Instance.PortalFolder(PortalSettings);
+            if (!portalFolder.FolderExists)
+            {
+                Directory.CreateDirectory(portalFolder.PhysicalFullDirectory);
+            }
+
+            var schemaFile = new FileUri(portalFolder, "schema.json");
+            if (schemaFile.FileExists)
+            {
+                virtualFolderOfSchemaFiles = AppConfig.Instance.PortalFolder(PortalSettings);
+            }
+
+            AlpacaEngine alpaca = new AlpacaEngine(Page, ModuleContext, virtualFolderOfSchemaFiles.FolderPath, "");
+            alpaca.RegisterAll(false, false);
         }
         protected override void OnLoad(EventArgs e)
         {
@@ -39,13 +42,12 @@ namespace Satrabel.Modules.DigitalAssets
         public override void PrepareProperties()
         {
             base.PrepareProperties();
-            //TitleInput.Text = File.Title;
         }
+
         public override object SaveProperties()
         {
             var file = base.SaveProperties();
-            //File.Title = TitleInput.Text;
-            ContentItemUtils.Save(File, "meta", hfAlpacaData.Value);
+            OpenFilesUtils.Save(File, LuceneMappingUtils.MetaField, hfAlpacaData.Value);
             return file;
         }
         public int ContentItemId

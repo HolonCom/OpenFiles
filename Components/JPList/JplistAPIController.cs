@@ -1,6 +1,5 @@
 ﻿using DotNetNuke.Entities.Content.Common;
 using DotNetNuke.Entities.Icons;
-using DotNetNuke.Instrumentation;
 using DotNetNuke.Security;
 using DotNetNuke.Services.FileSystem;
 using DotNetNuke.Web.Api;
@@ -16,8 +15,14 @@ using System.Net;
 using System.Net.Http;
 using System.Web;
 using System.Web.Http;
+using DotNetNuke.Entities.Portals;
+using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.TemplateHelpers;
-using TemplateHelper = Satrabel.OpenFiles.Components.Template.TemplateHelper;
+using Satrabel.OpenContent.Components.Datasource.Search;
+using Satrabel.OpenContent.Components.Lucene.Config;
+using Satrabel.OpenContent.Components.JPList;
+using Satrabel.OpenFiles.Components.ExternalData;
+using Satrabel.OpenFiles.Components.Utils;
 
 namespace Satrabel.OpenFiles.Components.JPList
 {
@@ -31,85 +36,196 @@ namespace Satrabel.OpenFiles.Components.JPList
         {
             try
             {
-                IEnumerable<LuceneIndexItem> docs;
+                Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() called with request [{0}].", req.ToJson());
 
-                var jpListQuery = BuildJpListQuery(req.StatusLst);
-                if (!string.IsNullOrEmpty(req.folder) && jpListQuery.Filters.All(f => f.name != "Folder")) // If there is no "Folder" filter active, then add one
-                {
-                    jpListQuery.Filters.Add(new FilterDTO()
-                    {
-                        name = "Folder",
-                        value = NormalizePath(req.folder)
-                    });
-                }
-                else
-                {
-                    foreach (var item in jpListQuery.Filters.Where(f => f.name == "Folder"))
-                    {
-                        item.path = NormalizePath(item.path);
-                    }
-                }
-                jpListQuery.Filters.Add(new FilterDTO()
-                {
-                    name = "PortalId",
-                    path = PortalSettings.PortalId.ToString()
-                });
+                FieldConfig indexConfig = FilesRepository.GetIndexConfig(PortalSettings.PortalId);
+                bool addWorkFlow = PortalSettings.UserMode != PortalSettings.Mode.Edit;
+                QueryBuilder queryBuilder = new QueryBuilder(indexConfig);
+                queryBuilder.BuildFilter(PortalSettings.PortalId, req.folder, addWorkFlow, PortalSettings.UserInfo.Social.Roles);
+                JplistQueryBuilder.MergeJpListQuery(FilesRepository.GetIndexConfig(PortalSettings), queryBuilder.Select, req.StatusLst, DnnLanguageUtils.GetCurrentCultureCode());
 
-                string luceneQuery = BuildLuceneQuery(jpListQuery);
-                if (string.IsNullOrEmpty(luceneQuery))
+                string curFolder = NormalizePath(req.folder);
+                foreach (var item in queryBuilder.Select.Query.FilterRules.Where(f => f.Field == LuceneMappingUtils.FolderField))
                 {
-                    docs = SearchEngine.GetAllIndexedRecords();
-                }
-                else
-                {
-                    docs = SearchEngine.Search(luceneQuery);
+                    curFolder = NormalizePath(item.Value.AsString);
+                    item.Value = new StringRuleValue(NormalizePath(item.Value.AsString)); //any file of current folder
                 }
 
-                int total = docs.Count();
-                if (jpListQuery.Pagination.currentPage > 0)
-                    docs = docs.Skip(jpListQuery.Pagination.currentPage * jpListQuery.Pagination.number).Take(jpListQuery.Pagination.number);
+                var def = new SelectQueryDefinition();
+                def.Build(queryBuilder.Select);
+
+                var docs = LuceneController.Instance.Search(def);
+                int total = docs.TotalResults;
+
+
+
+                var ratio = string.IsNullOrEmpty(req.imageRatio) ? new Ratio(100, 100) : new Ratio(req.imageRatio);
+
+                Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", def.Filter.ToString() + " / " + def.Query.ToString(), total);
+
+                //if (LogContext.IsLogActive)
+                //{
+                //    var logKey = "Query";
+                //    LogContext.Log(ActiveModule.ModuleID, logKey, "select", queryBuilder.Select);
+                //    LogContext.Log(ActiveModule.ModuleID, logKey, "debuginfo", dsItems.DebugInfo);
+                //    LogContext.Log(ActiveModule.ModuleID, logKey, "model", model);
+                //    model["Logs"] = JToken.FromObject(LogContext.Current.ModuleLogs(ActiveModule.ModuleID));
+                //}
+
                 var fileManager = FileManager.Instance;
                 var data = new List<FileDTO>();
-                foreach (var doc in docs)
+                var breadcrumbs = new List<IFolderInfo>();
+                if (req.withSubFolder)
                 {
-                    var f = fileManager.GetFile(doc.FileId);
+                    //hier blijken we resultaten toe te voegen die niet uit lucene komen
+                    breadcrumbs = AddFolders(NormalizePath(req.folder), curFolder, fileManager, data, ratio);
+                }
+
+                foreach (var doc in docs.ids)
+                {
+                    IFileInfo f = fileManager.GetFile(doc.FileId);
                     if (f == null)
                     {
                         //file seems to have been deleted
-                        SearchEngine.RemoveDocument(doc.FileId);
+                        LuceneController.Instance.Delete(LuceneMappingUtils.CreateLuceneItem(doc.PortalId, doc.FileId));
                         total -= 1;
                     }
                     else
                     {
+                        if (f.FileName == "_folder.jpg")
+                        {
+                            continue; // skip
+                        }
+                        dynamic title = null;
+                        var custom = GetCustomFileDataAsDynamic(f);
+                        if (custom != null && custom.meta != null)
+                        {
+                            try
+                            {
+                                title = Normalize.DynamicValue(custom.meta.title, "");
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Logger.Debug("OpenFiles.JplistApiController.List() Failed to get title.", ex);
+                            }
+                        }
+
                         data.Add(new FileDTO()
                         {
+                            Id = f.FileId,
+                            Name = Normalize.DynamicValue(title, f.FileName),
                             FileName = f.FileName,
+                            CreatedOnDate = f.CreatedOnDate,
+                            LastModifiedOnDate = f.LastModifiedOnDate,
                             FolderName = f.Folder,
                             Url = fileManager.GetUrl(f),
-                            ImageUrl = ImageHelper.GetImageUrl(f, new Ratio(100, 100)),
-                            Custom = GetCustomFileDataAsDynamic(f),
                             IsImage = fileManager.IsImageFile(f),
-                            IconUrl = GetFileIconUrl(f.Extension)
+                            ImageUrl = ImageHelper.GetImageUrl(f, ratio),
+                            Custom = custom,
+                            IconUrl = GetFileIconUrl(f.Extension),
+                            IsEditable = IsEditable,
+                            EditUrl = IsEditable ? GetFileEditUrl(f) : ""
                         });
                     }
                 }
 
-                var res = new ResultDTO<FileDTO>()
-                {
-                    data = data,
-                    count = total
-                };
-
+                var res = new ResultExtDTO<FileDTO>()
+                     {
+                         data = new ResultDataDTO<FileDTO>()
+                         {
+                             items = data,
+                             breadcrumbs = breadcrumbs.Select(f => new ResultBreadcrumbDTO
+                             {
+                                 name = f.FolderName,
+                                 path = f.FolderPath.Trim('/')
+                             })
+                         },
+                         count = total
+                     };
                 return Request.CreateResponse(HttpStatusCode.OK, res);
+
             }
             catch (Exception exc)
             {
-                Utils.Logger.Error(exc);
+                Log.Logger.Error(exc);
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
+        }
+        private List<IFolderInfo> AddFolders(string baseFolder, string curFolder, IFileManager fileManager, List<FileDTO> data, Ratio ratio)
+        {
+            var folderManager = FolderManager.Instance;
+            var folder = folderManager.GetFolder(PortalSettings.PortalId, curFolder);
+            var folders = folderManager.GetFolders(folder);
+            foreach (var f in folders)
+            {
+                var dto = new FileDTO()
+                {
+                    Name = f.DisplayName,
+                    CreatedOnDate = f.CreatedOnDate,
+                    LastModifiedOnDate = f.LastModifiedOnDate,
+                    FolderName = f.FolderName,
+                    FolderPath = f.FolderPath.Trim('/'),
+                    IsFolder = true
+                };
+                data.Add(dto);
+                var files = folderManager.GetFiles(f, false).ToList();
+                var firstFile = files.FirstOrDefault(fi => fi.FileName == "_folder.jpg");
+                if (firstFile == null)
+                {
+                    firstFile = files.OrderBy(fi => fi.FileName).FirstOrDefault();
+                }
+                if (firstFile != null && fileManager.IsImageFile(firstFile))
+                {
+                    var custom = GetCustomFileDataAsDynamic(firstFile);
 
+                    dto.FileName = firstFile.FileName;
+                    dto.Url = fileManager.GetUrl(firstFile);
+                    dto.IsImage = fileManager.IsImageFile(firstFile);
+                    dto.ImageUrl = dto.IsImage ? ImageHelper.GetImageUrl(firstFile, ratio) : "";
+                    dto.Custom = custom;
+                    dto.IconUrl = GetFileIconUrl(firstFile.Extension);
+                    dto.IsEditable = IsEditable;
+                    dto.EditUrl = IsEditable ? GetFileEditUrl(firstFile) : "";
+                }
+                else
+                {
+                    dto.FileName = f.FolderName;
+                    dto.IsImage = false;
+                    dto.IconUrl = GetFolderIconUrl();
+                    dto.IsEditable = false;
+                    dto.EditUrl = "";
+                }
+            }
+            var path = new List<IFolderInfo>();
+            path.Add(folder);
+            while (folder.ParentID > 0)
+            {
+                folder = folderManager.GetFolder(folder.ParentID);
+                path.Insert(0, folder);
+                if (string.IsNullOrEmpty(folder.FolderPath) || NormalizePath(folder.FolderPath) == baseFolder)
+                {
+                    break;
+                }
+            }
+            return path;
         }
 
+        #region Private Methods
+
+        private bool? _isEditable;
+        private bool IsEditable
+        {
+            get
+            {
+                //Perform tri-state switch check to avoid having to perform a security
+                //role lookup on every property access (instead caching the result)
+                if (!_isEditable.HasValue)
+                {
+                    _isEditable = ActiveModule.CheckIfEditable(PortalSettings.Current);
+                }
+                return _isEditable.Value;
+            }
+        }
         private string NormalizePath(string filePath)
         {
             filePath = filePath.Replace("\\", "/");
@@ -119,7 +235,12 @@ namespace Satrabel.OpenFiles.Components.JPList
             return filePath;
         }
 
-        #region Private Methods
+        private string GetFileEditUrl(IFileInfo fileInfo)
+        {
+            if (fileInfo == null) return "";
+            var portalFileUri = new PortalFileUri(fileInfo);
+            return portalFileUri.EditUrl();
+        }
 
         private static string GetFileIconUrl(string extension)
         {
@@ -130,137 +251,26 @@ namespace Satrabel.OpenFiles.Components.JPList
 
             return IconController.IconURL("ExtFile", "32x32", "Standard");
         }
-
+        private static string GetFolderIconUrl()
+        {
+            return IconController.IconURL("FolderStandard", "32x32", "Standard");
+        }
         private dynamic GetCustomFileDataAsDynamic(IFileInfo f)
         {
             if (f.ContentItemID > 0)
             {
                 var item = Util.GetContentController().GetContentItem(f.ContentItemID);
+                if (item == null)
+                {
+                    Log.Logger.ErrorFormat("Could not find contentitem for {0},{1},{2},{3},", f.FileId, f.Folder, f.FileName, f.ContentItemID);
+                    return new JObject();
+                }
                 return JsonUtils.JsonToDynamic(item.Content);
             }
             else
             {
                 return new JObject();
             }
-        }
-
-        private JpListQueryDTO BuildJpListQuery(List<StatusDTO> statuses)
-        {
-            var query = new JpListQueryDTO();
-            foreach (StatusDTO status in statuses)
-            {
-                switch (status.action)
-                {
-                    case "paging":
-                        {
-                            int number = 100000;
-                            //  string value (it could be number or "all")
-                            int.TryParse(status.data.number, out number);
-                            query.Pagination = new PaginationDTO()
-                            {
-                                number = number,
-                                currentPage = status.data.currentPage
-                            };
-                            break;
-                        }
-
-                    case "filter":
-                        {
-                            if (status.type == "textbox" && status.data != null && !String.IsNullOrEmpty(status.name) && !String.IsNullOrEmpty(status.data.value))
-                            {
-                                query.Filters.Add(new FilterDTO()
-                                {
-                                    name = status.name,
-                                    value = status.data.value,
-                                    pathGroup = status.data.pathGroup
-
-                                });
-                            }
-
-                            else if (status.type == "checkbox-group-filter" && status.data != null && !String.IsNullOrEmpty(status.name))
-                            {
-                                if (status.data.filterType == "pathGroup" && status.data.pathGroup != null && status.data.pathGroup.Count > 0)
-                                {
-                                    foreach (var path in status.data.pathGroup)
-                                    {
-                                        query.Filters.Add(new FilterDTO()
-                                        {
-                                            name = status.name,
-                                            value = status.data.value,
-                                            path = status.data.path,
-                                            pathGroup = status.data.pathGroup
-
-                                        });
-                                    }
-                                }
-                            }
-                            else if (status.type == "filter-select" && status.data != null && !String.IsNullOrEmpty(status.name))
-                            {
-                                if (status.data.filterType == "path" && status.data.path != null)
-                                {
-                                    query.Filters.Add(new FilterDTO()
-                                    {
-                                        name = status.name,
-                                        path = status.data.path,
-                                    });
-                                }
-                            }
-                            break;
-                        }
-
-                    case "sort":
-                        {
-                            query.Sorts.Add(new SortDTO()
-                            {
-                                path = status.data.path,
-                                order = status.data.order
-                            });
-                            break;
-                        }
-                }
-
-            }
-            return query;
-        }
-
-        private string BuildLuceneQuery(JpListQueryDTO jpListQuery)
-        {
-
-            string queryStr = "";
-            if (jpListQuery.Filters.Any())
-            {
-                foreach (FilterDTO f in jpListQuery.Filters)
-                {
-                    if (f.pathGroup != null && f.pathGroup.Any()) //group is bv multicheckbox, vb categories where(categy="" OR category="")
-                    {
-                        string pathStr = "";
-                        foreach (var p in f.pathGroup)
-                        {
-                            pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + f.name + ":" + p;
-                        }
-
-                        queryStr += "+" + "(" + pathStr + ")";
-                    }
-                    else
-                    {
-                        string[] names = f.name.Split(',');
-                        string pathStr = "";
-                        foreach (var n in names)
-                        {
-                            if (!string.IsNullOrEmpty(f.path))
-                            {
-                                pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + n + ":" + f.path;  //for dropdownlists; value is keyword => never partial search
-                            }
-                            else
-                            {
-                                pathStr += (string.IsNullOrEmpty(pathStr) ? "" : " OR ") + n + ":" + f.value + "*";   //textbox
-                            }
-                        }
-                        queryStr += "+" + "(" + pathStr + ")";
-                    }
-                }
-            }
-            return queryStr;
         }
 
         #endregion

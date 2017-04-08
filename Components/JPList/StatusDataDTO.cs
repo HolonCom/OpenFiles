@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
 
 namespace Satrabel.OpenFiles.Components.JPList
 {
@@ -68,5 +65,11 @@ namespace Satrabel.OpenFiles.Components.JPList
         public int currentPage { get; set; }
 
         #endregion
+
+        public string min { get; set; }
+        public string max { get; set; }
+        public string prev { get; set; }
+        public string next { get; set; }
+
     }
 }

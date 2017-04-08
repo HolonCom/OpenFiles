@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Satrabel.Modules.DigitalAssets {
+namespace Satrabel.OpenFiles.DigitalAssets {
     
     
     public partial class FileFieldsControl {

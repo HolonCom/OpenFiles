@@ -17,6 +17,14 @@ OpenFiles is a joint project of Robrecht Siera ([HolonCom](http://www.holoncom.e
  * [Dnn v7.4.2](https://dotnetnuke.codeplex.com/)
  * [OpenContent v2.0](https://opencontent.codeplex.com)
 
+##Caution:
+
+This OpenContent Add-on is not tested in various environments.
+Here are some of our Dnn settings that might have a influence on the add-on
+
+ * site-settings > advanced > Cachebust resource URIs > Disabled
+
+
 ##Features
 
 * Enhance the Dnn Filemanager
@@ -38,6 +46,10 @@ OpenFiles is a joint project of Robrecht Siera ([HolonCom](http://www.holoncom.e
 ##Example template
 
 * not available yet
+
+##External resources
+
+* http://imageprocessor.org/imageprocessor-web/
 
 ##Coming soon ...
 
