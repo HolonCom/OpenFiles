@@ -8,8 +8,7 @@ namespace Satrabel.OpenFiles.Components
     public class AppConfig
     {
         private static readonly Lazy<AppConfig> lazy = new Lazy<AppConfig>(() => new AppConfig());
-
-        public static AppConfig Instance { get { return lazy.Value; } }
+        public static AppConfig Instance => lazy.Value;
 
         private AppConfig()
         {

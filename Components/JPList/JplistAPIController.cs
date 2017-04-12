@@ -19,6 +19,7 @@ using DotNetNuke.Entities.Portals;
 using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.TemplateHelpers;
 using Satrabel.OpenContent.Components.Datasource.Search;
+using Satrabel.OpenContent.Components.Dnn;
 using Satrabel.OpenContent.Components.Lucene.Config;
 using Satrabel.OpenContent.Components.JPList;
 using Satrabel.OpenFiles.Components.ExternalData;
