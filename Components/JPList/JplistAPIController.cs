@@ -20,8 +20,9 @@ using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.TemplateHelpers;
 using Satrabel.OpenContent.Components.Datasource.Search;
 using Satrabel.OpenContent.Components.Dnn;
-using Satrabel.OpenContent.Components.Lucene.Config;
+using Satrabel.OpenContent.Components.Indexing;
 using Satrabel.OpenContent.Components.JPList;
+using Satrabel.OpenContent.Components.Lucene;
 using Satrabel.OpenFiles.Components.ExternalData;
 using Satrabel.OpenFiles.Components.Utils;
 

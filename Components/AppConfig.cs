@@ -14,10 +14,8 @@ namespace Satrabel.OpenFiles.Components
         {
         }
 
-        public FolderUri SchemaFolder
-        {
-            get { return new FolderUri("~/DesktopModules/OpenFiles/Templates/Schema/"); }
-        }
+        public FolderUri SchemaFolder => new FolderUri("~/DesktopModules/OpenFiles/Templates/Schema/");
+
         public FolderUri PortalFolder(PortalSettings ps)
         {
             //var ps = PortalSettings.Current;
@@ -35,8 +33,7 @@ namespace Satrabel.OpenFiles.Components
             return null;
         }
 
-        public bool CaseSensitiveFieldNames { get { return false; } }
-        public string LuceneIndexFolder { get { return @"App_Data\OpenFiles\LuceneIndex"; } }
+        public string LuceneIndexFolder => @"App_Data\OpenFiles\LuceneIndex";
 
 
         #region Constants

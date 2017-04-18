@@ -5,8 +5,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.Dnn;
+using Satrabel.OpenContent.Components.Indexing;
 using Satrabel.OpenContent.Components.Json;
-using Satrabel.OpenContent.Components.Lucene.Config;
 
 namespace Satrabel.OpenFiles.Components.ExternalData
 {
