@@ -9,7 +9,7 @@ using DotNetNuke.Entities.Content.Common;
 using DotNetNuke.Services.Exceptions;
 using DotNetNuke.Services.FileSystem;
 using Newtonsoft.Json.Linq;
-using Satrabel.OpenContent.Components.Lucene.Config;
+using Satrabel.OpenContent.Components.Indexing;
 using Satrabel.OpenFiles.Components.Lucene;
 using Satrabel.OpenFiles.Components.Utils;
 

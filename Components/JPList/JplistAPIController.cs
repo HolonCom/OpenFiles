@@ -17,10 +17,12 @@ using System.Web;
 using System.Web.Http;
 using DotNetNuke.Entities.Portals;
 using Satrabel.OpenContent.Components;
-using Satrabel.OpenContent.Components.TemplateHelpers;
-using Satrabel.OpenContent.Components.Datasource.Search;
-using Satrabel.OpenContent.Components.Lucene.Config;
+using Satrabel.OpenContent.Components.Dnn;
+using Satrabel.OpenContent.Components.Indexing;
 using Satrabel.OpenContent.Components.JPList;
+using Satrabel.OpenContent.Components.Lucene;
+using Satrabel.OpenContent.Components.Querying.Search;
+using Satrabel.OpenContent.Components.TemplateHelpers;
 using Satrabel.OpenFiles.Components.ExternalData;
 using Satrabel.OpenFiles.Components.Utils;
 
@@ -38,6 +40,7 @@ namespace Satrabel.OpenFiles.Components.JPList
             {
                 Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() called with request [{0}].", req.ToJson());
 
+                OpenContentModuleConfig module = OpenContentModuleConfig.Create(ActiveModule, PortalSettings);
                 FieldConfig indexConfig = FilesRepository.GetIndexConfig(PortalSettings.PortalId);
                 bool addWorkFlow = PortalSettings.UserMode != PortalSettings.Mode.Edit;
                 QueryBuilder queryBuilder = new QueryBuilder(indexConfig);
@@ -56,8 +59,6 @@ namespace Satrabel.OpenFiles.Components.JPList
 
                 var docs = LuceneController.Instance.Search(def);
                 int total = docs.TotalResults;
-
-
 
                 var ratio = string.IsNullOrEmpty(req.imageRatio) ? new Ratio(100, 100) : new Ratio(req.imageRatio);
 
@@ -78,7 +79,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 if (req.withSubFolder)
                 {
                     //hier blijken we resultaten toe te voegen die niet uit lucene komen
-                    breadcrumbs = AddFolders(NormalizePath(req.folder), curFolder, fileManager, data, ratio);
+                    breadcrumbs = AddFolders(module, NormalizePath(req.folder), curFolder, fileManager, data, ratio);
                 }
 
                 foreach (var doc in docs.ids)
@@ -123,25 +124,25 @@ namespace Satrabel.OpenFiles.Components.JPList
                             ImageUrl = ImageHelper.GetImageUrl(f, ratio),
                             Custom = custom,
                             IconUrl = GetFileIconUrl(f.Extension),
-                            IsEditable = IsEditable,
-                            EditUrl = IsEditable ? GetFileEditUrl(f) : ""
+                            IsEditable = IsEditable(module),
+                            EditUrl = IsEditable(module) ? GetFileEditUrl(f) : ""
                         });
                     }
                 }
 
                 var res = new ResultExtDTO<FileDTO>()
-                     {
-                         data = new ResultDataDTO<FileDTO>()
-                         {
-                             items = data,
-                             breadcrumbs = breadcrumbs.Select(f => new ResultBreadcrumbDTO
-                             {
-                                 name = f.FolderName,
-                                 path = f.FolderPath.Trim('/')
-                             })
-                         },
-                         count = total
-                     };
+                {
+                    data = new ResultDataDTO<FileDTO>()
+                    {
+                        items = data,
+                        breadcrumbs = breadcrumbs.Select(f => new ResultBreadcrumbDTO
+                        {
+                            name = f.FolderName,
+                            path = f.FolderPath.Trim('/')
+                        })
+                    },
+                    count = total
+                };
                 return Request.CreateResponse(HttpStatusCode.OK, res);
 
             }
@@ -151,7 +152,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
-        private List<IFolderInfo> AddFolders(string baseFolder, string curFolder, IFileManager fileManager, List<FileDTO> data, Ratio ratio)
+        private List<IFolderInfo> AddFolders(OpenContentModuleConfig module, string baseFolder, string curFolder, IFileManager fileManager, List<FileDTO> data, Ratio ratio)
         {
             var folderManager = FolderManager.Instance;
             var folder = folderManager.GetFolder(PortalSettings.PortalId, curFolder);
@@ -184,8 +185,8 @@ namespace Satrabel.OpenFiles.Components.JPList
                     dto.ImageUrl = dto.IsImage ? ImageHelper.GetImageUrl(firstFile, ratio) : "";
                     dto.Custom = custom;
                     dto.IconUrl = GetFileIconUrl(firstFile.Extension);
-                    dto.IsEditable = IsEditable;
-                    dto.EditUrl = IsEditable ? GetFileEditUrl(firstFile) : "";
+                    dto.IsEditable = IsEditable(module);
+                    dto.EditUrl = IsEditable(module) ? GetFileEditUrl(firstFile) : "";
                 }
                 else
                 {
@@ -198,7 +199,7 @@ namespace Satrabel.OpenFiles.Components.JPList
             }
             var path = new List<IFolderInfo>();
             path.Add(folder);
-            while (folder.ParentID > 0)
+            while (folder.ParentID > 0 && NormalizePath(folder.FolderPath) != baseFolder)
             {
                 folder = folderManager.GetFolder(folder.ParentID);
                 path.Insert(0, folder);
@@ -213,20 +214,18 @@ namespace Satrabel.OpenFiles.Components.JPList
         #region Private Methods
 
         private bool? _isEditable;
-        private bool IsEditable
+        private bool IsEditable(OpenContentModuleConfig module)
         {
-            get
+            //Perform tri-state switch check to avoid having to perform a security
+            //role lookup on every property access (instead caching the result)
+            if (!_isEditable.HasValue)
             {
-                //Perform tri-state switch check to avoid having to perform a security
-                //role lookup on every property access (instead caching the result)
-                if (!_isEditable.HasValue)
-                {
-                    _isEditable = ActiveModule.CheckIfEditable(PortalSettings.Current);
-                }
-                return _isEditable.Value;
+                _isEditable = module.ViewModule.CheckIfEditable(module);
             }
+            return _isEditable.Value;
         }
-        private string NormalizePath(string filePath)
+
+        private static string NormalizePath(string filePath)
         {
             filePath = filePath.Replace("\\", "/");
             filePath = filePath.Trim('~');
@@ -235,7 +234,7 @@ namespace Satrabel.OpenFiles.Components.JPList
             return filePath;
         }
 
-        private string GetFileEditUrl(IFileInfo fileInfo)
+        private static string GetFileEditUrl(IFileInfo fileInfo)
         {
             if (fileInfo == null) return "";
             var portalFileUri = new PortalFileUri(fileInfo);
@@ -255,7 +254,7 @@ namespace Satrabel.OpenFiles.Components.JPList
         {
             return IconController.IconURL("FolderStandard", "32x32", "Standard");
         }
-        private dynamic GetCustomFileDataAsDynamic(IFileInfo f)
+        private static dynamic GetCustomFileDataAsDynamic(IFileInfo f)
         {
             if (f.ContentItemID > 0)
             {
