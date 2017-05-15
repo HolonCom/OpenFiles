@@ -74,14 +74,18 @@ namespace Satrabel.OpenFiles.Components.JPList
                 //}
 
                 var fileManager = FileManager.Instance;
-                var data = new List<FileDTO>();
+                var retval = new List<FileDTO>();
                 var breadcrumbs = new List<IFolderInfo>();
                 if (req.withSubFolder)
                 {
                     //hier blijken we resultaten toe te voegen die niet uit lucene komen
-                    breadcrumbs = AddFolders(module, NormalizePath(req.folder), curFolder, fileManager, data, ratio);
+                    breadcrumbs = AddFolders(module, NormalizePath(req.folder), curFolder, fileManager, retval, ratio);
                 }
-
+                if (req.StatusLst.Any(i => i.action == "filter" && i.data.filterType == "TextFilter"))
+                {
+                    //reset retval again, as we don't want to include the folders, because we are doing a textsearch
+                    retval = new List<FileDTO>();
+                }
                 foreach (var doc in docs.ids)
                 {
                     IFileInfo f = fileManager.GetFile(doc.FileId);
@@ -111,7 +115,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                             }
                         }
 
-                        data.Add(new FileDTO()
+                        retval.Add(new FileDTO()
                         {
                             Id = f.FileId,
                             Name = Normalize.DynamicValue(title, f.FileName),
@@ -134,7 +138,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 {
                     data = new ResultDataDTO<FileDTO>()
                     {
-                        items = data,
+                        items = retval,
                         breadcrumbs = breadcrumbs.Select(f => new ResultBreadcrumbDTO
                         {
                             name = f.FolderName,
