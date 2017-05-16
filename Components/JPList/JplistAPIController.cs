@@ -15,6 +15,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web;
 using System.Web.Http;
+using System.Web.WebPages;
 using DotNetNuke.Entities.Portals;
 using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.Dnn;
@@ -81,9 +82,10 @@ namespace Satrabel.OpenFiles.Components.JPList
                     //hier blijken we resultaten toe te voegen die niet uit lucene komen
                     breadcrumbs = AddFolders(module, NormalizePath(req.folder), curFolder, fileManager, retval, ratio);
                 }
-                if (req.StatusLst.Any(i => i.action == "filter" && i.data.filterType == "TextFilter"))
+
+                //reset retval again if we are doing a textsearch, because we don't want to include the folders
+                if (req.StatusLst.Any(i => i.action == "filter" && i.data.filterType == "TextFilter" && i.data.value.IsEmpty()))
                 {
-                    //reset retval again, as we don't want to include the folders, because we are doing a textsearch
                     retval = new List<FileDTO>();
                 }
                 foreach (var doc in docs.ids)
