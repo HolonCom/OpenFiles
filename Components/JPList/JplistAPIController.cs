@@ -18,14 +18,15 @@ using System.Web.Http;
 using System.Web.WebPages;
 using DotNetNuke.Entities.Portals;
 using Satrabel.OpenContent.Components;
+using Satrabel.OpenContent.Components.Datasource.Search;
 using Satrabel.OpenContent.Components.Dnn;
-using Satrabel.OpenContent.Components.Indexing;
 using Satrabel.OpenContent.Components.JPList;
 using Satrabel.OpenContent.Components.Lucene;
-using Satrabel.OpenContent.Components.Querying.Search;
+using Satrabel.OpenContent.Components.Lucene.Config;
 using Satrabel.OpenContent.Components.TemplateHelpers;
 using Satrabel.OpenFiles.Components.ExternalData;
 using Satrabel.OpenFiles.Components.Utils;
+using LuceneController = Satrabel.OpenFiles.Components.Lucene.LuceneController;
 
 namespace Satrabel.OpenFiles.Components.JPList
 {

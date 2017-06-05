@@ -5,8 +5,8 @@ using DotNetNuke.Entities.Content;
 using DotNetNuke.Entities.Content.Common;
 using DotNetNuke.Services.FileSystem;
 using Newtonsoft.Json.Linq;
-using Satrabel.OpenContent.Components.Indexing;
 using Satrabel.OpenContent.Components.Json;
+using Satrabel.OpenContent.Components.Lucene.Config;
 using Satrabel.OpenFiles.Components.ExternalData;
 using Satrabel.OpenFiles.Components.Lucene;
 

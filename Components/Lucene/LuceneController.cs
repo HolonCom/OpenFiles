@@ -8,8 +8,8 @@ using Lucene.Net.Search;
 using DotNetNuke.Entities.Portals;
 using DotNetNuke.Services.Search.Internals;
 using Lucene.Net.Documents;
-using Satrabel.OpenContent.Components.Indexing;
 using Satrabel.OpenContent.Components.Lucene;
+using Satrabel.OpenContent.Components.Lucene.Config;
 using Satrabel.OpenFiles.Components.ExternalData;
 using Satrabel.OpenFiles.Components.Utils;
 

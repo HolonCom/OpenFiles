@@ -34,3 +34,4 @@ obj/
 build-local.log
 Tests/bin/
 *.user
+install/
