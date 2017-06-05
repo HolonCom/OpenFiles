@@ -1,5 +1,6 @@
 using System;
 using Newtonsoft.Json.Linq;
+using Satrabel.OpenContent.Components.Json;
 
 namespace Satrabel.OpenFiles.Components.Lucene
 {
@@ -12,28 +13,26 @@ namespace Satrabel.OpenFiles.Components.Lucene
             Id = itemId;
             CreatedOnDate = createdOnDate;
         }
-        public string Id { get; set; }
+        public string Id { get; private set; }
         public string Type { get; private set; }
-        public string Tenant { get; set; }
-        public DateTime CreatedOnDate { get; set; }
+        public string Tenant { get; private set; }
+        public DateTime CreatedOnDate { get; private set; }
 
 
-        public int PortalId
-        {
-            get
-            {
-                return int.Parse(Tenant);
-            }
-        }
-        public int FileId
-        {
-            get
-            {
-                return int.Parse(Id);
-            }
-        }
+        public int PortalId => int.Parse(Tenant);
+        public int FileId => int.Parse(Id);
         public string FileName { get; set; }
         public string Folder { get; set; }
+        public string DisplayName
+        {
+            get
+            {
+                string retval = FileName;
+                if (Meta.IsNotEmpty() && Meta["title"].IsNotEmpty())
+                    retval = Meta["title"].ToString();
+                return retval;
+            }
+        }
         //public string Title { get; set; }
         //public string Description { get; set; }
         //public List<string> Categories { get; private set; }

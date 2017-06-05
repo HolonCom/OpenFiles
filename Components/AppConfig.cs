@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Web.WebPages;
 using DotNetNuke.Entities.Portals;
 using Satrabel.OpenContent.Components;
 
@@ -9,35 +10,24 @@ namespace Satrabel.OpenFiles.Components
     {
         private static readonly Lazy<AppConfig> lazy = new Lazy<AppConfig>(() => new AppConfig());
 
-        public static AppConfig Instance { get { return lazy.Value; } }
+        public static AppConfig Instance => lazy.Value;
 
         private AppConfig()
         {
         }
 
-        public FolderUri SchemaFolder
+        public FolderUri SchemaFolder => new FolderUri("~/DesktopModules/OpenFiles/Templates/Schema/");
+
+        public FolderUri PortalFolder(int portalId, string portalHomeDirectory)
         {
-            get { return new FolderUri("~/DesktopModules/OpenFiles/Templates/Schema/"); }
-        }
-        public FolderUri PortalFolder(PortalSettings ps)
-        {
-            //var ps = PortalSettings.Current;
-            if (ps != null)
-                return new PortalFolderUri(ps.PortalId, ps.HomeDirectory + "/OpenFiles/");
+            if (portalId > -1)
+                return new PortalFolderUri(portalId, portalHomeDirectory + "/OpenFiles/");
             Log.Logger.WarnFormat("Cannot determine PortalFolder as Portalsettings is NULL");
             return null;
         }
 
-        public FolderUri PortalFolder(PortalInfo ps)
-        {
-            if (ps != null)
-                return new PortalFolderUri(ps.PortalID, ps.HomeDirectory + "/OpenFiles/");
-            Log.Logger.WarnFormat("Cannot determine PortalFolder as PortalInfo is NULL");
-            return null;
-        }
-
-        public bool CaseSensitiveFieldNames { get { return false; } }
-        public string LuceneIndexFolder { get { return @"App_Data\OpenFiles\LuceneIndex"; } }
+        public bool CaseSensitiveFieldNames => false;
+        public string LuceneIndexFolder => @"App_Data\OpenFiles\LuceneIndex";
 
 
         #region Constants

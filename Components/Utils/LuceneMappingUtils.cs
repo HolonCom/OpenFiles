@@ -20,54 +20,58 @@ namespace Satrabel.OpenFiles.Components.Utils
     {
         #region Consts
 
-        public static readonly string ItemTypeValue = "dnnfile";
+        private const string ITEM_TYPE_VALUE = "dnnfile";
 
         /// <summary>
         /// The name of the field which holds the type.
         /// </summary>
-        public static readonly string ItemTypeField = "$type";
-        public static readonly string TenantField = "$tenant";
+        private const string ITEM_TYPE_FIELD = "$type";
+
+        private const string TENANT_FIELD = "$tenant";
 
 
         /// <summary>
         /// The name of the field which holds the JSON-serialized source of the object.
         /// </summary>
-        public static readonly string FieldSource = "$source";
+        private const string FIELD_SOURCE = "$source";
 
         /// <summary>
         /// The name of the field which holds the timestamp when the document was created.
         /// </summary>
-        public static readonly string FieldTimestamp = "$timestamp";
-        public static readonly string ItemIdField = "$id";
-        public static readonly string FieldCreatedOnDate = "$createdondate";
+        private const string FIELD_TIMESTAMP = "$timestamp";
 
-        public static readonly string PortalIdField = "PortalId";
-        public static readonly string FileIdField = "FileId";
-        public static readonly string FileNameField = "FileName";
-        public static readonly string FolderField = "Folder";
-        public static readonly string FileContentField = "FileContent";
-        public static readonly string MetaField = "meta";
+        private const string ITEM_ID_FIELD = "$id";
+        private const string CREATED_ON_DATE_FIELD = "$createdondate";
+        private const string FILE_ID_FIELD = "FileId";
+        private const string FILENAME_FIELD = "FileName";
+        private const string DISPLAYNAME_FIELD = "DisplayName";
+        private const string FILE_CONTENT_FIELD = "FileContent";
+
+        public const string PORTAL_ID_FIELD = "PortalId";
+        public const string FOLDER_FIELD = "Folder";
+        public const string META_FIELD = "meta";
 
         #endregion
 
         internal static Document CreateLuceneDocument(LuceneIndexItem item, FieldConfig config, bool storeSource = false)
         {
             Document luceneDoc = new Document();
-            luceneDoc.Add(new Field(ItemTypeField, item.Type, Field.Store.YES, Field.Index.NOT_ANALYZED));
-            luceneDoc.Add(new Field(TenantField, item.Tenant, Field.Store.YES, Field.Index.NOT_ANALYZED));
-            luceneDoc.Add(new Field(ItemIdField, item.Id, Field.Store.YES, Field.Index.NOT_ANALYZED));
+            luceneDoc.Add(new Field(ITEM_TYPE_FIELD, item.Type, Field.Store.YES, Field.Index.NOT_ANALYZED));
+            luceneDoc.Add(new Field(TENANT_FIELD, item.Tenant, Field.Store.YES, Field.Index.NOT_ANALYZED));
+            luceneDoc.Add(new Field(ITEM_ID_FIELD, item.Id, Field.Store.YES, Field.Index.NOT_ANALYZED));
             if (storeSource)
             {
-                luceneDoc.Add(new Field(FieldSource, item.ToJson(), Field.Store.YES, Field.Index.NO));
+                luceneDoc.Add(new Field(FIELD_SOURCE, item.ToJson(), Field.Store.YES, Field.Index.NO));
             }
-            luceneDoc.Add(new NumericField(FieldTimestamp, Field.Store.YES, true).SetLongValue(DateTime.UtcNow.Ticks));
-            luceneDoc.Add(new NumericField(FieldCreatedOnDate, Field.Store.NO, true).SetLongValue(item.CreatedOnDate.Ticks));
+            luceneDoc.Add(new NumericField(FIELD_TIMESTAMP, Field.Store.YES, true).SetLongValue(DateTime.UtcNow.Ticks));
+            luceneDoc.Add(new NumericField(CREATED_ON_DATE_FIELD, Field.Store.NO, true).SetLongValue(item.CreatedOnDate.Ticks));
 
-            luceneDoc.Add(new Field(PortalIdField, item.PortalId.ToString(), Field.Store.YES, Field.Index.ANALYZED));
-            luceneDoc.Add(new Field(FileIdField, item.FileId.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-            luceneDoc.Add(new Field(FileNameField, item.FileName, Field.Store.YES, Field.Index.ANALYZED));
-            luceneDoc.Add(new Field(FolderField, QueryParser.Escape(item.Folder) , Field.Store.YES, Field.Index.NOT_ANALYZED));
-            luceneDoc.Add(new Field(FileContentField, string.IsNullOrEmpty(item.FileContent) ? "" : item.FileContent, Field.Store.YES, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field(PORTAL_ID_FIELD, item.PortalId.ToString(), Field.Store.YES, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field(FILE_ID_FIELD, item.FileId.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
+            luceneDoc.Add(new Field(FILENAME_FIELD, item.FileName, Field.Store.YES, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field(FOLDER_FIELD, QueryParser.Escape(item.Folder) , Field.Store.YES, Field.Index.NOT_ANALYZED));
+            luceneDoc.Add(new Field(DISPLAYNAME_FIELD, item.DisplayName, Field.Store.YES, Field.Index.ANALYZED));
+            luceneDoc.Add(new Field(FILE_CONTENT_FIELD, string.IsNullOrEmpty(item.FileContent) ? "" : item.FileContent, Field.Store.YES, Field.Index.ANALYZED));
             var objectMapper = new JsonObjectMapper();
             objectMapper.AddJsonToDocument(item.Meta, luceneDoc, config);
 
@@ -76,18 +80,18 @@ namespace Satrabel.OpenFiles.Components.Utils
 
         internal static LuceneIndexItem CreateLuceneItem(Document doc)
         {
-            return new LuceneIndexItem(ItemTypeValue, doc.Get(TenantField), doc.Get(FieldCreatedOnDate).TicksToDateTime(), doc.Get(ItemIdField))
+            return new LuceneIndexItem(ITEM_TYPE_VALUE, doc.Get(TENANT_FIELD), doc.Get(CREATED_ON_DATE_FIELD).TicksToDateTime(), doc.Get(ITEM_ID_FIELD))
             {
-                FileName = doc.Get(FileNameField),
-                Folder = doc.Get(FolderField),
-                FileContent = doc.Get(FileContentField),
-                Meta = doc.Get(MetaField),
+                FileName = doc.Get(FILENAME_FIELD),
+                Folder = doc.Get(FOLDER_FIELD),
+                FileContent = doc.Get(FILE_CONTENT_FIELD),
+                Meta = doc.Get(META_FIELD),
             };
         }
 
         internal static LuceneIndexItem CreateLuceneItem(int portalid, int fileid)
         {
-            var indexData = new LuceneIndexItem(ItemTypeValue, portalid.ToString(), DateTime.Now, fileid.ToString());
+            var indexData = new LuceneIndexItem(ITEM_TYPE_VALUE, portalid.ToString(), DateTime.Now, fileid.ToString());
             return indexData;
         }
         public static LuceneIndexItem CreateLuceneItem(IFileInfo file, FieldConfig indexConfig)
@@ -98,7 +102,7 @@ namespace Satrabel.OpenFiles.Components.Utils
 
         internal static LuceneIndexItem CreateLuceneItem(OpenFilesInfo fileInfo, FieldConfig indexConfig)
         {
-            var luceneItem = new LuceneIndexItem(ItemTypeValue, fileInfo.File.PortalId.ToString(), fileInfo.File.CreatedOnDate, fileInfo.File.FileId.ToString())
+            var luceneItem = new LuceneIndexItem(ITEM_TYPE_VALUE, fileInfo.File.PortalId.ToString(), fileInfo.File.CreatedOnDate, fileInfo.File.FileId.ToString())
                 {
                     FileName = fileInfo.File.FileName,
                     Folder = fileInfo.File.Folder.TrimEnd('/'),
@@ -106,12 +110,12 @@ namespace Satrabel.OpenFiles.Components.Utils
                 };
 
             JObject custom = fileInfo.JsonAsJToken;
-            custom.MakeSureFieldExists(MetaField, JTokenType.Object);
-            custom[MetaField].HydrateDefaultFields(indexConfig);
+            custom.MakeSureFieldExists(META_FIELD, JTokenType.Object);
+            custom[META_FIELD].HydrateDefaultFields(indexConfig);
 
-            if (custom[MetaField].HasValues)
+            if (custom[META_FIELD].HasValues)
             {
-                luceneItem.Meta = custom[MetaField];
+                luceneItem.Meta = custom[META_FIELD];
             }
 
             return luceneItem;
@@ -121,10 +125,10 @@ namespace Satrabel.OpenFiles.Components.Utils
         {
             var query = new BooleanQuery();
 
-            var typeTermQuery = new TermQuery(new Term(ItemTypeField, type));
+            var typeTermQuery = new TermQuery(new Term(ITEM_TYPE_FIELD, type));
             query.Add(typeTermQuery, Occur.MUST);
 
-            var tenantTermQuery = new TermQuery(new Term(TenantField, tenant));
+            var tenantTermQuery = new TermQuery(new Term(TENANT_FIELD, tenant));
             query.Add(tenantTermQuery, Occur.MUST);
 
             Filter filter = new QueryWrapperFilter(query);
@@ -140,20 +144,20 @@ namespace Satrabel.OpenFiles.Components.Utils
         public static Query GetDeleteQuery(LuceneIndexItem data)
         {
             var selection = new TermQuery(new Term(LuceneMappingUtils.GetIndexFieldName(), LuceneMappingUtils.GetIndexFieldValue(data)));
-            return new FilteredQuery(selection, LuceneMappingUtils.GetTypeTenantFilter(ItemTypeValue, data.PortalId.ToString()));
+            return new FilteredQuery(selection, LuceneMappingUtils.GetTypeTenantFilter(ITEM_TYPE_VALUE, data.PortalId.ToString()));
         }
 
         public static Query GetDeleteFolderQuery(int portalId, string folderPath)
         {
-            var selection = new TermQuery(new Term(LuceneMappingUtils.FolderField, folderPath.TrimEnd('/')));
-            return new FilteredQuery(selection, LuceneMappingUtils.GetTypeTenantFilter(ItemTypeValue, portalId.ToString()));
+            var selection = new TermQuery(new Term(LuceneMappingUtils.FOLDER_FIELD, folderPath.TrimEnd('/')));
+            return new FilteredQuery(selection, LuceneMappingUtils.GetTypeTenantFilter(ITEM_TYPE_VALUE, portalId.ToString()));
         }
 
         #region private methods
 
         private static string GetIndexFieldName()
         {
-            return FileIdField;
+            return FILE_ID_FIELD;
         }
 
         private static string GetIndexFieldValue(LuceneIndexItem data)

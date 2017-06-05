@@ -13,29 +13,13 @@ namespace Satrabel.OpenFiles.Components.ExternalData
     {
         internal static FieldConfig GetIndexConfig(int portalId)
         {
-            var portal = PortalController.Instance.GetPortal(portalId);
+            PortalInfo portal = PortalController.Instance.GetPortal(portalId);
             return GetIndexConfig(portal);
         }
 
-        internal static FieldConfig GetIndexConfig(PortalInfo ps)
+        internal static FieldConfig GetIndexConfig(PortalInfo portal)
         {
-            var file = new FileUri(AppConfig.Instance.PortalFolder(ps), "index.json");
-            if (!file.FileExists)
-            {
-                file = new FileUri(AppConfig.Instance.SchemaFolder, "index.json");
-            }
-            if (file.FileExists)
-            {
-                string content = File.ReadAllText(file.PhysicalFilePath);
-                var indexConfig = JsonConvert.DeserializeObject<FieldConfig>(content);
-                return indexConfig;
-            }
-            throw new Exception("Can not find index.json");
-        }
-
-        internal static FieldConfig GetIndexConfig(PortalSettings ps)
-        {
-            var file = new FileUri(AppConfig.Instance.PortalFolder(ps), "index.json");
+            var file = new FileUri(AppConfig.Instance.PortalFolder(portal.PortalID, portal.HomeDirectory), "index.json");
             if (!file.FileExists)
             {
                 file = new FileUri(AppConfig.Instance.SchemaFolder, "index.json");
@@ -50,6 +34,18 @@ namespace Satrabel.OpenFiles.Components.ExternalData
                 {
                     Index = true,
                     IndexType = "key",
+                    Sort = true
+                });
+                indexConfig.Fields.Add("FileName", new FieldConfig()
+                {
+                    Index = true,
+                    IndexType = "key",
+                    Sort = true
+                });
+                indexConfig.Fields.Add("DisplayName", new FieldConfig()
+                {
+                    Index = true,
+                    IndexType = "text",
                     Sort = true
                 });
                 return indexConfig;

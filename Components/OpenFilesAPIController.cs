@@ -36,14 +36,14 @@ namespace Satrabel.OpenFiles.Components
         {
             try
             {
-                JObject json = FilesRepository.GetSchemaAndOptionsJson(AppConfig.Instance.SchemaFolder, AppConfig.Instance.PortalFolder(PortalSettings), "");
+                JObject json = FilesRepository.GetSchemaAndOptionsJson(AppConfig.Instance.SchemaFolder, AppConfig.Instance.PortalFolder(PortalSettings.PortalId, PortalSettings.HomeDirectory), "");
                 if (id > 0)
                 {
                     var item = Util.GetContentController().GetContentItem(id);
                     if (!string.IsNullOrEmpty(item?.Content))
                     {
                         JObject dataJson = JObject.Parse(item.Content);
-                        json["data"] = dataJson[LuceneMappingUtils.MetaField];
+                        json["data"] = dataJson[LuceneMappingUtils.META_FIELD];
                     }
                 }
 
@@ -69,7 +69,7 @@ namespace Satrabel.OpenFiles.Components
                 string templateFilename = HostingEnvironment.MapPath("~/" + Template);
                 string prefix = Path.GetFileNameWithoutExtension(templateFilename) + "-";
 
-                JObject json = FilesRepository.GetSchemaAndOptionsJson(AppConfig.Instance.SchemaFolder, AppConfig.Instance.PortalFolder(PortalSettings), prefix);
+                JObject json = FilesRepository.GetSchemaAndOptionsJson(AppConfig.Instance.SchemaFolder, AppConfig.Instance.PortalFolder(PortalSettings.PortalId, PortalSettings.HomeDirectory), prefix);
 
                 if (!string.IsNullOrEmpty(data))
                 {
@@ -117,7 +117,7 @@ namespace Satrabel.OpenFiles.Components
             //string Template = "DesktopModules/OpenFiles/";
             try
             {
-                JObject json = FilesRepository.GetSchemaAndOptionsJson(AppConfig.Instance.SchemaFolder, AppConfig.Instance.PortalFolder(PortalSettings), "images");
+                JObject json = FilesRepository.GetSchemaAndOptionsJson(AppConfig.Instance.SchemaFolder, AppConfig.Instance.PortalFolder(PortalSettings.PortalId, PortalSettings.HomeDirectory), "images");
 
                 //int moduleId = ActiveModule.ModuleID;
                 if (id > 0)

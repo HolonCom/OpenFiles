@@ -46,10 +46,10 @@ namespace Satrabel.OpenFiles.Components.JPList
                 bool addWorkFlow = PortalSettings.UserMode != PortalSettings.Mode.Edit;
                 QueryBuilder queryBuilder = new QueryBuilder(indexConfig);
                 queryBuilder.BuildFilter(PortalSettings.PortalId, req.folder, addWorkFlow, PortalSettings.UserInfo.Social.Roles);
-                JplistQueryBuilder.MergeJpListQuery(FilesRepository.GetIndexConfig(PortalSettings), queryBuilder.Select, req.StatusLst, DnnLanguageUtils.GetCurrentCultureCode());
+                JplistQueryBuilder.MergeJpListQuery(indexConfig, queryBuilder.Select, req.StatusLst, DnnLanguageUtils.GetCurrentCultureCode());
 
                 string curFolder = NormalizePath(req.folder);
-                foreach (var item in queryBuilder.Select.Query.FilterRules.Where(f => f.Field == LuceneMappingUtils.FolderField))
+                foreach (var item in queryBuilder.Select.Query.FilterRules.Where(f => f.Field == LuceneMappingUtils.FOLDER_FIELD))
                 {
                     curFolder = NormalizePath(item.Value.AsString);
                     item.Value = new StringRuleValue(NormalizePath(item.Value.AsString)); //any file of current folder
@@ -84,7 +84,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 }
 
                 //reset retval again if we are doing a textsearch, because we don't want to include the folders
-                if (req.StatusLst.Any(i => i.action == "filter" && i.data.filterType == "TextFilter" && i.data.value.IsEmpty()))
+                if (req.StatusLst.Any(i => i.action == "filter" && i.data.filterType == "TextFilter" && !i.data.value.IsEmpty()))
                 {
                     retval = new List<FileDTO>();
                 }
