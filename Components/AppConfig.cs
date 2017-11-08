@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Web.WebPages;
-using DotNetNuke.Entities.Portals;
 using Satrabel.OpenContent.Components;
 
 namespace Satrabel.OpenFiles.Components

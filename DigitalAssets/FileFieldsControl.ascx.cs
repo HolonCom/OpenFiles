@@ -50,26 +50,8 @@ namespace Satrabel.OpenFiles.DigitalAssets
             OpenFilesUtils.Save(File, LuceneMappingUtils.META_FIELD, hfAlpacaData.Value);
             return file;
         }
-        public int ContentItemId
-        {
-            get
-            {
-                return File.ContentItemID;
-            }
-        }
-        public string CurrentCulture
-        {
-            get
-            {
-                return LocaleController.Instance.GetCurrentLocale(PortalId).Code;
-            }
-        }
-        public string NumberDecimalSeparator
-        {
-            get
-            {
-                return LocaleController.Instance.GetCurrentLocale(PortalId).Culture.NumberFormat.NumberDecimalSeparator;
-            }
-        }
+        public int ContentItemId => File.ContentItemID;
+        public string CurrentCulture => LocaleController.Instance.GetCurrentLocale(PortalId).Code;
+        public string NumberDecimalSeparator => LocaleController.Instance.GetCurrentLocale(PortalId).Culture.NumberFormat.NumberDecimalSeparator;
     }
 }

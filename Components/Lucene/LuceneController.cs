@@ -7,6 +7,7 @@ using System.Linq;
 using Lucene.Net.Search;
 using DotNetNuke.Entities.Portals;
 using DotNetNuke.Services.Search.Internals;
+using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Satrabel.OpenContent.Components.Lucene;
 using Satrabel.OpenContent.Components.Lucene.Config;
@@ -39,10 +40,13 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 return _serviceInstance;
             }
         }
+
         #region constructor
         private LuceneController()
         {
-            _serviceInstance = new LuceneService(AppConfig.Instance.LuceneIndexFolder, LuceneMappingUtils.GetAnalyser());
+            var indexfolder = AppConfig.Instance.LuceneIndexFolder;
+            var analyser = LuceneMappingUtils.GetAnalyser();
+            _serviceInstance = new LuceneService(indexfolder, analyser);
         }
 
         public static void ClearInstance()
@@ -73,14 +77,6 @@ namespace Satrabel.OpenFiles.Components.Lucene
         #endregion
 
         #region Index
-
-        /// <summary>
-        /// Reindex files of a Folder.
-        /// </summary>
-        public void ReIndexFolderFiles(string folder)
-        {
-
-        }
 
         /// <summary>
         /// Reindex all portal files.

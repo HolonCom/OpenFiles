@@ -5,7 +5,6 @@ using DotNetNuke.Services.FileSystem;
 using DotNetNuke.Web.Api;
 using Newtonsoft.Json.Linq;
 using Satrabel.OpenContent.Components.Json;
-using Satrabel.OpenFiles.Components.Lucene;
 using Satrabel.OpenFiles.Components.Template;
 using System;
 using System.Collections.Generic;
@@ -40,9 +39,9 @@ namespace Satrabel.OpenFiles.Components.JPList
         {
             try
             {
-                Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() called with request [{0}].", req.ToJson());
+                Log.Logger.Debug($"OpenFiles.JplistApiController.List() called with request [{req.ToJson()}].");
 
-                OpenContentModuleConfig module = OpenContentModuleConfig.Create(ActiveModule, PortalSettings);
+                var module = OpenContentModuleConfig.Create(ActiveModule, PortalSettings);
                 FieldConfig indexConfig = FilesRepository.GetIndexConfig(PortalSettings.PortalId);
                 bool addWorkFlow = PortalSettings.UserMode != PortalSettings.Mode.Edit;
                 QueryBuilder queryBuilder = new QueryBuilder(indexConfig);
@@ -64,7 +63,7 @@ namespace Satrabel.OpenFiles.Components.JPList
 
                 var ratio = string.IsNullOrEmpty(req.imageRatio) ? new Ratio(100, 100) : new Ratio(req.imageRatio);
 
-                Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", def.Filter.ToString() + " / " + def.Query.ToString(), total);
+                Log.Logger.Debug($"OpenFiles.JplistApiController.List() Searched for [{def.Filter} / {def.Query}], found [{total}] items");
 
                 //if (LogContext.IsLogActive)
                 //{
@@ -80,7 +79,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 var breadcrumbs = new List<IFolderInfo>();
                 if (req.withSubFolder)
                 {
-                    //hier blijken we resultaten toe te voegen die niet uit lucene komen
+                    //adding results here that do not come from Lucene
                     breadcrumbs = AddFolders(module, NormalizePath(req.folder), curFolder, fileManager, retval, ratio);
                 }
 

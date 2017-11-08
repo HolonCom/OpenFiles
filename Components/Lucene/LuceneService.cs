@@ -13,6 +13,7 @@ using Lucene.Net.Store;
 using DotNetNuke.Common;
 using Lucene.Net.Analysis;
 using Satrabel.OpenContent.Components;
+using Requires = Satrabel.OpenContent.Components.Requires;
 
 #endregion
 
@@ -223,7 +224,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         public void Add(Document doc)
         {
-            Requires.NotNull("searchDocument", doc);
+            Requires.NotNull(doc, "searchDocument");
             if (doc.GetFields().Count > 0)
             {
                 try
@@ -244,7 +245,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         public void Delete(Query query)
         {
-            Requires.NotNull("luceneQuery", query);
+            Requires.NotNull(query, "luceneQuery");
             Writer.DeleteDocuments(query);
         }
 
