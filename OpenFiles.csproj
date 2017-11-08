@@ -168,6 +168,7 @@
     <Compile Include="Components\DigitalAssets\PreviewInfoPanelExtensionPoint.cs" />
     <Compile Include="Components\ExternalData\FilesRepository.cs" />
     <Compile Include="Components\FeatureController.cs" />
+    <Compile Include="Components\OpenContent\PdfIndexer.cs" />
     <Compile Include="Components\OpenFilesInfo.cs" />
     <Compile Include="Components\Utils\OpenFilesUtils.cs" />
     <Compile Include="Components\DigitalAssets\FolderFieldsControlExtensionPoint.cs" />
