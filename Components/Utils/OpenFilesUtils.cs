@@ -35,6 +35,10 @@ namespace Satrabel.OpenFiles.Components.Utils
             else
                 jsonContent[key] = JObject.Parse(newContent);
 
+            // set default values
+            if (jsonContent[key]["publicationdate"] == null)
+                jsonContent[key]["publicationdate"] = file.CreatedOnDate;
+
             dnnContentItem.Content = jsonContent.ToString();
             Util.GetContentController().UpdateContentItem(dnnContentItem);
 
