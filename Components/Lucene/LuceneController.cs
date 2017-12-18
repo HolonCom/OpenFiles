@@ -23,13 +23,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
         private static LuceneController _instance = new LuceneController();
         private LuceneService _serviceInstance;
 
-        public static LuceneController Instance
-        {
-            get
-            {
-                return _instance;
-            }
-        }
+        public static LuceneController Instance => _instance;
 
         public LuceneService Store
         {
@@ -116,8 +110,9 @@ namespace Satrabel.OpenFiles.Components.Lucene
                 IndexFiles(startDate);
         }
 
-        private void IndexFiles(DateTime? startDate, string folderPath = "")
+        private void IndexFiles(DateTime? startDate)
         {
+            Log.Logger.Debug("Reindexing documents");
             LuceneController.ClearInstance();
             try
             {
@@ -127,13 +122,14 @@ namespace Satrabel.OpenFiles.Components.Lucene
                     var portals = PortalController.Instance.GetPortals();
                     foreach (var portal in portals.Cast<PortalInfo>())
                     {
-                        if (!startDate.HasValue)
-                        {
-                            Log.Logger.InfoFormat("Reindexing all documents from Portal {0}", portal.PortalID);
-                        }
+                        if (startDate.HasValue)
+                            Log.Logger.Debug($"Reindexing documents from Portal {portal.PortalID} starting from {startDate}");
+                        else
+                            Log.Logger.Info($"Reindexing all documents from Portal {portal.PortalID}");
+
                         var indexSince = FixedIndexingStartDate(portal.PortalID, startDate ?? DateTime.MinValue);
                         List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portal.PortalID, "", true, indexSince).ToList();
-                        Log.Logger.DebugFormat("Found {1} documents from Portal {0} to index", portal.PortalID, searchDocs.Count());
+                        Log.Logger.Debug($"Found {searchDocs.Count()} documents from Portal {portal.PortalID} to index");
 
                         foreach (LuceneIndexItem indexItem in searchDocs)
                         {
@@ -141,11 +137,15 @@ namespace Satrabel.OpenFiles.Components.Lucene
                             FieldConfig indexJson = FilesRepository.GetIndexConfig(portal);
                             lc.Store.Add(LuceneMappingUtils.CreateLuceneDocument(indexItem, indexJson));
                         }
-                        Log.Logger.DebugFormat("Indexed {1} documents from Portal {0}", portal.PortalID, searchDocs.Count());
+                        Log.Logger.Debug($"Indexed {searchDocs.Count} documents from Portal {portal.PortalID}");
                     }
                     lc.Store.Commit();
                     lc.Store.OptimizeSearchIndex(true);
                 }
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Error("Error while indexing OpenFile documents", ex);
             }
             finally
             {
@@ -167,7 +167,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                     }
                     var indexSince = FixedIndexingStartDate(portalId, startDate ?? DateTime.MinValue);
                     List<LuceneIndexItem> searchDocs = fileIndexer.GetPortalSearchDocuments(portalId, folderPath, true, indexSince).ToList();
-                    Log.Logger.DebugFormat("Found {2} documents from Portal {0} folder {1} to index", portalId, folderPath, searchDocs.Count());
+                    Log.Logger.Debug($"Found {searchDocs.Count} documents from Portal {portalId} folder {folderPath} to index");
 
                     FieldConfig indexJson = FilesRepository.GetIndexConfig(portalId);
                     foreach (LuceneIndexItem indexItem in searchDocs)
@@ -175,7 +175,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                         Delete(indexItem, lc);
                         lc.Store.Add(LuceneMappingUtils.CreateLuceneDocument(indexItem, indexJson));
                     }
-                    Log.Logger.DebugFormat("Indexed {2} documents from Portal {0} folder {1}", portalId, folderPath, searchDocs.Count());
+                    Log.Logger.Debug($"Indexed {searchDocs.Count} documents from Portal { portalId} folder {folderPath}");
                     lc.Store.Commit();
                     lc.Store.OptimizeSearchIndex(true);
                 }
