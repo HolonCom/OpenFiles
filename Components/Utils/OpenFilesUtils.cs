@@ -42,7 +42,6 @@ namespace Satrabel.OpenFiles.Components.Utils
             dnnContentItem.Content = jsonContent.ToString();
             Util.GetContentController().UpdateContentItem(dnnContentItem);
 
-
             //Save to lucene
             var item = new OpenFilesInfo(file, dnnContentItem, jsonContent);
             FieldConfig indexConfig = FilesRepository.GetIndexConfig(file.PortalId);

@@ -62,7 +62,7 @@ namespace Satrabel.OpenFiles
             }
         }
 
-        private ScheduleItem CreateScheduleItem()
+        private static ScheduleItem CreateScheduleItem()
         {
             var scheduleItem = new ScheduleItem();
             scheduleItem.TypeFullName = "Satrabel.OpenFiles.Components.Lucene.SearchEngineScheduler, OpenFiles";

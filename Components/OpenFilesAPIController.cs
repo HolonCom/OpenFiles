@@ -56,8 +56,7 @@ namespace Satrabel.OpenFiles.Components
             }
         }
 
-
-
+        
         [ValidateAntiForgeryToken]
         [DnnModuleAuthorize(AccessLevel = SecurityAccessLevel.Edit)]
         [HttpGet]
