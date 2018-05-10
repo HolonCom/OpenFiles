@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DotNetNuke.Entities.Users;
 using Satrabel.OpenContent.Components.Datasource.Search;
-using Satrabel.OpenContent.Components.Indexing;
+using Satrabel.OpenContent.Components.Lucene.Config;
 using Satrabel.OpenFiles.Components.Utils;
 
 namespace Satrabel.OpenFiles.Components.JPList
@@ -23,7 +23,7 @@ namespace Satrabel.OpenFiles.Components.JPList
             var filter = Select.Filter;
             filter.AddRule(new FilterRule()
             {
-                Field = LuceneMappingUtils.PortalIdField,
+                Field = LuceneMappingUtils.PORTAL_ID_FIELD,
                 FieldType = FieldTypeEnum.INTEGER,
                 FieldOperator = OperatorEnum.EQUAL,
                 Value = new IntegerRuleValue(portalId)
@@ -33,7 +33,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 string wildCardSearchValue = NormalizePath(folder);
                 filter.AddRule(new FilterRule()
                 {
-                    Field = LuceneMappingUtils.FolderField,
+                    Field = LuceneMappingUtils.FOLDER_FIELD,
                     FieldType = FieldTypeEnum.KEY,
                     FieldOperator = OperatorEnum.START_WITH,
                     Value = new StringRuleValue(wildCardSearchValue)

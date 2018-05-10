@@ -20,7 +20,7 @@ namespace Satrabel.OpenFiles.DigitalAssets
             alpaca.RegisterAll(false, false);
 
             int fileid = int.Parse(Page.Request.QueryString["fileId"]);
-            var fm = DotNetNuke.Services.FileSystem.FileManager.Instance;
+            var fm = FileManager.Instance;
             File = fm.GetFile(fileid);
             ScopeWrapper.Visible = fm.IsImageFile(File);
             lblNoImage.Visible = !ScopeWrapper.Visible;
@@ -28,46 +28,26 @@ namespace Satrabel.OpenFiles.DigitalAssets
 
         public void BindAction(int portalId, int tabId, int moduleId)
         {
-
         }
 
         public void CancelAction(int portalId, int tabId, int moduleId)
         {
-
         }
 
         public void SaveAction(int portalId, int tabId, int moduleId)
         {
-
         }
 
         public override void DataBindItem()
         {
-
         }
 
-        public int ContentItemId
-        {
-            get
-            {
-                return File.ContentItemID;
-            }
-        }
+        public int ContentItemId => File.ContentItemID;
 
-        public string CurrentCulture
-        {
-            get
-            {
-                return LocaleController.Instance.GetCurrentLocale(PortalId).Code;
-            }
-        }
-        public string NumberDecimalSeparator
-        {
-            get
-            {
-                return LocaleController.Instance.GetCurrentLocale(PortalId).Culture.NumberFormat.NumberDecimalSeparator;
-            }
-        }
+        public string CurrentCulture => LocaleController.Instance.GetCurrentLocale(PortalId).Code;
+
+        public string NumberDecimalSeparator => LocaleController.Instance.GetCurrentLocale(PortalId).Culture.NumberFormat.NumberDecimalSeparator;
+
         public string ImageUrl
         {
             get

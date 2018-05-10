@@ -12,6 +12,8 @@ using Lucene.Net.Search;
 using Lucene.Net.Store;
 using DotNetNuke.Common;
 using Lucene.Net.Analysis;
+using Satrabel.OpenContent.Components;
+using Requires = Satrabel.OpenContent.Components.Requires;
 
 #endregion
 
@@ -32,7 +34,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
         private readonly string _searchFolder;
         private readonly Analyzer _analyser;
 
-        private string IndexFolder { get; set; }
+        private string IndexFolder { get; }
 
         private IndexWriter _writer;
         private IndexReader _idxReader;
@@ -49,7 +51,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             _analyser = analyser;
             if (string.IsNullOrEmpty(_searchFolder))
                 throw new ArgumentNullException("searchFolder");
-            IndexFolder = Path.Combine(Globals.ApplicationMapPath, _searchFolder);
+            IndexFolder = Path.Combine(App.Config.ApplicationMapPath, _searchFolder);
             _readerTimeSpan = DefaultRereadTimeSpan;
         }
 
@@ -222,7 +224,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         public void Add(Document doc)
         {
-            Requires.NotNull("searchDocument", doc);
+            Requires.NotNull(doc, "searchDocument");
             if (doc.GetFields().Count > 0)
             {
                 try
@@ -243,7 +245,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         public void Delete(Query query)
         {
-            Requires.NotNull("luceneQuery", query);
+            Requires.NotNull(query, "luceneQuery");
             Writer.DeleteDocuments(query);
         }
 

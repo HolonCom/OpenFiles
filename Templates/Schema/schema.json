@@ -11,8 +11,7 @@
         },
         "publicationdate": {
             "title": "Published on",
-            "type": "string",
-            "default": "today"
+            "type": "string"
         },
         "category": {
             "title": "Category",

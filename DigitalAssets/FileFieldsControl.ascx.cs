@@ -17,7 +17,7 @@ namespace Satrabel.OpenFiles.DigitalAssets
 
             var virtualFolderOfSchemaFiles = AppConfig.Instance.SchemaFolder;
 
-            var portalFolder = AppConfig.Instance.PortalFolder(PortalSettings);
+            var portalFolder = AppConfig.Instance.PortalFolder(PortalSettings.PortalId, PortalSettings.HomeDirectory);
             if (!portalFolder.FolderExists)
             {
                 Directory.CreateDirectory(portalFolder.PhysicalFullDirectory);
@@ -26,10 +26,10 @@ namespace Satrabel.OpenFiles.DigitalAssets
             var schemaFile = new FileUri(portalFolder, "schema.json");
             if (schemaFile.FileExists)
             {
-                virtualFolderOfSchemaFiles = AppConfig.Instance.PortalFolder(PortalSettings);
+                virtualFolderOfSchemaFiles = AppConfig.Instance.PortalFolder(PortalSettings.PortalId, PortalSettings.HomeDirectory);
             }
 
-            AlpacaEngine alpaca = new AlpacaEngine(Page, ModuleContext, virtualFolderOfSchemaFiles.FolderPath, "");
+            AlpacaEngine alpaca = new AlpacaEngine(Page, PortalSettings.PortalId, virtualFolderOfSchemaFiles.FolderPath, "");
             alpaca.RegisterAll(false, false);
         }
         protected override void OnLoad(EventArgs e)
@@ -47,29 +47,11 @@ namespace Satrabel.OpenFiles.DigitalAssets
         public override object SaveProperties()
         {
             var file = base.SaveProperties();
-            OpenFilesUtils.Save(File, LuceneMappingUtils.MetaField, hfAlpacaData.Value);
+            OpenFilesUtils.Save(File, LuceneMappingUtils.META_FIELD, hfAlpacaData.Value);
             return file;
         }
-        public int ContentItemId
-        {
-            get
-            {
-                return File.ContentItemID;
-            }
-        }
-        public string CurrentCulture
-        {
-            get
-            {
-                return LocaleController.Instance.GetCurrentLocale(PortalId).Code;
-            }
-        }
-        public string NumberDecimalSeparator
-        {
-            get
-            {
-                return LocaleController.Instance.GetCurrentLocale(PortalId).Culture.NumberFormat.NumberDecimalSeparator;
-            }
-        }
+        public int ContentItemId => File.ContentItemID;
+        public string CurrentCulture => LocaleController.Instance.GetCurrentLocale(PortalId).Code;
+        public string NumberDecimalSeparator => LocaleController.Instance.GetCurrentLocale(PortalId).Culture.NumberFormat.NumberDecimalSeparator;
     }
 }

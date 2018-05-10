@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Hosting;
+using Satrabel.OpenContent.Components;
 
 namespace Satrabel.OpenFiles.Components.Template
 {
@@ -43,7 +44,7 @@ namespace Satrabel.OpenFiles.Components.Template
                 }
             }
             // language options
-            optionsFilename = physicalTemplateFolder + "options." + PortalSettings.Current.CultureCode + ".json";
+            optionsFilename = physicalTemplateFolder + $"options.{DnnLanguageUtils.GetCurrentCultureCode()}.json";
             if (File.Exists(optionsFilename))
             {
                 string fileContent = File.ReadAllText(optionsFilename);
@@ -57,8 +58,8 @@ namespace Satrabel.OpenFiles.Components.Template
             }
             if (optionsJson != null)
             {
-                dynamic Options = JsonUtils.JsonToDynamic(optionsJson.ToString());
-                model.Options = Options;
+                dynamic options = JsonUtils.JsonToDynamic(optionsJson.ToString());
+                model.Options = options;
             }
             if (!string.IsNullOrEmpty(folder))
             {
@@ -76,7 +77,7 @@ namespace Satrabel.OpenFiles.Components.Template
                 }
                 else
                 {
-                    throw new Exception(string.Format("Folder {0} does not exist", folder));
+                    throw new Exception($"Folder {folder} does not exist");
                 }
             }
             return model;

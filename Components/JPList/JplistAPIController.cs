@@ -5,7 +5,6 @@ using DotNetNuke.Services.FileSystem;
 using DotNetNuke.Web.Api;
 using Newtonsoft.Json.Linq;
 using Satrabel.OpenContent.Components.Json;
-using Satrabel.OpenFiles.Components.Lucene;
 using Satrabel.OpenFiles.Components.Template;
 using System;
 using System.Collections.Generic;
@@ -15,16 +14,18 @@ using System.Net;
 using System.Net.Http;
 using System.Web;
 using System.Web.Http;
+using System.Web.WebPages;
 using DotNetNuke.Entities.Portals;
 using Satrabel.OpenContent.Components;
-using Satrabel.OpenContent.Components.TemplateHelpers;
 using Satrabel.OpenContent.Components.Datasource.Search;
 using Satrabel.OpenContent.Components.Dnn;
-using Satrabel.OpenContent.Components.Indexing;
 using Satrabel.OpenContent.Components.JPList;
 using Satrabel.OpenContent.Components.Lucene;
+using Satrabel.OpenContent.Components.Lucene.Config;
+using Satrabel.OpenContent.Components.TemplateHelpers;
 using Satrabel.OpenFiles.Components.ExternalData;
 using Satrabel.OpenFiles.Components.Utils;
+using LuceneController = Satrabel.OpenFiles.Components.Lucene.LuceneController;
 
 namespace Satrabel.OpenFiles.Components.JPList
 {
@@ -38,16 +39,17 @@ namespace Satrabel.OpenFiles.Components.JPList
         {
             try
             {
-                Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() called with request [{0}].", req.ToJson());
+                Log.Logger.Debug($"OpenFiles.JplistApiController.List() called with request [{req.ToJson()}].");
 
+                var module = OpenContentModuleConfig.Create(ActiveModule, PortalSettings);
                 FieldConfig indexConfig = FilesRepository.GetIndexConfig(PortalSettings.PortalId);
                 bool addWorkFlow = PortalSettings.UserMode != PortalSettings.Mode.Edit;
                 QueryBuilder queryBuilder = new QueryBuilder(indexConfig);
                 queryBuilder.BuildFilter(PortalSettings.PortalId, req.folder, addWorkFlow, PortalSettings.UserInfo.Social.Roles);
-                JplistQueryBuilder.MergeJpListQuery(FilesRepository.GetIndexConfig(PortalSettings), queryBuilder.Select, req.StatusLst, DnnLanguageUtils.GetCurrentCultureCode());
+                JplistQueryBuilder.MergeJpListQuery(indexConfig, queryBuilder.Select, req.StatusLst, DnnLanguageUtils.GetCurrentCultureCode());
 
                 string curFolder = NormalizePath(req.folder);
-                foreach (var item in queryBuilder.Select.Query.FilterRules.Where(f => f.Field == LuceneMappingUtils.FolderField))
+                foreach (var item in queryBuilder.Select.Query.FilterRules.Where(f => f.Field == LuceneMappingUtils.FOLDER_FIELD))
                 {
                     curFolder = NormalizePath(item.Value.AsString);
                     item.Value = new StringRuleValue(NormalizePath(item.Value.AsString)); //any file of current folder
@@ -59,11 +61,9 @@ namespace Satrabel.OpenFiles.Components.JPList
                 var docs = LuceneController.Instance.Search(def);
                 int total = docs.TotalResults;
 
-
-
                 var ratio = string.IsNullOrEmpty(req.imageRatio) ? new Ratio(100, 100) : new Ratio(req.imageRatio);
 
-                Log.Logger.DebugFormat("OpenFiles.JplistApiController.List() Searched for [{0}], found [{1}] items", def.Filter.ToString() + " / " + def.Query.ToString(), total);
+                Log.Logger.Debug($"OpenFiles.JplistApiController.List() Searched for [{def.Filter} / {def.Query}], found [{total}] items");
 
                 //if (LogContext.IsLogActive)
                 //{
@@ -75,14 +75,19 @@ namespace Satrabel.OpenFiles.Components.JPList
                 //}
 
                 var fileManager = FileManager.Instance;
-                var data = new List<FileDTO>();
+                var retval = new List<FileDTO>();
                 var breadcrumbs = new List<IFolderInfo>();
                 if (req.withSubFolder)
                 {
-                    //hier blijken we resultaten toe te voegen die niet uit lucene komen
-                    breadcrumbs = AddFolders(NormalizePath(req.folder), curFolder, fileManager, data, ratio);
+                    //adding results here that do not come from Lucene
+                    breadcrumbs = AddFolders(module, NormalizePath(req.folder), curFolder, fileManager, retval, ratio);
                 }
 
+                //reset retval again if we are doing a textsearch, because we don't want to include the folders
+                if (req.StatusLst.Any(i => i.action == "filter" && i.data.filterType == "TextFilter" && !i.data.value.IsEmpty()))
+                {
+                    retval = new List<FileDTO>();
+                }
                 foreach (var doc in docs.ids)
                 {
                     IFileInfo f = fileManager.GetFile(doc.FileId);
@@ -112,7 +117,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                             }
                         }
 
-                        data.Add(new FileDTO()
+                        retval.Add(new FileDTO()
                         {
                             Id = f.FileId,
                             Name = Normalize.DynamicValue(title, f.FileName),
@@ -125,25 +130,25 @@ namespace Satrabel.OpenFiles.Components.JPList
                             ImageUrl = ImageHelper.GetImageUrl(f, ratio),
                             Custom = custom,
                             IconUrl = GetFileIconUrl(f.Extension),
-                            IsEditable = IsEditable,
-                            EditUrl = IsEditable ? GetFileEditUrl(f) : ""
+                            IsEditable = IsEditable(module),
+                            EditUrl = IsEditable(module) ? GetFileEditUrl(f) : ""
                         });
                     }
                 }
 
                 var res = new ResultExtDTO<FileDTO>()
-                     {
-                         data = new ResultDataDTO<FileDTO>()
-                         {
-                             items = data,
-                             breadcrumbs = breadcrumbs.Select(f => new ResultBreadcrumbDTO
-                             {
-                                 name = f.FolderName,
-                                 path = f.FolderPath.Trim('/')
-                             })
-                         },
-                         count = total
-                     };
+                {
+                    data = new ResultDataDTO<FileDTO>()
+                    {
+                        items = retval,
+                        breadcrumbs = breadcrumbs.Select(f => new ResultBreadcrumbDTO
+                        {
+                            name = f.FolderName,
+                            path = f.FolderPath.Trim('/')
+                        })
+                    },
+                    count = total
+                };
                 return Request.CreateResponse(HttpStatusCode.OK, res);
 
             }
@@ -153,7 +158,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
             }
         }
-        private List<IFolderInfo> AddFolders(string baseFolder, string curFolder, IFileManager fileManager, List<FileDTO> data, Ratio ratio)
+        private List<IFolderInfo> AddFolders(OpenContentModuleConfig module, string baseFolder, string curFolder, IFileManager fileManager, List<FileDTO> data, Ratio ratio)
         {
             var folderManager = FolderManager.Instance;
             var folder = folderManager.GetFolder(PortalSettings.PortalId, curFolder);
@@ -186,8 +191,8 @@ namespace Satrabel.OpenFiles.Components.JPList
                     dto.ImageUrl = dto.IsImage ? ImageHelper.GetImageUrl(firstFile, ratio) : "";
                     dto.Custom = custom;
                     dto.IconUrl = GetFileIconUrl(firstFile.Extension);
-                    dto.IsEditable = IsEditable;
-                    dto.EditUrl = IsEditable ? GetFileEditUrl(firstFile) : "";
+                    dto.IsEditable = IsEditable(module);
+                    dto.EditUrl = IsEditable(module) ? GetFileEditUrl(firstFile) : "";
                 }
                 else
                 {
@@ -200,7 +205,7 @@ namespace Satrabel.OpenFiles.Components.JPList
             }
             var path = new List<IFolderInfo>();
             path.Add(folder);
-            while (folder.ParentID > 0)
+            while (folder.ParentID > 0 && NormalizePath(folder.FolderPath) != baseFolder)
             {
                 folder = folderManager.GetFolder(folder.ParentID);
                 path.Insert(0, folder);
@@ -215,20 +220,18 @@ namespace Satrabel.OpenFiles.Components.JPList
         #region Private Methods
 
         private bool? _isEditable;
-        private bool IsEditable
+        private bool IsEditable(OpenContentModuleConfig module)
         {
-            get
+            //Perform tri-state switch check to avoid having to perform a security
+            //role lookup on every property access (instead caching the result)
+            if (!_isEditable.HasValue)
             {
-                //Perform tri-state switch check to avoid having to perform a security
-                //role lookup on every property access (instead caching the result)
-                if (!_isEditable.HasValue)
-                {
-                    _isEditable = ActiveModule.CheckIfEditable(PortalSettings.Current);
-                }
-                return _isEditable.Value;
+                _isEditable = module.ViewModule.CheckIfEditable(module);
             }
+            return _isEditable.Value;
         }
-        private string NormalizePath(string filePath)
+
+        private static string NormalizePath(string filePath)
         {
             filePath = filePath.Replace("\\", "/");
             filePath = filePath.Trim('~');
@@ -237,7 +240,7 @@ namespace Satrabel.OpenFiles.Components.JPList
             return filePath;
         }
 
-        private string GetFileEditUrl(IFileInfo fileInfo)
+        private static string GetFileEditUrl(IFileInfo fileInfo)
         {
             if (fileInfo == null) return "";
             var portalFileUri = new PortalFileUri(fileInfo);
@@ -257,7 +260,7 @@ namespace Satrabel.OpenFiles.Components.JPList
         {
             return IconController.IconURL("FolderStandard", "32x32", "Standard");
         }
-        private dynamic GetCustomFileDataAsDynamic(IFileInfo f)
+        private static dynamic GetCustomFileDataAsDynamic(IFileInfo f)
         {
             if (f.ContentItemID > 0)
             {

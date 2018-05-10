@@ -1,5 +1,4 @@
 ﻿using System;
-using DotNetNuke.Entities.Portals;
 using Satrabel.OpenContent.Components;
 
 namespace Satrabel.OpenFiles.Components
@@ -8,6 +7,7 @@ namespace Satrabel.OpenFiles.Components
     public class AppConfig
     {
         private static readonly Lazy<AppConfig> lazy = new Lazy<AppConfig>(() => new AppConfig());
+
         public static AppConfig Instance => lazy.Value;
 
         private AppConfig()
@@ -16,20 +16,12 @@ namespace Satrabel.OpenFiles.Components
 
         public FolderUri SchemaFolder => new FolderUri("~/DesktopModules/OpenFiles/Templates/Schema/");
 
-        public FolderUri PortalFolder(PortalSettings ps)
-        {
-            //var ps = PortalSettings.Current;
-            if (ps != null)
-                return new PortalFolderUri(ps.PortalId, ps.HomeDirectory + "/OpenFiles/");
-            Log.Logger.WarnFormat("Cannot determine PortalFolder as Portalsettings is NULL");
-            return null;
-        }
 
-        public FolderUri PortalFolder(PortalInfo ps)
+        public FolderUri PortalFolder(int portalId, string portalHomeDirectory)
         {
-            if (ps != null)
-                return new PortalFolderUri(ps.PortalID, ps.HomeDirectory + "/OpenFiles/");
-            Log.Logger.WarnFormat("Cannot determine PortalFolder as PortalInfo is NULL");
+            if (portalId > -1)
+                return new PortalFolderUri(portalId, portalHomeDirectory + "/OpenFiles/");
+            Log.Logger.WarnFormat("Cannot determine PortalFolder as Portalsettings is NULL");
             return null;
         }
 
