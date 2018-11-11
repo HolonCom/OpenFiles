@@ -58,7 +58,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
         private void CheckDisposed()
         {
             if (Thread.VolatileRead(ref _isDisposed) == DISPOSED)
-                throw new ObjectDisposedException(string.Format("LuceneController [{0}] is disposed and cannot be used anymore", _searchFolder));
+                throw new ObjectDisposedException($"LuceneController [{_searchFolder}] is disposed and cannot be used anymore");
         }
         #endregion
 
