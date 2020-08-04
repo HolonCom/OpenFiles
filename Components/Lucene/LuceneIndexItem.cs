@@ -27,10 +27,11 @@ namespace Satrabel.OpenFiles.Components.Lucene
         {
             get
             {
-                string retval = FileName;
+                string retval = "";
                 if (Meta.IsNotEmpty() && Meta["title"].IsNotEmpty())
                     retval = Meta["title"].ToString();
-                return retval;
+
+                return retval == "" ? FileName : retval;
             }
         }
         //public string Title { get; set; }

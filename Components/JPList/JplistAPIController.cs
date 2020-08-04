@@ -103,7 +103,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                         {
                             continue; // skip
                         }
-                        dynamic title = null;
+                        string title = "";
                         var custom = GetCustomFileDataAsDynamic(f);
                         if (custom != null && custom.meta != null)
                         {
@@ -120,7 +120,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                         retval.Add(new FileDTO()
                         {
                             Id = f.FileId,
-                            Name = Normalize.DynamicValue(title, f.FileName),
+                            Name = title == "" ? f.FileName : title,
                             FileName = f.FileName,
                             CreatedOnDate = f.CreatedOnDate,
                             LastModifiedOnDate = f.LastModifiedOnDate,
