@@ -1,6 +1,4 @@
-﻿#region Usings
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,7 +13,6 @@ using Lucene.Net.Analysis;
 using Satrabel.OpenContent.Components;
 using Requires = Satrabel.OpenContent.Components.Requires;
 
-#endregion
 
 namespace Satrabel.OpenFiles.Components.Lucene
 {
@@ -23,8 +20,8 @@ namespace Satrabel.OpenFiles.Components.Lucene
     {
 
         #region Constants
-        private const string WriteLockFile = "write.lock";
-        private const int DefaultRereadTimeSpan = 10; // in seconds (initialy 30sec)
+        private const string WRITE_LOCK_FILE = "write.lock";
+        private const int DEFAULT_REREAD_TIME_SPAN = 10; // in seconds (initialy 30sec)
         private const int DISPOSED = 1;
         private const int UNDISPOSED = 0;
         #endregion
@@ -34,7 +31,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
         private readonly string _searchFolder;
         private readonly Analyzer _analyser;
 
-        private string IndexFolder { get; }
+        private readonly string _indexFolder;
 
         private IndexWriter _writer;
         private IndexReader _idxReader;
@@ -47,21 +44,14 @@ namespace Satrabel.OpenFiles.Components.Lucene
         #region constructor
         internal LuceneService(string searchFolder, Analyzer analyser)
         {
+            Requires.NotNullOrEmpty(searchFolder, nameof(searchFolder));
+            Requires.NotNull(analyser, nameof(analyser));
+
             _searchFolder = searchFolder;
             _analyser = analyser;
-            if (string.IsNullOrEmpty(_searchFolder))
-                throw new ArgumentNullException("searchFolder");
-            try
-            {
                 var config = App.Config;
-                IndexFolder = Path.Combine(config.ApplicationMapPath, _searchFolder);
-            }
-            catch (Exception e)
-            {
-                if (Debugger.IsAttached)
-                    Debugger.Break();
-            }
-            _readerTimeSpan = DefaultRereadTimeSpan;
+                _indexFolder = Path.Combine(config.ApplicationMapPath, _searchFolder);
+            _readerTimeSpan = DEFAULT_REREAD_TIME_SPAN;
         }
 
         private void CheckDisposed()
@@ -81,7 +71,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                     {
                         if (_writer == null)
                         {
-                            var lockFile = Path.Combine(IndexFolder, WriteLockFile);
+                            var lockFile = Path.Combine(_indexFolder, WRITE_LOCK_FILE);
                             if (File.Exists(lockFile))
                             {
                                 try
@@ -99,7 +89,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
                             }
 
                             CheckDisposed();
-                            var writer = new IndexWriter(FSDirectory.Open(IndexFolder), _analyser, IndexWriter.MaxFieldLength.UNLIMITED);
+                            var writer = new IndexWriter(FSDirectory.Open(_indexFolder), _analyser, IndexWriter.MaxFieldLength.UNLIMITED);
                             _idxReader = writer.GetReader();
                             Thread.MemoryBarrier();
                             _writer = writer;
@@ -129,7 +119,7 @@ namespace Satrabel.OpenFiles.Components.Lucene
             {
                 // Note: disposing the IndexSearcher instance obtained from the next
                 // statement will not close the underlying reader on dispose.
-                searcher = new IndexSearcher(FSDirectory.Open(IndexFolder));
+                searcher = new IndexSearcher(FSDirectory.Open(_indexFolder));
             }
 
             var reader = new CachedReader(searcher);
@@ -151,17 +141,17 @@ namespace Satrabel.OpenFiles.Components.Lucene
             get
             {
                 return (DateTime.UtcNow - _lastReadTimeUtc).TotalSeconds >= _readerTimeSpan &&
-                    System.IO.Directory.Exists(IndexFolder) &&
-                    System.IO.Directory.GetLastWriteTimeUtc(IndexFolder) != _lastDirModifyTimeUtc;
+                    System.IO.Directory.Exists(_indexFolder) &&
+                    System.IO.Directory.GetLastWriteTimeUtc(_indexFolder) != _lastDirModifyTimeUtc;
             }
         }
 
         private void UpdateLastAccessTimes()
         {
             _lastReadTimeUtc = DateTime.UtcNow;
-            if (System.IO.Directory.Exists(IndexFolder))
+            if (System.IO.Directory.Exists(_indexFolder))
             {
-                _lastDirModifyTimeUtc = System.IO.Directory.GetLastWriteTimeUtc(IndexFolder);
+                _lastDirModifyTimeUtc = System.IO.Directory.GetLastWriteTimeUtc(_indexFolder);
             }
         }
 
@@ -169,22 +159,22 @@ namespace Satrabel.OpenFiles.Components.Lucene
         {
             // forces re-opening the reader within 30 seconds from now (used mainly by commit)
             var now = DateTime.UtcNow;
-            if (_readerTimeSpan > DefaultRereadTimeSpan && (now - _lastReadTimeUtc).TotalSeconds > DefaultRereadTimeSpan)
+            if (_readerTimeSpan > DEFAULT_REREAD_TIME_SPAN && (now - _lastReadTimeUtc).TotalSeconds > DEFAULT_REREAD_TIME_SPAN)
             {
-                _lastReadTimeUtc = now - TimeSpan.FromSeconds(_readerTimeSpan - DefaultRereadTimeSpan);
+                _lastReadTimeUtc = now - TimeSpan.FromSeconds(_readerTimeSpan - DEFAULT_REREAD_TIME_SPAN);
             }
         }
 
         private void CheckValidIndexFolder()
         {
             if (!ValidateIndexFolder())
-                throw new Exception(string.Format("Lucene Search indexing directory [{0}] is either empty or does not exist", _searchFolder));
+                throw new Exception($"Lucene Search indexing directory [{_searchFolder}] is either empty or does not exist");
         }
 
         internal bool ValidateIndexFolder()
         {
-            return System.IO.Directory.Exists(IndexFolder) &&
-                   System.IO.Directory.GetFiles(IndexFolder, "*.*").Length > 0;
+            return System.IO.Directory.Exists(_indexFolder) &&
+                   System.IO.Directory.GetFiles(_indexFolder, "*.*").Length > 0;
         }
 
         #endregion
