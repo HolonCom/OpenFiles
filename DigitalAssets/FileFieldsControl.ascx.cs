@@ -1,10 +1,10 @@
-﻿using System;
-using System.IO;
-using DotNetNuke.Modules.DigitalAssets.Components.ExtensionPoint;
+﻿using DotNetNuke.Modules.DigitalAssets.Components.ExtensionPoint;
 using DotNetNuke.Services.Localization;
 using Satrabel.OpenContent.Components;
 using Satrabel.OpenContent.Components.Alpaca;
 using Satrabel.OpenFiles.Components.Utils;
+using System;
+using System.IO;
 using AppConfig = Satrabel.OpenFiles.Components.AppConfig;
 
 namespace Satrabel.OpenFiles.DigitalAssets
@@ -30,7 +30,7 @@ namespace Satrabel.OpenFiles.DigitalAssets
             }
 
             AlpacaEngine alpaca = new AlpacaEngine(Page, PortalSettings.PortalId, virtualFolderOfSchemaFiles.FolderPath, "");
-            alpaca.RegisterAll(false, false);
+            alpaca.RegisterAll(false, false, false);
         }
         protected override void OnLoad(EventArgs e)
         {

@@ -1,9 +1,10 @@
-﻿using System;
-using DotNetNuke.Entities.Content;
+﻿using DotNetNuke.Entities.Content;
 using DotNetNuke.Entities.Content.Common;
 using DotNetNuke.Services.Exceptions;
 using DotNetNuke.Services.FileSystem;
 using Newtonsoft.Json.Linq;
+using Satrabel.OpenContent.Components.Json;
+using System;
 
 namespace Satrabel.OpenFiles.Components
 {
@@ -28,19 +29,33 @@ namespace Satrabel.OpenFiles.Components
             File = file;
             DnnContentItem = null;
             JsonAsJToken = new JObject();
+            var rawContent = "not specified";
             try
             {
                 if (file.ContentItemID > 0)
                 {
                     DnnContentItem = Util.GetContentController().GetContentItem(file.ContentItemID);
-                    JsonAsJToken = JObject.Parse(DnnContentItem.Content);
+                    if (DnnContentItem != null && DnnContentItem.Content.IsJson())
+                    {
+                        rawContent = DnnContentItem.Content;
+                        JsonAsJToken = JObject.Parse(rawContent);
+                    }
+                    else
+                    {
+                        Log.Logger.Warn($"Expected Content Item not found for file [{file.RelativePath}].");
+                    }
                 }
+                else
+                {
+                    Log.Logger.Debug($"No ContentItem available for file [{file.RelativePath}].");
+                }
+
             }
             catch (Exception ex)
             {
-                Exceptions.LogException(ex);
+                var exep = new Exception($"Cannot open content item of {file.RelativePath}. Raw Content: [{rawContent}].", ex);
+                Exceptions.LogException(exep);
             }
-
         }
 
         public JObject JsonAsJToken { get; private set; }

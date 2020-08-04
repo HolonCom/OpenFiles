@@ -30,7 +30,7 @@ namespace Satrabel.OpenFiles.Components
     public class OpenFilesAPIController : DnnApiController
     {
         [ValidateAntiForgeryToken]
-        [DnnModuleAuthorize(AccessLevel = SecurityAccessLevel.Edit)] // rechten van FileManager module??
+        [DnnModuleAuthorize(AccessLevel = SecurityAccessLevel.Edit)] // rechten van FileManager module!!
         [HttpGet]
         public HttpResponseMessage Edit(int id)
         {

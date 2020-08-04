@@ -9,15 +9,15 @@
 
 #region Using Statements
 
-using System;
-using DotNetNuke.Entities.Modules;
 using DotNetNuke.Common.Utilities;
-using Satrabel.OpenFiles.Components.Lucene;
-using DotNetNuke.Services.Scheduling;
+using DotNetNuke.Entities.Modules;
 using DotNetNuke.Services.FileSystem;
-using System.Web.UI.WebControls;
+using DotNetNuke.Services.Scheduling;
 using DotNetNuke.Services.Search.Internals;
 using Satrabel.OpenFiles.Components;
+using Satrabel.OpenFiles.Components.Lucene;
+using System;
+using System.Web.UI.WebControls;
 
 #endregion
 
@@ -41,7 +41,8 @@ namespace Satrabel.OpenFiles
                 var folders = fm.GetFolders(PortalId);
                 foreach (var folder in folders)
                 {
-                    ddlFolders.Items.Add(new ListItem(folder.FolderPath.Trim('/'), folder.FolderPath));
+                    if (folder.FolderPath.ToLowerInvariant().StartsWith("files/"))
+                        ddlFolders.Items.Add(new ListItem(folder.FolderPath.Trim('/'), folder.FolderPath));
                 }
             }
         }

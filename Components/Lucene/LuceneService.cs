@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -10,7 +11,6 @@ using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
-using DotNetNuke.Common;
 using Lucene.Net.Analysis;
 using Satrabel.OpenContent.Components;
 using Requires = Satrabel.OpenContent.Components.Requires;
@@ -51,7 +51,16 @@ namespace Satrabel.OpenFiles.Components.Lucene
             _analyser = analyser;
             if (string.IsNullOrEmpty(_searchFolder))
                 throw new ArgumentNullException("searchFolder");
-            IndexFolder = Path.Combine(App.Config.ApplicationMapPath, _searchFolder);
+            try
+            {
+                var config = App.Config;
+                IndexFolder = Path.Combine(config.ApplicationMapPath, _searchFolder);
+            }
+            catch (Exception e)
+            {
+                if (Debugger.IsAttached)
+                    Debugger.Break();
+            }
             _readerTimeSpan = DefaultRereadTimeSpan;
         }
 
