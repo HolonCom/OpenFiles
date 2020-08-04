@@ -21,16 +21,8 @@ namespace Satrabel.OpenFiles.Components.ExternalData
     {
         /// -----------------------------------------------------------------------------
         /// <summary>
-        /// Returns the collection of SearchDocuments populated with Tab MetaData for the given portal.
+        /// Returns the collection of LuceneIndexItem ready to be indexed by Lucene.
         /// </summary>
-        /// <param name="portalId"></param>
-        /// <param name="folderPath"></param>
-        /// <param name="recursive"></param>
-        /// <param name="startDateLocal"></param>
-        /// <returns></returns>
-        /// <history>
-        ///     [vnguyen]   04/16/2013  created
-        /// </history>
         /// -----------------------------------------------------------------------------
         public IEnumerable<LuceneIndexItem> GetPortalSearchDocuments(int portalId, string folderPath, bool recursive, DateTime? startDateLocal)
         {

@@ -49,8 +49,8 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
             _searchFolder = searchFolder;
             _analyser = analyser;
-                var config = App.Config;
-                _indexFolder = Path.Combine(config.ApplicationMapPath, _searchFolder);
+            var config = App.Config;
+            _indexFolder = Path.Combine(config.ApplicationMapPath, _searchFolder);
             _readerTimeSpan = DEFAULT_REREAD_TIME_SPAN;
         }
 
@@ -186,10 +186,11 @@ namespace Satrabel.OpenFiles.Components.Lucene
             if (pageSize == 0) throw new Exception("Invalid Pagesize. Pagesize is zero.");
             var searcher = GetSearcher();
             TopDocs topDocs;
+            var numOfItemsToReturn = (pageIndex + 1) * pageSize;
             if (filter == null)
-                topDocs = searcher.Search(query, null, (pageIndex + 1) * pageSize, sort);
+                topDocs = searcher.Search(query, null, numOfItemsToReturn, sort);
             else
-                topDocs = searcher.Search(query, new QueryWrapperFilter(filter), (pageIndex + 1) * pageSize, sort);
+                topDocs = searcher.Search(query, new QueryWrapperFilter(filter), numOfItemsToReturn, sort);
 
             var results = new List<LuceneIndexItem>();
             if (topDocs.ScoreDocs.Length != 0)
