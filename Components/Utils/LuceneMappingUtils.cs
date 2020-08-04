@@ -72,6 +72,13 @@ namespace Satrabel.OpenFiles.Components.Utils
             luceneDoc.Add(new Field(FOLDER_FIELD, QueryParser.Escape(item.Folder) , Field.Store.YES, Field.Index.NOT_ANALYZED));
             luceneDoc.Add(new Field(DISPLAYNAME_FIELD, item.DisplayName, Field.Store.YES, Field.Index.ANALYZED));
             luceneDoc.Add(new Field(FILE_CONTENT_FIELD, string.IsNullOrEmpty(item.FileContent) ? "" : item.FileContent, Field.Store.YES, Field.Index.ANALYZED));
+
+            // for sorting 
+            // To create a Sort field, prefix field name with "@"
+            // Careful: To sort on a file, it should not be Analysed. 
+            luceneDoc.Add(new Field($"@{FILENAME_FIELD}", item.FileName, Field.Store.NO, Field.Index.NOT_ANALYZED));
+            luceneDoc.Add(new Field($"@{DISPLAYNAME_FIELD}", item.DisplayName, Field.Store.NO, Field.Index.NOT_ANALYZED));
+
             var objectMapper = new JsonObjectMapper();
             objectMapper.AddJsonToDocument(item.Meta, luceneDoc, config);
 
