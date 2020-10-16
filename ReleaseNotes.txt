@@ -2,6 +2,6 @@
 <p class="Contributor">
 	Brought to you by HolonCom.eu and Satrabel.be <br />
 	<a href="mailto:info@holoncom.eu">info@holoncom.eu</a><br />
-	<a href=http://www.holoncom.eu>http://www.holoncom.eu</a><br />
+	<a href=http://www.holoncom.eu>http://www.holoncom.eu</a>
 </p>
 <hr/>

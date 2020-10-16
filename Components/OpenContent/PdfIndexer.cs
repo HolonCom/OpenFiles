@@ -12,11 +12,13 @@ namespace Satrabel.OpenFiles.Components.OpenContent
             if (int.TryParse(file, out var fileId))
             {
                 var f = FileManager.Instance.GetFile(fileId);
+                if (f == null) return false;
                 return f.Extension == "pdf";
             }
             else
             {
                 var f = FileUri.FromPath(file);
+                if (f == null) return false;
                 return f.Extension == ".pdf";
             }
         }

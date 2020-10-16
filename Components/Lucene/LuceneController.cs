@@ -7,7 +7,6 @@ using System.Linq;
 using Lucene.Net.Search;
 using DotNetNuke.Entities.Portals;
 using DotNetNuke.Services.Search.Internals;
-using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Satrabel.OpenContent.Components.Lucene;
 using Satrabel.OpenContent.Components.Lucene.Config;
@@ -20,38 +19,48 @@ namespace Satrabel.OpenFiles.Components.Lucene
 {
     public class LuceneController : IDisposable
     {
-        private static LuceneController _instance = new LuceneController();
-        private LuceneService _serviceInstance;
+        private LuceneService _serviceStoreInstance;
 
-        public static LuceneController Instance => _instance;
+        public static LuceneController Instance { get; private set; } = new LuceneController();
 
         public LuceneService Store
         {
             get
             {
-                if (_serviceInstance == null)
+                if (_serviceStoreInstance == null)
                     throw new Exception("LuceneController not initialized properly");
-                return _serviceInstance;
+                return _serviceStoreInstance;
             }
         }
 
         #region constructor
+
         private LuceneController()
         {
             var indexfolder = AppConfig.Instance.LuceneIndexFolder;
             var analyser = LuceneMappingUtils.GetAnalyser();
-            _serviceInstance = new LuceneService(indexfolder, analyser);
+            _serviceStoreInstance = new LuceneService(indexfolder, analyser);
         }
 
         public static void ClearInstance()
         {
-            if (_instance != null)
+            if (Instance != null)
             {
-                _instance.Dispose();
-                _instance = null;
+                Instance.Dispose();
+                Instance = null;
             }
-            _instance = new LuceneController();
+            Instance = new LuceneController();
         }
+
+        public void Dispose()
+        {
+            if (_serviceStoreInstance != null)
+            {
+                _serviceStoreInstance.Dispose();
+                _serviceStoreInstance = null;
+            }
+        }
+
         #endregion
 
         #region Search
@@ -196,11 +205,6 @@ namespace Satrabel.OpenFiles.Components.Lucene
             this.Add(data, null);
         }
 
-        //private void Add(LuceneIndexItem data)
-        //{
-        //    this.Add(data, null);
-        //}
-
         /// <summary>
         /// Deletes the matching objects in the IndexWriter.
         /// </summary>
@@ -289,14 +293,5 @@ namespace Satrabel.OpenFiles.Components.Lucene
         }
 
         #endregion
-
-        public void Dispose()
-        {
-            if (_serviceInstance != null)
-            {
-                _serviceInstance.Dispose();
-                _serviceInstance = null;
-            }
-        }
     }
 }
