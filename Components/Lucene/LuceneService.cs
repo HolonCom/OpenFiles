@@ -30,7 +30,6 @@ namespace Satrabel.OpenFiles.Components.Lucene
 
         private readonly string _searchFolder;
         private readonly Analyzer _analyser;
-
         private readonly string _indexFolder;
 
         private IndexWriter _writer;
