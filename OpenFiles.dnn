@@ -1,6 +1,6 @@
 <dotnetnuke type="Package" version="5.0">
   <packages>
-    <package name="OpenFiles" type="Module" version="03.05.04">
+    <package name="OpenFiles" type="Module" version="03.05.05">
       <friendlyName>OpenFiles</friendlyName>
       <description>OpenFiles module by HolonCom.eu</description>
       <iconFile>~/DesktopModules/OpenFiles/Images/icon_extensions.png</iconFile>

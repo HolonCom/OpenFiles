@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("HolonCom")]
 [assembly: AssemblyProduct("OpenFiles (OpenContent Add-On)")]
-[assembly: AssemblyCopyright("Copyright © 2015-2017")]
+[assembly: AssemblyCopyright("Copyright © 2015-2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -30,5 +30,5 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("03.05.04.0")]
-[assembly: AssemblyFileVersion("03.05.04")]
+[assembly: AssemblyVersion("03.05.05.0")]
+[assembly: AssemblyFileVersion("03.05.05")]
