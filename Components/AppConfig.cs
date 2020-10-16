@@ -16,6 +16,7 @@ namespace Satrabel.OpenFiles.Components
 
         public FolderUri SchemaFolder => new FolderUri("~/DesktopModules/OpenFiles/Templates/Schema/");
 
+
         public FolderUri PortalFolder(int portalId, string portalHomeDirectory)
         {
             if (portalId > -1)
@@ -24,7 +25,6 @@ namespace Satrabel.OpenFiles.Components
             return null;
         }
 
-        public bool CaseSensitiveFieldNames => false;
         public string LuceneIndexFolder => @"App_Data\OpenFiles\LuceneIndex";
 
 
