@@ -136,6 +136,7 @@ namespace Satrabel.OpenFiles.Components.JPList
                     }
                 }
 
+                var siblings = GetSiblingFolders(curFolder);
                 var res = new ResultExtDTO<FileDTO>()
                 {
                     data = new ResultDataDTO<FileDTO>()
@@ -145,19 +146,54 @@ namespace Satrabel.OpenFiles.Components.JPList
                         {
                             name = f.FolderName,
                             path = f.FolderPath.Trim('/')
-                        })
+                        }),
+                        previous = siblings.Item1,
+                        next = siblings.Item2
                     },
                     count = total
                 };
                 return Request.CreateResponse(HttpStatusCode.OK, res);
 
             }
-            catch (Exception exc)
+            catch (Exception e)
             {
-                Log.Logger.Error(exc);
-                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc);
+                Log.Logger.Error(new Exception($"OpenFiles.JplistAPIController.List failed for {req.ToJObject("Request")}"), e);
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, e);
             }
         }
+
+        private Tuple<string, string> GetSiblingFolders(string curFolder)
+        {
+            if (curFolder.Split('/').Length < 3) return new Tuple<string, string>("", "");
+
+            var folderManager = FolderManager.Instance;
+            var folder = folderManager.GetFolder(PortalSettings.PortalId, curFolder);
+            var parentFolders = folderManager.GetFolders(folderManager.GetFolder(folder.ParentID));
+
+            var previous = "";
+            var next = "";
+            var found = false;
+            foreach (var f in parentFolders)
+            {
+                if (found)
+                {
+                    next = f.FolderPath.Trim('/');
+                    break;
+                }
+
+                if (f.FolderID == folder.FolderID)
+                {
+                    found = true;
+                    continue;
+                }
+
+                previous = f.FolderPath.Trim('/');
+            }
+
+            return new Tuple<string, string>(previous, next);
+        }
+
+
         private List<IFolderInfo> AddFolders(OpenContentModuleConfig module, string baseFolder, string curFolder, IFileManager fileManager, List<FileDTO> data, Ratio ratio)
         {
             var folderManager = FolderManager.Instance;

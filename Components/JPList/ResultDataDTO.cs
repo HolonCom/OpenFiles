@@ -7,6 +7,9 @@ namespace Satrabel.OpenFiles.Components.JPList
         public IEnumerable<TResultDTO> items { get; set; }
 
         public IEnumerable<ResultBreadcrumbDTO> breadcrumbs { get; set; }
-        
+
+        public string previous { get; set; }
+
+        public string next { get; set; }
     }
 }
