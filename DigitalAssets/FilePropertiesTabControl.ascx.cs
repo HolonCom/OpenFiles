@@ -17,7 +17,7 @@ namespace Satrabel.OpenFiles.DigitalAssets
         protected void Page_Load(object sender, EventArgs e)
         {
             AlpacaEngine alpaca = new AlpacaEngine(Page, ModuleContext.PortalId, AppConfig.Instance.SchemaFolder.FolderPath, "images");
-            alpaca.RegisterAll(false, false, false);
+            alpaca.RegisterAll(false, false, false, false);
 
             int fileid = int.Parse(Page.Request.QueryString["fileId"]);
             var fm = FileManager.Instance;
